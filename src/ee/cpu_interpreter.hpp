@@ -63,6 +63,8 @@ void lwr(u32 rs, u32 rt, s16 imm);
 void lwu(u32 rs, u32 rt, s16 imm);
 void mfhi(u32 rd);
 void mflo(u32 rd);
+void movn(u32 rs, u32 rt, u32 rd);
+void movz(u32 rs, u32 rt, u32 rd);
 void mthi(u32 rs);
 void mtlo(u32 rs);
 void mult(u32 rs, u32 rt);

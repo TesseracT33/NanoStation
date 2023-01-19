@@ -10,12 +10,12 @@ void add(u32 rs, u32 rt, u32 rd)
 {
     s32 sum;
     bool overflow;
- #if defined __clang__ || defined __GNUC__
+#if defined __clang__ || defined __GNUC__
     overflow = __builtin_add_overflow(gpr[rs].s32(), gpr[rt].s32(), &sum);
- #else
+#else
     sum = gpr[rs].s32() + gpr[rt].s32();
     overflow = (gpr[rs].s32() ^ sum) & (gpr[rt].s32() ^ sum) & 0x8000'0000;
- #endif
+#endif
     if (overflow) {
         integer_overflow_exception();
     } else {
@@ -408,12 +408,10 @@ void ld(u32 rs, u32 rt, s16 imm)
 
 void ldl(u32 rs, u32 rt, s16 imm)
 {
-    
 }
 
 void ldr(u32 rs, u32 rt, s16 imm)
 {
-
 }
 
 void lh(u32 rs, u32 rt, s16 imm)
@@ -434,7 +432,6 @@ void lhu(u32 rs, u32 rt, s16 imm)
 
 void lq(u32 rs, u32 rt, s16 imm)
 {
-
 }
 
 void lui(u32 rt, u16 imm)
@@ -452,12 +449,10 @@ void lw(u32 rs, u32 rt, s16 imm)
 
 void lwl(u32 rs, u32 rt, s16 imm)
 {
-
 }
 
 void lwr(u32 rs, u32 rt, s16 imm)
 {
-
 }
 
 void lwu(u32 rs, u32 rt, s16 imm)
@@ -478,6 +473,20 @@ void mflo(u32 rd)
     gpr.set(rd, lo);
 }
 
+void movn(u32 rs, u32 rt, u32 rd)
+{
+    if (gpr[rt].s64() != 0) {
+        gpr.set(rd, gpr[rs].s64());
+    }
+}
+
+void movz(u32 rs, u32 rt, u32 rd)
+{
+    if (gpr[rt].s64() == 0) {
+        gpr.set(rd, gpr[rs].s64());
+    }
+}
+
 void mthi(u32 rs)
 {
     hi = gpr[rs].s64();
@@ -490,12 +499,10 @@ void mtlo(u32 rs)
 
 void mult(u32 rs, u32 rt)
 {
-    
 }
 
 void multu(u32 rs, u32 rt)
 {
-    
 }
 
 void nor(u32 rs, u32 rt, u32 rd)
@@ -515,7 +522,6 @@ void ori(u32 rs, u32 rt, u16 imm)
 
 void pref()
 {
-
 }
 
 void sb(u32 rs, u32 rt, s16 imm)
@@ -530,12 +536,10 @@ void sd(u32 rs, u32 rt, s16 imm)
 
 void sdl(u32 rs, u32 rt, s16 imm)
 {
-
 }
 
 void sdr(u32 rs, u32 rt, s16 imm)
 {
-
 }
 
 void sh(u32 rs, u32 rt, s16 imm)
@@ -575,7 +579,6 @@ void sltu(u32 rs, u32 rt, u32 rd)
 
 void sq(u32 rs, u32 rt, s16 imm)
 {
-    
 }
 
 void sra(u32 rt, u32 rd, u32 sa)
@@ -605,22 +608,18 @@ void sw(u32 rs, u32 rt, s16 imm)
 
 void swl(u32 rs, u32 rt, s16 imm)
 {
-
 }
 
 void swr(u32 rs, u32 rt, s16 imm)
 {
-
 }
 
 void sync()
 {
-
 }
 
 void syscall()
 {
-
 }
 
 void sub(u32 rs, u32 rt, u32 rd)
@@ -739,4 +738,4 @@ void xori(u32 rs, u32 rt, u16 imm)
     gpr.set(rt, gpr[rs].s32() ^ imm);
 }
 
-}
+} // namespace ee::interpreter
