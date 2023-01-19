@@ -499,10 +499,16 @@ void mtlo(u32 rs)
 
 void mult(u32 rs, u32 rt)
 {
+    s64 prod = s64(gpr[rs].s32()) * s64(gpr[rt].s32());
+    lo = s32(prod);
+    hi = prod >> 32;
 }
 
 void multu(u32 rs, u32 rt)
 {
+    u64 prod = u64(gpr[rs].u32()) * u64(gpr[rt].u32());
+    lo = s32(prod);
+    hi = s32(prod >> 32);
 }
 
 void nor(u32 rs, u32 rt, u32 rd)
