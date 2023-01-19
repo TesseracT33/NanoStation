@@ -46,6 +46,8 @@ list(APPEND clang_flags
 	-Wall
 	-Wconversion
 	-Wextra
+	-Wno-bitwise-op-parentheses
+	-Wno-sign-conversion
 	-Wpedantic
 )
 
@@ -72,6 +74,8 @@ list(APPEND gcc_flags
 	-Wall
 	-Wconversion
 	-Wextra
+	-Wno-bitwise-op-parentheses
+	-Wno-sign-conversion
 	-Wpedantic
 )
 

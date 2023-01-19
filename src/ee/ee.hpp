@@ -4,6 +4,8 @@
 
 #include <array>
 #include <concepts>
+#include <cstring>
+#include <utility>
 
 namespace ee {
 
@@ -43,16 +45,35 @@ enum class Reg {
 };
 
 struct GPR {
-    template<std::integral Int> Int get(int index) const;
-    u128 get(Reg reg) const;
-    template<std::integral Int> void set(int index, Int data);
-    void set(Reg reg, u128 data);
+    template<std::integral Int> Int get(std::integral auto index) const;
+    template<std::integral Int> void set(std::integral auto index, Int data);
+    u128 operator[](std::integral auto index) const;
 
 private:
     std::array<u128, 32> gpr{};
 } extern gpr;
 
-extern s32 pc;
-extern s64 lo, lo1, hi, hi1;
+extern bool in_branch_delay_slot;
+extern u32 jump_addr, pc;
+extern u64 lo, lo1, hi, hi1;
+
+void prepare_jump(u32 target);
 
 } // namespace ee
+
+
+template<std::integral Int> Int ee::GPR::get(std::integral auto index) const
+{
+    Int ret;
+    memcpy(&ret, &gpr[index], sizeof(Int));
+    return ret;
+}
+
+template<std::integral Int> void ee::GPR::set(std::integral auto index, Int data)
+{
+}
+
+u128 ee::GPR::operator[](std::integral auto index) const
+{
+    return u128();
+}
