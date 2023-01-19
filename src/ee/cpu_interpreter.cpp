@@ -52,24 +52,24 @@ void addu(u32 rs, u32 rt, u32 rd)
 
 void and_(u32 rs, u32 rt, u32 rd)
 {
-    gpr.set(rd, gpr[rs].s32() & gpr[rt].s32());
+    gpr.set(rd, gpr[rs].s64() & gpr[rt].s64());
 }
 
 void andi(u32 rs, u32 rt, u16 imm)
 {
-    gpr.set(rt, gpr[rs].s32() & imm);
+    gpr.set(rt, gpr[rs].s64() & imm);
 }
 
 void beq(u32 rs, u32 rt, s16 imm)
 {
-    if (gpr[rs].s32() == gpr[rt].s32()) {
+    if (gpr[rs].s64() == gpr[rt].s64()) {
         prepare_jump(pc + (imm << 2));
     }
 }
 
 void beql(u32 rs, u32 rt, s16 imm)
 {
-    if (gpr[rs].s32() == gpr[rt].s32()) {
+    if (gpr[rs].s64() == gpr[rt].s64()) {
         prepare_jump(pc + (imm << 2));
     } else {
         pc += 4;
@@ -78,7 +78,7 @@ void beql(u32 rs, u32 rt, s16 imm)
 
 void bgez(u32 rs, s16 imm)
 {
-    if (gpr[rs].s32() >= 0) {
+    if (gpr[rs].s64() >= 0) {
         prepare_jump(pc + (imm << 2));
     }
 }
@@ -86,7 +86,7 @@ void bgez(u32 rs, s16 imm)
 void bgezal(u32 rs, s16 imm)
 {
     gpr.set(31, 4 + (in_branch_delay_slot ? jump_addr : pc));
-    if (gpr[rs].s32() >= 0) {
+    if (gpr[rs].s64() >= 0) {
         prepare_jump(pc + (imm << 2));
     }
 }
@@ -94,7 +94,7 @@ void bgezal(u32 rs, s16 imm)
 void bgezall(u32 rs, s16 imm)
 {
     gpr.set(31, 4 + (in_branch_delay_slot ? jump_addr : pc));
-    if (gpr[rs].s32() >= 0) {
+    if (gpr[rs].s64() >= 0) {
         prepare_jump(pc + (imm << 2));
     } else {
         pc += 4;
@@ -103,7 +103,7 @@ void bgezall(u32 rs, s16 imm)
 
 void bgezl(u32 rs, s16 imm)
 {
-    if (gpr[rs].s32() >= 0) {
+    if (gpr[rs].s64() >= 0) {
         prepare_jump(pc + (imm << 2));
     } else {
         pc += 4;
@@ -112,14 +112,14 @@ void bgezl(u32 rs, s16 imm)
 
 void bgtz(u32 rs, s16 imm)
 {
-    if (gpr[rs].s32() > 0) {
+    if (gpr[rs].s64() > 0) {
         prepare_jump(pc + (imm << 2));
     }
 }
 
 void bgtzl(u32 rs, s16 imm)
 {
-    if (gpr[rs].s32() > 0) {
+    if (gpr[rs].s64() > 0) {
         prepare_jump(pc + (imm << 2));
     } else {
         pc += 4;
@@ -128,14 +128,14 @@ void bgtzl(u32 rs, s16 imm)
 
 void blez(u32 rs, s16 imm)
 {
-    if (gpr[rs].s32() <= 0) {
+    if (gpr[rs].s64() <= 0) {
         prepare_jump(pc + (imm << 2));
     }
 }
 
 void blezl(u32 rs, s16 imm)
 {
-    if (gpr[rs].s32() <= 0) {
+    if (gpr[rs].s64() <= 0) {
         prepare_jump(pc + (imm << 2));
     } else {
         pc += 4;
@@ -144,7 +144,7 @@ void blezl(u32 rs, s16 imm)
 
 void bltz(u32 rs, s16 imm)
 {
-    if (gpr[rs].s32() < 0) {
+    if (gpr[rs].s64() < 0) {
         prepare_jump(pc + (imm << 2));
     }
 }
@@ -152,7 +152,7 @@ void bltz(u32 rs, s16 imm)
 void bltzal(u32 rs, s16 imm)
 {
     gpr.set(31, 4 + (in_branch_delay_slot ? jump_addr : pc));
-    if (gpr[rs].s32() < 0) {
+    if (gpr[rs].s64() < 0) {
         prepare_jump(pc + (imm << 2));
     }
 }
@@ -160,7 +160,7 @@ void bltzal(u32 rs, s16 imm)
 void bltzall(u32 rs, s16 imm)
 {
     gpr.set(31, 4 + (in_branch_delay_slot ? jump_addr : pc));
-    if (gpr[rs].s32() < 0) {
+    if (gpr[rs].s64() < 0) {
         prepare_jump(pc + (imm << 2));
     } else {
         pc += 4;
@@ -169,7 +169,7 @@ void bltzall(u32 rs, s16 imm)
 
 void bltzl(u32 rs, s16 imm)
 {
-    if (gpr[rs].s32() < 0) {
+    if (gpr[rs].s64() < 0) {
         prepare_jump(pc + (imm << 2));
     } else {
         pc += 4;
@@ -178,14 +178,14 @@ void bltzl(u32 rs, s16 imm)
 
 void bne(u32 rs, u32 rt, s16 imm)
 {
-    if (gpr[rs].s32() != gpr[rt].s32()) {
+    if (gpr[rs].s64() != gpr[rt].s64()) {
         prepare_jump(pc + (imm << 2));
     }
 }
 
 void bnel(u32 rs, u32 rt, s16 imm)
 {
-    if (gpr[rs].s32() != gpr[rt].s32()) {
+    if (gpr[rs].s64() != gpr[rt].s64()) {
         prepare_jump(pc + (imm << 2));
     } else {
         pc += 4;
@@ -434,7 +434,7 @@ void lq(u32 rs, u32 rt, s16 imm)
 {
 }
 
-void lui(u32 rt, u16 imm)
+void lui(u32 rt, s16 imm)
 {
     gpr.set(rt, imm << 16);
 }
@@ -507,17 +507,17 @@ void multu(u32 rs, u32 rt)
 
 void nor(u32 rs, u32 rt, u32 rd)
 {
-    gpr.set(rd, ~(gpr[rs].s32() | gpr[rt].s32()));
+    gpr.set(rd, ~(gpr[rs].s64() | gpr[rt].s64()));
 }
 
 void or_(u32 rs, u32 rt, u32 rd)
 {
-    gpr.set(rd, gpr[rs].s32() | gpr[rt].s32());
+    gpr.set(rd, gpr[rs].s64() | gpr[rt].s64());
 }
 
 void ori(u32 rs, u32 rt, u16 imm)
 {
-    gpr.set(rt, gpr[rs].s32() | imm);
+    gpr.set(rt, gpr[rs].s64() | imm);
 }
 
 void pref()
@@ -559,22 +559,22 @@ void sllv(u32 rs, u32 rt, u32 rd)
 
 void slt(u32 rs, u32 rt, u32 rd)
 {
-    gpr.set(rd, u32(gpr[rs].s32() < gpr[rt].s32()));
+    gpr.set(rd, u32(gpr[rs].s64() < gpr[rt].s64()));
 }
 
 void slti(u32 rs, u32 rt, s16 imm)
 {
-    gpr.set(rt, u32(gpr[rs].s32() < imm));
+    gpr.set(rt, u32(gpr[rs].s64() < imm));
 }
 
 void sltiu(u32 rs, u32 rt, s16 imm)
 {
-    gpr.set(rt, u32(gpr[rs].u32() < u32(imm)));
+    gpr.set(rt, u32(gpr[rs].u64() < u64(imm)));
 }
 
 void sltu(u32 rs, u32 rt, u32 rd)
 {
-    gpr.set(rd, u32(gpr[rs].u32() < gpr[rt].u32()));
+    gpr.set(rd, u32(gpr[rs].u64() < gpr[rt].u64()));
 }
 
 void sq(u32 rs, u32 rt, s16 imm)
@@ -646,96 +646,96 @@ void subu(u32 rs, u32 rt, u32 rd)
 
 void teq(u32 rs, u32 rt)
 {
-    if (gpr[rs].s32() == gpr[rt].s32()) {
+    if (gpr[rs].s64() == gpr[rt].s64()) {
         trap_exception();
     }
 }
 
 void teqi(u32 rs, s16 imm)
 {
-    if (gpr[rs].s32() == imm) {
+    if (gpr[rs].s64() == imm) {
         trap_exception();
     }
 }
 
 void tge(u32 rs, u32 rt)
 {
-    if (gpr[rs].s32() >= gpr[rt].s32()) {
+    if (gpr[rs].s64() >= gpr[rt].s64()) {
         trap_exception();
     }
 }
 
 void tgei(u32 rs, s16 imm)
 {
-    if (gpr[rs].s32() >= imm) {
+    if (gpr[rs].s64() >= imm) {
         trap_exception();
     }
 }
 
 void tgeu(u32 rs, u32 rt)
 {
-    if (gpr[rs].u32() >= gpr[rt].u32()) {
+    if (gpr[rs].u64() >= gpr[rt].u64()) {
         trap_exception();
     }
 }
 
 void tgeiu(u32 rs, s16 imm)
 {
-    if (gpr[rs].u32() >= u32(imm)) {
+    if (gpr[rs].u64() >= u64(imm)) {
         trap_exception();
     }
 }
 
 void tlt(u32 rs, u32 rt)
 {
-    if (gpr[rs].s32() < gpr[rt].s32()) {
+    if (gpr[rs].s64() < gpr[rt].s64()) {
         trap_exception();
     }
 }
 
 void tlti(u32 rs, s16 imm)
 {
-    if (gpr[rs].s32() < imm) {
+    if (gpr[rs].s64() < imm) {
         trap_exception();
     }
 }
 
 void tltu(u32 rs, u32 rt)
 {
-    if (gpr[rs].u32() < gpr[rt].u32()) {
+    if (gpr[rs].u64() < gpr[rt].u64()) {
         trap_exception();
     }
 }
 
 void tltiu(u32 rs, s16 imm)
 {
-    if (gpr[rs].u32() < u32(imm)) {
+    if (gpr[rs].u64() < u64(imm)) {
         trap_exception();
     }
 }
 
 void tne(u32 rs, u32 rt)
 {
-    if (gpr[rs].s32() != gpr[rt].s32()) {
+    if (gpr[rs].s64() != gpr[rt].s64()) {
         trap_exception();
     }
 }
 
 void tnei(u32 rs, s16 imm)
 {
-    if (gpr[rs].s32() != imm) {
+    if (gpr[rs].s64() != imm) {
         trap_exception();
     }
 }
 
 void xor_(u32 rs, u32 rt, u32 rd)
 {
-    gpr.set(rd, gpr[rs].s32() ^ gpr[rt].s32());
+    gpr.set(rd, gpr[rs].s64() ^ gpr[rt].s64());
 }
 
 void xori(u32 rs, u32 rt, u16 imm)
 {
-    gpr.set(rt, gpr[rs].s32() ^ imm);
+    gpr.set(rt, gpr[rs].s64() ^ imm);
 }
 
 } // namespace ee::interpreter

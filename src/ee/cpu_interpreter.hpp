@@ -56,7 +56,7 @@ void ldr(u32 rs, u32 rt, s16 imm);
 void lh(u32 rs, u32 rt, s16 imm);
 void lhu(u32 rs, u32 rt, s16 imm);
 void lq(u32 rs, u32 rt, s16 imm);
-void lui(u32 rt, u16 imm);
+void lui(u32 rt, s16 imm);
 void lw(u32 rs, u32 rt, s16 imm);
 void lwl(u32 rs, u32 rt, s16 imm);
 void lwr(u32 rs, u32 rt, s16 imm);
