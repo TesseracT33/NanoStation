@@ -7,7 +7,7 @@ add_executable(NanoStation
 	ee/disassembler.cpp
 	ee/ee.cpp
 	ee/exceptions.cpp
- )
+)
 
 target_include_directories(NanoStation PRIVATE
 	.

@@ -8,7 +8,7 @@ GPR gpr;
 
 void prepare_jump(u32 target)
 {
-
+    in_branch_delay_slot = true;
 }
 
 } // namespace ee
