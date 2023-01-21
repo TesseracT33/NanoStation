@@ -14,7 +14,6 @@
 #define RT    (instr >> 16 & 31)
 #define FT    (instr >> 16 & 31)
 #define RS    (instr >> 21 & 31)
-#define FR    (instr >> 21 & 31)
 #define BASE  (instr >> 21 & 31)
 
 namespace ee::interpreter {
@@ -285,6 +284,136 @@ void cop3(u32 instr)
 
 void mmi(u32 instr)
 {
+    auto mmi0 = [](u32 instr) {
+        switch (instr >> 6 & 31) {
+        // case 0x00: paddw(); break;
+        // case 0x01: psubw(); break;
+        // case 0x02: pcgtw(); break;
+        // case 0x03: pmaxw(); break;
+        // case 0x04: paddh(); break;
+        // case 0x05: psubh(); break;
+        // case 0x06: pcgth(); break;
+        // case 0x07: pmaxh(); break;
+        // case 0x08: paddb(); break;
+        // case 0x09: psubb(); break;
+        // case 0x0A: pcgtb(); break;
+        // case 0x10: paddsw(); break;
+        // case 0x11: psubsw(); break;
+        // case 0x12: pextlw(); break;
+        // case 0x13: ppacw(); break;
+        // case 0x14: paddsh(); break;
+        // case 0x15: psubsh(); break;
+        // case 0x16: pextlh(); break;
+        // case 0x17: ppach(); break;
+        // case 0x18: paddsb(); break;
+        // case 0x19: psubsb(); break;
+        // case 0x1A: pextlb(); break;
+        // case 0x1B: ppacb(); break;
+        // case 0x1E: pext5(); break;
+        // case 0x1F: ppac5(); break;
+        default: reserved_instruction_exception();
+        }
+    };
+
+    auto mmi1 = [](u32 instr) {
+        switch (instr >> 6 & 31) {
+        // case 0x01: pabsw(); break;
+        // case 0x02: pceqw(); break;
+        // case 0x03: pminw(); break;
+        // case 0x04: padsbh(); break;
+        // case 0x05: pabsh(); break;
+        // case 0x06: pceqh(); break;
+        // case 0x07: pminh(); break;
+        // case 0x0A: pceqb(); break;
+        // case 0x10: padduw(); break;
+        // case 0x11: psubuw(); break;
+        // case 0x12: pextuw(); break;
+        // case 0x14: padduh(); break;
+        // case 0x15: psubuh(); break;
+        // case 0x16: pextuh(); break;
+        // case 0x18: paddub(); break;
+        // case 0x19: psubub(); break;
+        // case 0x1A: pextub(); break;
+        // case 0x1B: qfsrv(); break;
+        default: reserved_instruction_exception();
+        }
+    };
+
+    auto mmi2 = [](u32 instr) {
+        switch (instr >> 6 & 31) {
+        // case 0x00: pmaddw(); break;
+        // case 0x02: psllvw(); break;
+        // case 0x03: psrlvw(); break;
+        // case 0x04: pmsubw(); break;
+        // case 0x08: pmfhi(); break;
+        // case 0x09: pmflo(); break;
+        // case 0x0A: pinth(); break;
+        // case 0x0C: pmultw(); break;
+        // case 0x0D: pdivw(); break;
+        // case 0x0E: pcpyld(); break;
+        // case 0x10: pmaddh(); break;
+        // case 0x11: phmadh(); break;
+        // case 0x12: pand(); break;
+        // case 0x13: pxor(); break;
+        // case 0x14: pmsubh(); break;
+        // case 0x15: phmsbh(); break;
+        // case 0x1A: pexeh(); break;
+        // case 0x1B: prevh(); break;
+        // case 0x1C: pmulth(); break;
+        // case 0x1D: pdivbw(); break;
+        // case 0x1E: pexew(); break;
+        // case 0x1F: prot3w(); break;
+        default: reserved_instruction_exception();
+        }
+    };
+
+    auto mmi3 = [](u32 instr) {
+        switch (instr >> 6 & 31) {
+        // case 0x00: pmadduw(); break;
+        // case 0x03: psravw(); break;
+        // case 0x08: pmthi(); break;
+        // case 0x09: pmtlo(); break;
+        // case 0x0A: pinteh(); break;
+        // case 0x0C: pmultuw(); break;
+        // case 0x0D: pdivuw(); break;
+        // case 0x0E: pcpyud(); break;
+        // case 0x12: por(); break;
+        // case 0x13: pnor(); break;
+        // case 0x1A: pexch(); break;
+        // case 0x1B: pcpyh(); break;
+        // case 0x1E: pexcw(); break;
+        default: reserved_instruction_exception();
+        }
+    };
+
+    switch (instr & 63) {
+    // case 0x00: madd(); break;
+    // case 0x01: maddu(); break;
+    // case 0x04: plzcw(); break;
+    case 0x08: mmi0(instr); break;
+    case 0x09: mmi2(instr); break;
+    case 0x10: mfhi1(RD); break;
+    case 0x11: mthi1(RS); break;
+    case 0x12: mflo1(RD); break;
+    case 0x13: mtlo1(RS); break;
+    case 0x18: mult1(RS, RT); break;
+    case 0x19: multu1(RS, RT); break;
+    case 0x1A: div1(RS, RT); break;
+    case 0x1B: divu1(RS, RT); break;
+    // case 0x20: madd1(); break;
+    // case 0x21: maddu1(); break;
+    case 0x28: mmi1(instr); break;
+    case 0x29: mmi3(instr); break;
+    // case 0x30: pmfhl(); break;
+    // case 0x31: pmthl(); break;
+    // case 0x34: psllh(); break;
+    // case 0x36: psrlh(); break;
+    // case 0x37: psrah(); break;
+    // case 0x3C: psllw(); break;
+    // case 0x3E: psrlw(); break;
+    // case 0x3F: psraw(); break;
+    default: reserved_instruction_exception();
+    }
 }
 
 void regimm(u32 instr)
@@ -304,8 +433,8 @@ void regimm(u32 instr)
     case 0x11: bgezal(RS, IMM16); break;
     case 0x12: bltzall(RS, IMM16); break;
     case 0x13: bgezall(RS, IMM16); break;
-    // case 0x18: mtsab(); break;
-    // case 0x19: mtsah(); break;
+    case 0x18: mtsab(); break;
+    case 0x19: mtsah(); break;
     default: reserved_instruction_exception();
     }
 }
@@ -345,8 +474,8 @@ void special(u32 instr)
     case 0x25: or_(RS, RT, RD); break;
     case 0x26: xor_(RS, RT, RD); break;
     case 0x27: nor(RS, RT, RD); break;
-    // case 0x28: mfsa(); break;
-    // case 0x29: mtsa(); break;
+    case 0x28: mfsa(RD); break;
+    case 0x29: mtsa(RS); break;
     case 0x2A: slt(RS, RT, RD); break;
     case 0x2B: sltu(RS, RT, RD); break;
     case 0x2C: dadd(RS, RT, RD); break;

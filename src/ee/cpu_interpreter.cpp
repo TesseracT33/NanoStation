@@ -256,9 +256,25 @@ void div(u32 rs, u32 rt)
     } else if (op1 == std::numeric_limits<s32>::min() && op2 == -1) {
         lo = op1;
         hi = 0;
-    } else {
+    } else [[likely]] {
         lo = op1 / op2;
         hi = op1 % op2;
+    }
+}
+
+void div1(u32 rs, u32 rt)
+{
+    s32 op1 = gpr[rs].s32();
+    s32 op2 = gpr[rt].s32();
+    if (op2 == 0) {
+        lo1 = op1 >= 0 ? -1 : 1;
+        hi1 = op1;
+    } else if (op1 == std::numeric_limits<s32>::min() && op2 == -1) {
+        lo1 = op1;
+        hi1 = 0;
+    } else [[likely]] {
+        lo1 = op1 / op2;
+        hi1 = op1 % op2;
     }
 }
 
@@ -272,6 +288,19 @@ void divu(u32 rs, u32 rt)
     } else {
         lo = s32(op1 / op2);
         hi = s32(op1 % op2);
+    }
+}
+
+void divu1(u32 rs, u32 rt)
+{
+    u32 op1 = gpr[rs].u32();
+    u32 op2 = gpr[rt].u32();
+    if (op2 == 0) {
+        lo1 = -1;
+        hi1 = s32(op1);
+    } else {
+        lo1 = s32(op1 / op2);
+        hi1 = s32(op1 % op2);
     }
 }
 
@@ -496,9 +525,23 @@ void mfhi(u32 rd)
     gpr.set(rd, hi);
 }
 
+void mfhi1(u32 rd)
+{
+    gpr.set(rd, hi1);
+}
+
 void mflo(u32 rd)
 {
     gpr.set(rd, lo);
+}
+
+void mflo1(u32 rd)
+{
+    gpr.set(rd, lo1);
+}
+
+void mfsa(u32 rd)
+{
 }
 
 void movn(u32 rs, u32 rt, u32 rd)
@@ -520,9 +563,31 @@ void mthi(u32 rs)
     hi = gpr[rs].s64();
 }
 
+void mthi1(u32 rs)
+{
+    hi1 = gpr[rs].s64();
+}
+
 void mtlo(u32 rs)
 {
     lo = gpr[rs].s64();
+}
+
+void mtlo1(u32 rs)
+{
+    lo1 = gpr[rs].s64();
+}
+
+void mtsa(u32 rs)
+{
+}
+
+void mtsab()
+{
+}
+
+void mtsah()
+{
 }
 
 void mult(u32 rs, u32 rt)
@@ -532,11 +597,25 @@ void mult(u32 rs, u32 rt)
     hi = prod >> 32;
 }
 
+void mult1(u32 rs, u32 rt)
+{
+    s64 prod = s64(gpr[rs].s32()) * s64(gpr[rt].s32());
+    lo1 = s32(prod);
+    hi1 = prod >> 32;
+}
+
 void multu(u32 rs, u32 rt)
 {
     u64 prod = u64(gpr[rs].u32()) * u64(gpr[rt].u32());
     lo = s32(prod);
     hi = s32(prod >> 32);
+}
+
+void multu1(u32 rs, u32 rt)
+{
+    u64 prod = u64(gpr[rs].u32()) * u64(gpr[rt].u32());
+    lo1 = s32(prod);
+    hi1 = s32(prod >> 32);
 }
 
 void nor(u32 rs, u32 rt, u32 rd)
