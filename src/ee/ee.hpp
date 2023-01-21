@@ -57,10 +57,10 @@ extern bool in_branch_delay_slot;
 extern u32 jump_addr, pc;
 extern u64 lo, lo1, hi, hi1;
 
+bool init();
 void prepare_jump(u32 target);
 
 } // namespace ee
-
 
 template<std::integral Int> Int ee::GPR::get(std::integral auto index) const
 {
