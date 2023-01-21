@@ -3,6 +3,9 @@ cmake_minimum_required (VERSION 3.8)
 add_executable(NanoStation
 	main.cpp
 
+	ee/cop0.cpp
+	ee/cop1.cpp
+	ee/cop2.cpp
 	ee/cpu_interpreter.cpp
 	ee/disassembler.cpp
 	ee/ee.cpp
