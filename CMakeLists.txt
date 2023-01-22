@@ -44,11 +44,26 @@ endif()
 
 list(APPEND clang_flags
 	-Wall
+	-Wcast-align
 	-Wconversion
+	-Wdouble-promotion
+	-Weverything
 	-Wextra
+	-Wimplicit-fallthrough
+	-Wmissing-include-dirs
 	-Wno-bitwise-op-parentheses
+	-Wno-c++98-compat
+	-Wno-pre-c++14-compat
+	-Wno-pre-c++17-compat
+	-Wno-pre-c++20-compat
+	-Wno-pre-c++2b-compat
+	-Wno-shadow-uncaptured-local
 	-Wno-sign-conversion
+	-Wnon-virtual-dtor
+	-Wnull-dereference
 	-Wpedantic
+	-Wunreachable-code
+	-Wunused
 )
 
 if (DEBUG)
@@ -72,11 +87,25 @@ endif()
 list(APPEND gcc_flags
 	-std=c++23
 	-Wall
+	-Wcast-align
 	-Wconversion
+	-Wdouble-promotion
+	-Wduplicated-cond
+	-Wduplicated-branches
 	-Wextra
-	-Wno-bitwise-op-parentheses
+	-Wimplicit-fallthrough
+	-Wmissing-include-dirs
+	-Wno-c++11-compat
+	-Wno-c++14-compat
+	-Wno-c++17-compat
+	-Wno-c++20-compat
 	-Wno-sign-conversion
+	-Wnon-virtual-dtor
+	-Wnull-dereference
 	-Wpedantic
+	-Wunreachable-code
+	-Wunused
+	-Wuseless-cast
 )
 
 if (DEBUG)
@@ -106,6 +135,10 @@ list(APPEND msvc_flags
 	/std:c++latest # C++ standard
 	/volatile:iso  # Use iso standard for 'volatile'
 	/W4            # Warning level 4
+	/w14265        # Class has virtual functions, but destructor is not virtual.
+	/w14555        # Expression has no effect; expected expression with side-effect
+	/we4289        # Nonstandard extension used: 'variable': for-loop control variable declared in the for-loop is used outside
+                   # the for-loop scope
 )
 
 if (DEBUG)
