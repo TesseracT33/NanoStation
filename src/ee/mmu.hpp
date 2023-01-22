@@ -1,5 +1,6 @@
 #pragma once
 
+#include "exceptions.hpp"
 #include "types.hpp"
 
 #include <bit>
@@ -16,7 +17,9 @@ enum class MemOp {
     InstrFetch
 };
 
-template<size_t size, Alignment alignment = Alignment::Aligned, MemOp mem_op = MemOp::DataRead> auto virtual_read(s32 addr);
+template<size_t size, Alignment alignment = Alignment::Aligned, MemOp mem_op = MemOp::DataRead>
+auto virtual_read(s32 addr);
+
 template<size_t size, Alignment alignment = Alignment::Aligned> void virtual_write(s32 addr, auto data);
 
 template<size_t size, Alignment alignment, MemOp mem_op> auto virtual_read(s32 addr)
@@ -42,4 +45,4 @@ template<size_t size, Alignment alignment> void virtual_write(s32 addr, auto dat
     }
 }
 
-}
+} // namespace ee
