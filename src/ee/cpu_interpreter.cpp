@@ -5,12 +5,21 @@
 
 #include <limits>
 
+#ifdef __has_builtin
+#if __has_builtin(__builtin_add_overflow)
+#define USE_BUILTIN_ADD_OVERFLOW 1
+#endif
+#if __has_builtin(__builtin_sub_overflow)
+#define USE_BUILTIN_SUB_OVERFLOW 1
+#endif
+#endif
+
 namespace ee::interpreter {
 void add(u32 rs, u32 rt, u32 rd)
 {
     s32 sum;
     bool overflow;
-#if defined __clang__ || defined __GNUC__
+#if USE_BUILTIN_ADD_OVERFLOW
     overflow = __builtin_add_overflow(gpr[rs].s32(), gpr[rt].s32(), &sum);
 #else
     sum = gpr[rs].s32() + gpr[rt].s32();
@@ -27,7 +36,7 @@ void addi(u32 rs, u32 rt, s16 imm)
 {
     s32 sum;
     bool overflow;
-#if defined __clang__ || defined __GNUC__
+#if USE_BUILTIN_ADD_OVERFLOW
     overflow = __builtin_add_overflow(gpr[rs].s32(), imm, &sum);
 #else
     sum = gpr[rs].s32() + imm;
@@ -206,7 +215,7 @@ void dadd(u32 rs, u32 rt, u32 rd)
 {
     s64 sum;
     bool overflow;
-#if defined __clang__ || defined __GNUC__
+#if USE_BUILTIN_ADD_OVERFLOW
     overflow = __builtin_add_overflow(gpr[rs].s64(), gpr[rt].s64(), &sum);
 #else
     sum = gpr[rs].s64() + gpr[rt].s64();
@@ -223,7 +232,7 @@ void daddi(u32 rs, u32 rt, s16 imm)
 {
     s64 sum;
     bool overflow;
-#if defined __clang__ || defined __GNUC__
+#if USE_BUILTIN_ADD_OVERFLOW
     overflow = __builtin_add_overflow(gpr[rs].s64(), imm, &sum);
 #else
     sum = gpr[rs].s64() + imm;
@@ -353,7 +362,7 @@ void dsub(u32 rs, u32 rt, u32 rd)
 {
     s64 sum;
     bool overflow;
-#if defined __clang__ || defined __GNUC__
+#if USE_BUILTIN_SUB_OVERFLOW
     overflow = __builtin_sub_overflow(gpr[rs].s64(), gpr[rt].s64(), &sum);
 #else
     sum = gpr[rs].s64() - gpr[rt].s64();
@@ -739,7 +748,7 @@ void sub(u32 rs, u32 rt, u32 rd)
 {
     s32 sum;
     bool overflow;
-#if defined __clang__ || defined __GNUC__
+#if USE_BUILTIN_SUB_OVERFLOW
     overflow = __builtin_sub_overflow(gpr[rs].s32(), gpr[rt].s32(), &sum);
 #else
     sum = gpr[rs].s32() - gpr[rt].s32();
