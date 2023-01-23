@@ -6,13 +6,13 @@
 struct Arch {
     static constexpr bool x64 = 1;
     static constexpr bool arm64 = 0;
-} arch;
+} constexpr arch;
 #define X64 1
 #elif defined __aarch64__ || defined _M_ARM64
 struct Arch {
     static constexpr bool x64 = 0;
     static constexpr bool arm64 = 1;
-} arch;
+} constexpr arch;
 #define ARM64 1
 #else
 #error Unsupported architecture; only x86-64 and arm64 are supported.
