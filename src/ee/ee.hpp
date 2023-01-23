@@ -1,5 +1,6 @@
 #pragma once
 
+#include "reg128.hpp"
 #include "types.hpp"
 
 #include <array>
@@ -46,8 +47,11 @@ enum class Reg {
 
 struct GPR {
     template<std::integral Int> Int get(std::integral auto index) const;
-    template<std::integral Int> void set(std::integral auto index, Int data);
-    Reg128 operator[](std::integral auto index) const;
+    void set(std::integral auto index, std::integral auto data);
+    void set(std::integral auto index, m128i data);
+    template<uint lane> void set(std::integral auto index, std::integral auto data);
+
+    Reg128& operator[](std::integral auto index);
 
 private:
     std::array<Reg128, 32> gpr{};
@@ -69,12 +73,22 @@ template<std::integral Int> Int ee::GPR::get(std::integral auto index) const
     return ret;
 }
 
-template<std::integral Int> void ee::GPR::set(std::integral auto index, Int data)
+void ee::GPR::set(std::integral auto index, std::integral auto data)
 {
     gpr[index].set(data);
 }
 
-Reg128 ee::GPR::operator[](std::integral auto index) const
+void ee::GPR::set(std::integral auto index, m128i data)
+{
+    gpr[index].set(data);
+}
+
+template<uint lane> void ee::GPR::set(std::integral auto index, std::integral auto data)
+{
+    gpr[index].set<lane>(data);
+}
+
+Reg128& ee::GPR::operator[](std::integral auto index)
 {
     return gpr[index];
 }
