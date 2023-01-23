@@ -28,7 +28,7 @@ void add(u32 rs, u32 rt, u32 rd)
     if (overflow) {
         integer_overflow_exception();
     } else {
-        gpr.set(rd, sum);
+        gpr[rd] = sum;
     }
 }
 
@@ -45,28 +45,28 @@ void addi(u32 rs, u32 rt, s16 imm)
     if (overflow) {
         integer_overflow_exception();
     } else {
-        gpr.set(rt, sum);
+        gpr[rt] = sum;
     }
 }
 
 void addiu(u32 rs, u32 rt, s16 imm)
 {
-    gpr.set(rt, gpr[rs].s32() + imm);
+    gpr[rt] = gpr[rs].s32() + imm;
 }
 
 void addu(u32 rs, u32 rt, u32 rd)
 {
-    gpr.set(rd, gpr[rs].s32() + gpr[rt].s32());
+    gpr[rd] = gpr[rs].s32() + gpr[rt].s32();
 }
 
 void and_(u32 rs, u32 rt, u32 rd)
 {
-    gpr.set(rd, gpr[rs].s64() & gpr[rt].s64());
+    gpr[rd] = gpr[rs].s64() & gpr[rt].s64();
 }
 
 void andi(u32 rs, u32 rt, u16 imm)
 {
-    gpr.set(rt, gpr[rs].s64() & imm);
+    gpr[rt] = gpr[rs].s64() & imm;
 }
 
 void beq(u32 rs, u32 rt, s16 imm)
@@ -94,7 +94,7 @@ void bgez(u32 rs, s16 imm)
 
 void bgezal(u32 rs, s16 imm)
 {
-    gpr.set(31, 4 + (in_branch_delay_slot ? jump_addr : pc));
+    gpr[31] = 4 + (in_branch_delay_slot ? jump_addr : pc);
     if (gpr[rs].s64() >= 0) {
         prepare_jump(pc + (imm << 2));
     }
@@ -102,7 +102,7 @@ void bgezal(u32 rs, s16 imm)
 
 void bgezall(u32 rs, s16 imm)
 {
-    gpr.set(31, 4 + (in_branch_delay_slot ? jump_addr : pc));
+    gpr[31] = 4 + (in_branch_delay_slot ? jump_addr : pc);
     if (gpr[rs].s64() >= 0) {
         prepare_jump(pc + (imm << 2));
     } else {
@@ -160,7 +160,7 @@ void bltz(u32 rs, s16 imm)
 
 void bltzal(u32 rs, s16 imm)
 {
-    gpr.set(31, 4 + (in_branch_delay_slot ? jump_addr : pc));
+    gpr[31] = 4 + (in_branch_delay_slot ? jump_addr : pc);
     if (gpr[rs].s64() < 0) {
         prepare_jump(pc + (imm << 2));
     }
@@ -168,7 +168,7 @@ void bltzal(u32 rs, s16 imm)
 
 void bltzall(u32 rs, s16 imm)
 {
-    gpr.set(31, 4 + (in_branch_delay_slot ? jump_addr : pc));
+    gpr[31] = 4 + (in_branch_delay_slot ? jump_addr : pc);
     if (gpr[rs].s64() < 0) {
         prepare_jump(pc + (imm << 2));
     } else {
@@ -224,7 +224,7 @@ void dadd(u32 rs, u32 rt, u32 rd)
     if (overflow) {
         integer_overflow_exception();
     } else {
-        gpr.set(rd, sum);
+        gpr[rd] = sum;
     }
 }
 
@@ -241,18 +241,18 @@ void daddi(u32 rs, u32 rt, s16 imm)
     if (overflow) {
         integer_overflow_exception();
     } else {
-        gpr.set(rt, sum);
+        gpr[rt] = sum;
     }
 }
 
 void daddiu(u32 rs, u32 rt, s16 imm)
 {
-    gpr.set(rt, gpr[rs].s64() + imm);
+    gpr[rt] = gpr[rs].s64() + imm;
 }
 
 void daddu(u32 rs, u32 rt, u32 rd)
 {
-    gpr.set(rd, gpr[rs].s64() + gpr[rt].s64());
+    gpr[rd] = gpr[rs].s64() + gpr[rt].s64();
 }
 
 void div(u32 rs, u32 rt)
@@ -315,47 +315,47 @@ void divu1(u32 rs, u32 rt)
 
 void dsll(u32 rt, u32 rd, u32 sa)
 {
-    gpr.set(rd, gpr[rt].s64() << sa);
+    gpr[rd] = gpr[rt].s64() << sa;
 }
 
 void dsll32(u32 rt, u32 rd, u32 sa)
 {
-    gpr.set(rd, gpr[rt].s64() << (sa + 32));
+    gpr[rd] = gpr[rt].s64() << (sa + 32);
 }
 
 void dsllv(u32 rs, u32 rt, u32 rd)
 {
-    gpr.set(rd, gpr[rt].s64() << (gpr[rs].s32() & 63));
+    gpr[rd] = gpr[rt].s64() << (gpr[rs].s32() & 63);
 }
 
 void dsra(u32 rt, u32 rd, u32 sa)
 {
-    gpr.set(rd, gpr[rt].s64() >> sa);
+    gpr[rd] = gpr[rt].s64() >> sa;
 }
 
 void dsra32(u32 rt, u32 rd, u32 sa)
 {
-    gpr.set(rd, gpr[rt].s64() >> (sa + 32));
+    gpr[rd] = gpr[rt].s64() >> (sa + 32);
 }
 
 void dsrav(u32 rs, u32 rt, u32 rd)
 {
-    gpr.set(rd, gpr[rt].s64() >> (gpr[rs].s32() & 63));
+    gpr[rd] = gpr[rt].s64() >> (gpr[rs].s32() & 63);
 }
 
 void dsrl(u32 rt, u32 rd, u32 sa)
 {
-    gpr.set(rd, gpr[rt].u64() >> sa);
+    gpr[rd] = gpr[rt].u64() >> sa;
 }
 
 void dsrl32(u32 rt, u32 rd, u32 sa)
 {
-    gpr.set(rd, gpr[rt].u64() >> (sa + 32));
+    gpr[rd] = gpr[rt].u64() >> (sa + 32);
 }
 
 void dsrlv(u32 rs, u32 rt, u32 rd)
 {
-    gpr.set(rd, gpr[rt].u64() >> (gpr[rs].s32() & 63));
+    gpr[rd] = gpr[rt].u64() >> (gpr[rs].s32() & 63);
 }
 
 void dsub(u32 rs, u32 rt, u32 rd)
@@ -371,13 +371,13 @@ void dsub(u32 rs, u32 rt, u32 rd)
     if (overflow) {
         integer_overflow_exception();
     } else {
-        gpr.set(rd, sum);
+        gpr[rd] = sum;
     }
 }
 
 void dsubu(u32 rs, u32 rt, u32 rd)
 {
-    gpr.set(rd, gpr[rs].s64() - gpr[rt].s64());
+    gpr[rd] = gpr[rs].s64() - gpr[rt].s64();
 }
 
 void j(u32 imm26)
@@ -392,7 +392,7 @@ void jal(u32 imm26)
     if (!in_branch_delay_slot) {
         prepare_jump(pc & 0xF000'0000 | imm26 << 2);
     }
-    gpr.set(31, 4 + (in_branch_delay_slot ? jump_addr : pc));
+    gpr[31] = 4 + (in_branch_delay_slot ? jump_addr : pc);
 }
 
 void jalr(u32 rs, u32 rd)
@@ -405,7 +405,7 @@ void jalr(u32 rs, u32 rd)
             prepare_jump(target);
         }
     }
-    gpr.set(rd, 4 + (in_branch_delay_slot ? jump_addr : pc));
+    gpr[rd] = 4 + (in_branch_delay_slot ? jump_addr : pc);
 }
 
 void jr(u32 rs)
@@ -424,7 +424,7 @@ void lb(u32 rs, u32 rt, s16 imm)
 {
     s8 val = virtual_read<1>(gpr[rs].s32() + imm);
     if (!exception_occurred) {
-        gpr.set(rt, val);
+        gpr[rt] = val;
     }
 }
 
@@ -432,7 +432,7 @@ void lbu(u32 rs, u32 rt, s16 imm)
 {
     u8 val = virtual_read<1>(gpr[rs].s32() + imm);
     if (!exception_occurred) {
-        gpr.set(rt, val);
+        gpr[rt] = val;
     }
 }
 
@@ -440,7 +440,7 @@ void ld(u32 rs, u32 rt, s16 imm)
 {
     s64 val = virtual_read<8>(gpr[rs].s32() + imm);
     if (!exception_occurred) {
-        gpr.set(rt, val);
+        gpr[rt] = val;
     }
 }
 
@@ -450,7 +450,7 @@ void ldl(u32 rs, u32 rt, s16 imm)
     s64 val = virtual_read<8, Alignment::Unaligned>(addr);
     if (!exception_occurred) {
         s64 load_mask = s64(0xFF00'0000'0000'0000) >> (8 * (addr & 7));
-        gpr.set(rt, val & load_mask | gpr[rt].s64() & ~load_mask);
+        gpr[rt] = val & load_mask | gpr[rt].s64() & ~load_mask;
     }
 }
 
@@ -462,7 +462,7 @@ void ldr(u32 rs, u32 rt, s16 imm)
         s64 bits_offset = 8 * (addr & 7);
         u64 load_mask = 0xFFFF'FFFF'FFFF'FFFF >> bits_offset;
         val >>= bits_offset;
-        gpr.set(rt, val & load_mask | gpr[rt].s64() & ~load_mask);
+        gpr[rt] = val & load_mask | gpr[rt].s64() & ~load_mask;
     }
 }
 
@@ -470,7 +470,7 @@ void lh(u32 rs, u32 rt, s16 imm)
 {
     s16 val = virtual_read<2>(gpr[rs].s32() + imm);
     if (!exception_occurred) {
-        gpr.set(rt, val);
+        gpr[rt] = val;
     }
 }
 
@@ -478,7 +478,7 @@ void lhu(u32 rs, u32 rt, s16 imm)
 {
     u16 val = virtual_read<2>(gpr[rs].s32() + imm);
     if (!exception_occurred) {
-        gpr.set(rt, val);
+        gpr[rt] = val;
     }
 }
 
@@ -488,14 +488,14 @@ void lq(u32 rs, u32 rt, s16 imm)
 
 void lui(u32 rt, s16 imm)
 {
-    gpr.set(rt, imm << 16);
+    gpr[rt] = imm << 16;
 }
 
 void lw(u32 rs, u32 rt, s16 imm)
 {
     s32 val = virtual_read<4>(gpr[rs].s32() + imm);
     if (!exception_occurred) {
-        gpr.set(rt, val);
+        gpr[rt] = val;
     }
 }
 
@@ -505,7 +505,7 @@ void lwl(u32 rs, u32 rt, s16 imm)
     s32 val = virtual_read<4, Alignment::Unaligned>(addr);
     if (!exception_occurred) {
         s32 load_mask = s32(0xFF00'0000) >> (8 * (addr & 3));
-        gpr.set(rt, val & load_mask | gpr[rt].s32() & ~load_mask);
+        gpr[rt] = val & load_mask | gpr[rt].s32() & ~load_mask;
     }
 }
 
@@ -517,7 +517,7 @@ void lwr(u32 rs, u32 rt, s16 imm)
         s32 bits_offset = 8 * (addr & 3);
         u32 load_mask = 0xFFFF'FFFF >> bits_offset;
         val >>= bits_offset;
-        gpr.set(rt, val & load_mask | gpr[rt].s32() & ~load_mask);
+        gpr[rt] = val & load_mask | gpr[rt].s32() & ~load_mask;
     }
 }
 
@@ -525,28 +525,28 @@ void lwu(u32 rs, u32 rt, s16 imm)
 {
     u32 val = virtual_read<4>(gpr[rs].s32() + imm);
     if (!exception_occurred) {
-        gpr.set(rt, val);
+        gpr[rt] = val;
     }
 }
 
 void mfhi(u32 rd)
 {
-    gpr.set(rd, hi);
+    gpr[rd] = hi;
 }
 
 void mfhi1(u32 rd)
 {
-    gpr.set(rd, hi1);
+    gpr[rd] = hi1;
 }
 
 void mflo(u32 rd)
 {
-    gpr.set(rd, lo);
+    gpr[rd] = lo;
 }
 
 void mflo1(u32 rd)
 {
-    gpr.set(rd, lo1);
+    gpr[rd] = lo1;
 }
 
 void mfsa(u32 rd)
@@ -556,14 +556,14 @@ void mfsa(u32 rd)
 void movn(u32 rs, u32 rt, u32 rd)
 {
     if (gpr[rt].s64() != 0) {
-        gpr.set(rd, gpr[rs].s64());
+        gpr[rd] = gpr[rs].s64();
     }
 }
 
 void movz(u32 rs, u32 rt, u32 rd)
 {
     if (gpr[rt].s64() == 0) {
-        gpr.set(rd, gpr[rs].s64());
+        gpr[rd] = gpr[rs].s64();
     }
 }
 
@@ -629,17 +629,17 @@ void multu1(u32 rs, u32 rt)
 
 void nor(u32 rs, u32 rt, u32 rd)
 {
-    gpr.set(rd, ~(gpr[rs].s64() | gpr[rt].s64()));
+    gpr[rd] = ~(gpr[rs].s64() | gpr[rt].s64());
 }
 
 void or_(u32 rs, u32 rt, u32 rd)
 {
-    gpr.set(rd, gpr[rs].s64() | gpr[rt].s64());
+    gpr[rd] = gpr[rs].s64() | gpr[rt].s64();
 }
 
 void ori(u32 rs, u32 rt, u16 imm)
 {
-    gpr.set(rt, gpr[rs].s64() | imm);
+    gpr[rt] = gpr[rs].s64() | imm;
 }
 
 void pref()
@@ -671,32 +671,32 @@ void sh(u32 rs, u32 rt, s16 imm)
 
 void sll(u32 rt, u32 rd, u32 sa)
 {
-    gpr.set(rd, gpr[rt].s32() << sa);
+    gpr[rd] = gpr[rt].s32() << sa;
 }
 
 void sllv(u32 rs, u32 rt, u32 rd)
 {
-    gpr.set(rd, gpr[rt].s32() << (gpr[rs].s32() & 31));
+    gpr[rd] = gpr[rt].s32() << (gpr[rs].s32() & 31);
 }
 
 void slt(u32 rs, u32 rt, u32 rd)
 {
-    gpr.set(rd, u32(gpr[rs].s64() < gpr[rt].s64()));
+    gpr[rd] = u32(gpr[rs].s64() < gpr[rt].s64());
 }
 
 void slti(u32 rs, u32 rt, s16 imm)
 {
-    gpr.set(rt, u32(gpr[rs].s64() < imm));
+    gpr[rt] = u32(gpr[rs].s64() < imm);
 }
 
 void sltiu(u32 rs, u32 rt, s16 imm)
 {
-    gpr.set(rt, u32(gpr[rs].u64() < u64(imm)));
+    gpr[rt] = u32(gpr[rs].u64() < u64(imm));
 }
 
 void sltu(u32 rs, u32 rt, u32 rd)
 {
-    gpr.set(rd, u32(gpr[rs].u64() < gpr[rt].u64()));
+    gpr[rd] = u32(gpr[rs].u64() < gpr[rt].u64());
 }
 
 void sq(u32 rs, u32 rt, s16 imm)
@@ -705,22 +705,22 @@ void sq(u32 rs, u32 rt, s16 imm)
 
 void sra(u32 rt, u32 rd, u32 sa)
 {
-    gpr.set(rd, gpr[rt].s32() >> sa);
+    gpr[rd] = gpr[rt].s32() >> sa;
 }
 
 void srav(u32 rs, u32 rt, u32 rd)
 {
-    gpr.set(rd, gpr[rt].s32() >> (gpr[rs].s32() & 31));
+    gpr[rd] = gpr[rt].s32() >> (gpr[rs].s32() & 31);
 }
 
 void srl(u32 rt, u32 rd, u32 sa)
 {
-    gpr.set(rd, gpr[rt].u32() >> sa);
+    gpr[rd] = gpr[rt].u32() >> sa;
 }
 
 void srlv(u32 rs, u32 rt, u32 rd)
 {
-    gpr.set(rd, gpr[rt].u32() >> (gpr[rs].s32() & 31));
+    gpr[rd] = gpr[rt].u32() >> (gpr[rs].s32() & 31);
 }
 
 void sw(u32 rs, u32 rt, s16 imm)
@@ -757,13 +757,13 @@ void sub(u32 rs, u32 rt, u32 rd)
     if (overflow) {
         integer_overflow_exception();
     } else {
-        gpr.set(rd, sum);
+        gpr[rd] = sum;
     }
 }
 
 void subu(u32 rs, u32 rt, u32 rd)
 {
-    gpr.set(rd, gpr[rs].s32() - gpr[rt].s32());
+    gpr[rd] = gpr[rs].s32() - gpr[rt].s32();
 }
 
 void teq(u32 rs, u32 rt)
@@ -852,12 +852,12 @@ void tnei(u32 rs, s16 imm)
 
 void xor_(u32 rs, u32 rt, u32 rd)
 {
-    gpr.set(rd, gpr[rs].s64() ^ gpr[rt].s64());
+    gpr[rd] = gpr[rs].s64() ^ gpr[rt].s64();
 }
 
 void xori(u32 rs, u32 rt, u16 imm)
 {
-    gpr.set(rt, gpr[rs].s64() ^ imm);
+    gpr[rt] = gpr[rs].s64() ^ imm;
 }
 
 } // namespace ee::interpreter
