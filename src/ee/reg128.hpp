@@ -13,17 +13,34 @@ using m128i = __m128i;
 #endif
 
 struct Reg128 {
-    template<uint lane = 0>::s8 s8() const { return get<lane, ::s8>(); }
-    template<uint lane = 0>::u8 u8() const { return get<lane, ::u8>(); }
-    template<uint lane = 0>::s16 s16() const { return get<lane, ::s16>(); }
-    template<uint lane = 0>::u16 u16() const { return get<lane, ::u16>(); }
-    template<uint lane = 0>::s32 s32() const { return get<lane, ::s32>(); }
-    template<uint lane = 0>::u32 u32() const { return get<lane, ::u32>(); }
-    template<uint lane = 0>::s64 s64() const { return get<lane, ::s64>(); }
-    template<uint lane = 0>::u64 u64() const { return get<lane, ::u64>(); }
+    template<uint lane = 0>::s8 s8() const { return get<::s8, lane>(); }
+    template<uint lane = 0>::u8 u8() const { return get<::u8, lane>(); }
+    template<uint lane = 0>::s16 s16() const { return get<::s16, lane>(); }
+    template<uint lane = 0>::u16 u16() const { return get<::u16, lane>(); }
+    template<uint lane = 0>::s32 s32() const { return get<::s32, lane>(); }
+    template<uint lane = 0>::u32 u32() const { return get<::u32, lane>(); }
+    template<uint lane = 0>::s64 s64() const { return get<::s64, lane>(); }
+    template<uint lane = 0>::u64 u64() const { return get<::u64, lane>(); }
     ::m128i m128i() const { return std::bit_cast<::m128i>(*this); }
     void set(std::integral auto val) { lo = val; }
+    void set_lower_dword(std::integral auto val) { set(val); }
+    void set_upper_dword(std::integral auto val) { hi = val; }
     void set(::m128i val) { *this = std::bit_cast<Reg128>(val); }
+
+    template<std::integral Int> Int get() const
+    {
+        Int ret;
+        std::memcpy(&ret, reinterpret_cast<::u8 const*>(this), sizeof(Int));
+        return ret;
+    }
+
+    template<std::integral Int, uint lane> Int get() const
+    {
+        static_assert(lane < sizeof(*this) / sizeof(Int), "Accessing out-of-bounds lane.");
+        Int ret;
+        std::memcpy(&ret, reinterpret_cast<::u8 const*>(this) + lane * sizeof(Int), sizeof(Int));
+        return ret;
+    }
 
     template<uint lane> void set(std::integral auto val)
     {
@@ -43,14 +60,8 @@ struct Reg128 {
         return *this;
     }
 
-private:
-    template<uint lane, std::integral Int> Int get() const
-    {
-        static_assert(lane < sizeof(*this) / sizeof(Int), "Accessing out-of-bounds lane.");
-        Int ret;
-        std::memcpy(&ret, reinterpret_cast<::u8 const*>(this) + lane * sizeof(Int), sizeof(Int));
-        return ret;
-    }
+    operator ::m128i() const { return m128i(); }
 
+private:
     ::u64 lo, hi;
 };

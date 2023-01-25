@@ -47,6 +47,7 @@ enum class Reg {
 
 struct GPR {
     template<std::integral Int> Int get(std::integral auto index) const;
+    template<std::integral Int, uint lane> Int get(std::integral auto index) const;
     void set(std::integral auto index, std::integral auto data);
     void set(std::integral auto index, m128i data);
     template<uint lane> void set(std::integral auto index, std::integral auto data);
@@ -59,7 +60,7 @@ private:
 
 extern bool in_branch_delay_slot;
 extern u32 jump_addr, pc;
-extern u64 lo, lo1, hi, hi1;
+extern Reg128 lo, lo1, hi, hi1;
 
 bool init();
 void prepare_jump(u32 target);
@@ -68,9 +69,12 @@ void prepare_jump(u32 target);
 
 template<std::integral Int> Int ee::GPR::get(std::integral auto index) const
 {
-    Int ret;
-    std::memcpy(&ret, &gpr[index], sizeof(Int));
-    return ret;
+    return gpr[index].get<Int>();
+}
+
+template<std::integral Int, uint lane> Int ee::GPR::get(std::integral auto index) const
+{
+    return gpr[index].get<Int, lane>();
 }
 
 void ee::GPR::set(std::integral auto index, std::integral auto data)
