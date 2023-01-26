@@ -435,8 +435,8 @@ void regimm(u32 instr)
     case 0x11: bgezal(RS, IMM16); break;
     case 0x12: bltzall(RS, IMM16); break;
     case 0x13: bgezall(RS, IMM16); break;
-    case 0x18: mtsab(); break;
-    case 0x19: mtsah(); break;
+    case 0x18: mtsab(RS, IMM16); break;
+    case 0x19: mtsah(RS, IMM16); break;
     default: reserved_instruction_exception();
     }
 }

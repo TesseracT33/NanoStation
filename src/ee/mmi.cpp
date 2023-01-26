@@ -2,6 +2,11 @@
 #include "ee.hpp"
 #include "host.hpp"
 
+#include <bit>
+#include <cassert>
+#include <cstring>
+#include <utility>
+
 // reference: https://wiki.qemu.org/File:C790.pdf
 
 namespace ee {
@@ -203,8 +208,8 @@ void pdivbw(u32 rs, u32 rt) // Parallel Divide Broadcast Word
     s32 rem[4];
     for (int i = 0; i < 4; ++i) {
         s32 op1, op2;
-        std::memcpy(&op1, reinterpret_cast<u8 const*>(&src_rs) + 4 * i, 4);
-        std::memcpy(&op2, reinterpret_cast<u8 const*>(&src_rt) + 4 * i, 4);
+        std::memcpy(&op1, reinterpret_cast<u8*>(&src_rs) + 4 * i, 4);
+        std::memcpy(&op2, reinterpret_cast<u8*>(&src_rt) + 4 * i, 4);
         if (op2 == 0) {
             quot[i] = op1 >= 0 ? -1 : 1;
             rem[i] = op1;
@@ -230,8 +235,8 @@ void pdivuw(u32 rs, u32 rt) // Parallel Divide Unsigned Word
     s32 rem[2];
     for (int i = 0; i < 2; ++i) {
         u32 op1, op2;
-        std::memcpy(&op1, reinterpret_cast<u8 const*>(&src_rs) + 8 * i, 4);
-        std::memcpy(&op2, reinterpret_cast<u8 const*>(&src_rt) + 8 * i, 4);
+        std::memcpy(&op1, reinterpret_cast<u8*>(&src_rs) + 8 * i, 4);
+        std::memcpy(&op2, reinterpret_cast<u8*>(&src_rt) + 8 * i, 4);
         if (op2 == 0) {
             quot[i] = -1;
             rem[i] = op1;
@@ -254,8 +259,8 @@ void pdivw(u32 rs, u32 rt) // Parallel Divide Word
     s32 rem[2];
     for (int i = 0; i < 2; ++i) {
         s32 op1, op2;
-        std::memcpy(&op1, reinterpret_cast<u8 const*>(&src_rs) + 8 * i, 4);
-        std::memcpy(&op2, reinterpret_cast<u8 const*>(&src_rt) + 8 * i, 4);
+        std::memcpy(&op1, reinterpret_cast<u8*>(&src_rs) + 8 * i, 4);
+        std::memcpy(&op2, reinterpret_cast<u8*>(&src_rt) + 8 * i, 4);
         if (op2 == 0) {
             quot[i] = op1 >= 0 ? -1 : 1;
             rem[i] = op1;
@@ -307,7 +312,7 @@ void pext5(u32 rt, u32 rd) // Parallel Extend Upper from 5 bits
     u32 dst_w[4];
     for (int i = 0; i < 4; ++i) {
         u16 src_hw;
-        std::memcpy(&src_hw, reinterpret_cast<u8 const*>(&src) + 4 * i, 2);
+        std::memcpy(&src_hw, reinterpret_cast<u8*>(&src) + 4 * i, 2);
         dst_w[i] =
           ((src_hw & 0x1F) << 3) | ((src_hw & 0x3E0) << 6) | ((src_hw & 0x7C00) << 9) | ((src_hw & 0x8000) << 16);
     }
@@ -374,11 +379,11 @@ void phmsbh(u32 rs, u32 rt, u32 rd) // Parallel Horizontal Multiply-Subtract Hal
     s32 prod[4];
     for (int i = 0; i < 4; ++i) {
         s16 op0, op1, op2, op3;
-        std::memcpy(&op2, reinterpret_cast<u8 const*>(&src_rs) + 4 * i + 2, 2);
-        std::memcpy(&op3, reinterpret_cast<u8 const*>(&src_rt) + 4 * i + 2, 2);
-        std::memcpy(&op0, reinterpret_cast<u8 const*>(&src_rs) + 4 * i, 2);
-        std::memcpy(&op1, reinterpret_cast<u8 const*>(&src_rt) + 4 * i, 2);
-        prod[i] = s32(op0) * s32(op1) - s32(op2) * s32(op3);
+        std::memcpy(&op2, reinterpret_cast<u8*>(&src_rs) + 4 * i + 2, 2);
+        std::memcpy(&op3, reinterpret_cast<u8*>(&src_rt) + 4 * i + 2, 2);
+        std::memcpy(&op0, reinterpret_cast<u8*>(&src_rs) + 4 * i, 2);
+        std::memcpy(&op1, reinterpret_cast<u8*>(&src_rt) + 4 * i, 2);
+        prod[i] = op0 * op1 - op2 * op3;
     }
     gpr[rd] = _mm_set_epi32(prod[3], prod[2], prod[1], prod[0]);
     lo.set_lower_dword(prod[0]);
@@ -406,6 +411,9 @@ void pinth(u32 rs, u32 rt, u32 rd) // Parallel Interleave Halfword
 
 void plzcw(u32 rs, u32 rd) // Parallel Leading Zero or One Count Word
 {
+    u32 leading_ones = std::countl_one(gpr[rs].u32()) - 1; // TODO: should it be able to underflow?
+    u32 leading_zeroes = std::countl_zero(gpr[rs].u64() >> 32) - 1;
+    gpr.set(rd, u64(leading_zeroes) << 32 | leading_ones);
 }
 
 void pmaddh(u32 rs, u32 rt, u32 rd) // Parallel Multiply-Add Halfword
@@ -534,7 +542,7 @@ void ppac5(u32 rt, u32 rd) // Parallel Pack to 5 bits
     u16 dst_hw[4];
     for (int i = 0; i < 4; ++i) {
         u32 src_w;
-        std::memcpy(&src_w, reinterpret_cast<u8 const*>(&src) + 4 * i, 4);
+        std::memcpy(&src_w, reinterpret_cast<u8*>(&src) + 4 * i, 4);
         dst_hw[i] = (src_w >> 3 & 0x1F) | (src_w >> 6 & 0x3E0) | (src_w >> 9 & 0x7C00) | (src_w >> 16 & 0x8000);
     }
     gpr[rd] = _mm_set_epi16(0, dst_hw[3], 0, dst_hw[2], 0, dst_hw[1], 0, dst_hw[0]);
@@ -723,6 +731,51 @@ void pxor(u32 rs, u32 rt, u32 rd) // Parallel XOR
 
 void qfsrv(u32 rs, u32 rt, u32 rd) // Quadword Funnel Shift Right Variable
 {
+    assert(!(sa & 7));
+    if (sa > 255) {
+        std::memset(&gpr[rd], 0, 16);
+    } else if (sa > 0) [[likely]] {
+#if INT128_AVAILABLE
+        using u128 = __uint128_t;
+        u128 rs_src = std::bit_cast<u128>(gpr[rs]);
+        u128 rt_src = std::bit_cast<u128>(gpr[rt]);
+        u128 res;
+        if (sa < 128) {
+            res = rt_src >> sa | rs_src << (128 - sa);
+        } else {
+            res = rs_src >> (sa - 128);
+        }
+        gpr.set(rd, std::bit_cast<m128i>(res));
+#else
+        m128i qwords[2] = { gpr[rt], gpr[rs] };
+        u64 dwords[4];
+        std::memcpy(dwords, qwords, 32);
+        u64 res[2];
+        u64 q = sa / 64;
+        u64 rshift = sa & 63;
+        if (rshift == 0) {
+            res[0] = dwords[q];
+            res[1] = q < 3 ? dwords[q + 1] : 0;
+        } else {
+            res[0] = dwords[q] >> rshift;
+            if (q < 3) {
+                u64 lshift = 64 - rshift;
+                res[0] |= dwords[q + 1] << lshift;
+                res[1] = dwords[q + 1] >> rshift;
+                if (q < 2) {
+                    res[1] |= dwords[q + 2] << lshift;
+                }
+            } else {
+                res[1] = 0;
+            }
+        }
+        m128i out;
+        std::memcpy(&out, res, 16);
+        gpr[rd] = out;
+#endif
+    } else {
+        gpr[rd] = gpr[rt];
+    }
 }
 
 } // namespace ee

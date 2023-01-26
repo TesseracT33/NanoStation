@@ -589,14 +589,17 @@ void mtlo1(u32 rs)
 
 void mtsa(u32 rs)
 {
+    sa = gpr[rs].u64();
 }
 
-void mtsab()
+void mtsab(u32 rs, s16 imm)
 {
+    sa = 8 * (15 & (gpr[rs].s16() ^ imm));
 }
 
-void mtsah()
+void mtsah(u32 rs, s16 imm)
 {
+    sa = 16 * (7 & (gpr[rs].s16() ^ imm));
 }
 
 void mult(u32 rs, u32 rt)
