@@ -12,7 +12,7 @@ using s16 = int16_t;
 using s32 = int32_t;
 using s64 = int64_t;
 
-#if (defined __clang__ || defined __GNUC__) && defined __SIZEOF_INT128__
+#ifdef __SIZEOF_INT128__
 #define INT128_AVAILABLE 1
 using u128 = __uint128_t;
 using s128 = __int128_t;
