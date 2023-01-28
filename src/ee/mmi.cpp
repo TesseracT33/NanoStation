@@ -2,6 +2,7 @@
 #include "ee.hpp"
 #include "host.hpp"
 
+#include <algorithm>
 #include <bit>
 #include <cassert>
 #include <cstring>
@@ -121,9 +122,16 @@ void paddw(u32 rs, u32 rt, u32 rd) // Parallel Add Word
 void padsbh(u32 rs, u32 rt, u32 rd) // Parallel Add/Subtract Halfword
 {
 #if X64
+    m128i res;
+#if __AVX512BW__ && __AVX512F__ && __AVX512VL__
+    res = _mm_maskz_add_epi16(0xF0, gpr[rs], gpr[rt]);
+    res = _mm_mask_sub_epi16(res, 0xF, gpr[rs], gpr[rt]);
+#else
     m128i add = _mm_add_epi16(gpr[rs], gpr[rt]);
     m128i sub = _mm_sub_epi16(gpr[rs], gpr[rt]);
-    gpr[rd] = _mm_blend_epi16(add, sub, 0xF);
+    res = _mm_blend_epi16(add, sub, 0xF);
+#endif
+    gpr.set(rd, res);
 #endif
 }
 
@@ -412,7 +420,7 @@ void pinth(u32 rs, u32 rt, u32 rd) // Parallel Interleave Halfword
 void plzcw(u32 rs, u32 rd) // Parallel Leading Zero or One Count Word
 {
     u32 leading_ones = std::countl_one(gpr[rs].u32()) - 1; // TODO: should it be able to underflow?
-    u32 leading_zeroes = std::countl_zero(gpr[rs].u64() >> 32) - 1;
+    u32 leading_zeroes = std::countl_zero(u32(gpr[rs].u64() >> 32)) - 1;
     gpr.set(rd, u64(leading_zeroes) << 32 | leading_ones);
 }
 
@@ -449,6 +457,26 @@ void pmfhi(u32 rd) //  Parallel Move From HI Register
 
 void pmfhl(u32 rd, u32 fmt) // Parallel Move From HI/LO Register
 {
+#if X64
+    if (fmt == 0) {
+        gpr[rd] = _mm_blend_epi32(_mm_slli_si128(hi, 4) , lo, 5);
+    }
+    if (fmt == 1) {
+        gpr[rd] = _mm_blend_epi32(hi, _mm_srli_si128(lo, 4), 5);
+    }
+    if (fmt == 2) {
+        s64 src = lo.s32() | hi.s64() << 32;
+        gpr.set(rd, std::min(0x7FFF'FFFFLL, std::max(-0x8000'0000LL, src)));
+    }
+    if (fmt == 3) {
+        m128i lo_u16 = _mm_and_si128(lo, _mm_set1_epi32(0xFFFF));
+        m128i hi_u16 = _mm_and_si128(hi, _mm_set1_epi32(0xFFFF));
+        gpr[rd] = _mm_shuffle_epi32(_mm_packus_epi32(lo_u16, hi_u16), 2 << 2 | 1 << 4 | 3 << 6);
+    }
+    if (fmt == 4) {
+        gpr[rd] = _mm_shuffle_epi32(_mm_packs_epi32(lo, hi), 2 << 2 | 1 << 4 | 3 << 6);
+    }
+#endif
 }
 
 void pmflo(u32 rd) // Parallel Move From LO Register
@@ -485,6 +513,11 @@ void pmthi(u32 rs) // Parallel Move To HI Register
 
 void pmthl(u32 rs, u32 fmt) // Parallel Move To HI/LO Register
 {
+    if (fmt) return;
+#if X64
+    lo = _mm_blend_epi32(lo, gpr[rs], 5);
+    hi = _mm_blend_epi32(hi, _mm_srli_si128(gpr[rs], 4), 5);
+#endif
 }
 
 void pmtlo(u32 rs) // Parallel Move To LO Register
@@ -736,7 +769,6 @@ void qfsrv(u32 rs, u32 rt, u32 rd) // Quadword Funnel Shift Right Variable
         std::memset(&gpr[rd], 0, 16);
     } else if (sa > 0) [[likely]] {
 #if INT128_AVAILABLE
-        using u128 = __uint128_t;
         u128 rs_src = std::bit_cast<u128>(gpr[rs]);
         u128 rt_src = std::bit_cast<u128>(gpr[rt]);
         u128 res;
