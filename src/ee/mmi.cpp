@@ -459,7 +459,7 @@ void pmfhl(u32 rd, u32 fmt) // Parallel Move From HI/LO Register
 {
 #if X64
     if (fmt == 0) {
-        gpr[rd] = _mm_blend_epi32(_mm_slli_si128(hi, 4) , lo, 5);
+        gpr[rd] = _mm_blend_epi32(_mm_slli_si128(hi, 4), lo, 5);
     }
     if (fmt == 1) {
         gpr[rd] = _mm_blend_epi32(hi, _mm_srli_si128(lo, 4), 5);
@@ -500,10 +500,33 @@ void pminw(u32 rs, u32 rt, u32 rd) // Parallel Minimum Word
 
 void pmsubh(u32 rs, u32 rt, u32 rd) // Parallel Multiply-Subtract Halfword
 {
+#if X64
+    m128i lo_prods = _mm_mullo_epi16(gpr[rs], gpr[rt]);
+    m128i hi_prods = _mm_mulhi_epi16(gpr[rs], gpr[rt]);
+    m128i prods0 = _mm_unpacklo_epi16(lo_prods, hi_prods);
+    m128i prods1 = _mm_unpackhi_epi16(lo_prods, hi_prods);
+    m128i blend0 = _mm_blend_epi32(_mm_slli_si128(hi, 8), lo, 3);
+    m128i blend1 = _mm_blend_epi32(hi, _mm_srli_si128(lo, 8), 3);
+    m128i diffs0 = _mm_sub_epi32(blend0, prods0);
+    m128i diffs1 = _mm_sub_epi32(blend1, prods1);
+    m128i shuffle0 = _mm_shuffle_epi32(diffs0, 2 << 2);
+    m128i shuffle1 = _mm_shuffle_epi32(diffs1, 2 << 6);
+    gpr[rd] = _mm_blend_epi32(shuffle1, shuffle0, 3);
+    lo = _mm_blend_epi32(_mm_slli_si128(diffs1, 8), diffs0, 3);
+    hi = _mm_blend_epi32(diffs1, _mm_srli_si128(diffs0, 8), 3);
+#endif
 }
 
 void pmsubw(u32 rs, u32 rt, u32 rd) // Parallel Multiply-Subtract Word
 {
+#if X64
+    m128i prod = _mm_mul_epi32(gpr[rs], gpr[rt]);
+    m128i blend = _mm_blend_epi32(_mm_slli_si128(hi, 4), lo, 5);
+    m128i diff = _mm_sub_epi64(blend, prod);
+    gpr.set(rd, diff);
+    lo = _mm_cvtepi32_epi64(_mm_shuffle_epi32(diff, 2 << 2));
+    hi = _mm_cvtepi32_epi64(_mm_shuffle_epi32(diff, 3 << 2 | 1));
+#endif
 }
 
 void pmthi(u32 rs) // Parallel Move To HI Register
@@ -530,8 +553,11 @@ void pmulth(u32 rs, u32 rt, u32 rd) // Parallel Multiply Halfword
 #if X64
     m128i prod_lo = _mm_mullo_epi16(gpr[rs], gpr[rt]);
     m128i prod_hi = _mm_mulhi_epi16(gpr[rs], gpr[rt]);
-    gpr[rd] = _mm_blend_epi16(prod_lo, _mm_slli_si128(prod_hi, 2), 0xAA);
-// TODO: lo, hi
+    gpr[rd] = _mm_blend_epi16(_mm_slli_si128(prod_hi, 2), prod_lo, 0x55);
+    m128i unpack_lo = _mm_unpacklo_epi16(prod_lo, prod_hi);
+    m128i unpack_hi = _mm_unpackhi_epi16(prod_lo, prod_hi);
+    lo = _mm_blend_epi32(_mm_slli_si128(unpack_hi, 8), unpack_lo, 3);
+    hi = _mm_blend_epi32(unpack_hi, _mm_srli_si128(unpack_lo, 8), 3);
 #endif
 }
 
@@ -540,8 +566,8 @@ void pmultuw(u32 rs, u32 rt, u32 rd) // Parallel Multiply Unsigned Word
 #if X64
     m128i prod = _mm_mul_epu32(gpr[rs], gpr[rt]);
     gpr.set(rd, prod);
-    lo = _mm_cvtepi32_epi64(prod);
-    hi = _mm_cvtepi32_epi64(_mm_srli_epi64(prod, 32));
+    lo = _mm_cvtepi32_epi64(_mm_shuffle_epi32(prod, 2 << 2));
+    hi = _mm_cvtepi32_epi64(_mm_shuffle_epi32(prod, 3 << 2 | 1));
 #endif
 }
 
@@ -550,8 +576,8 @@ void pmultw(u32 rs, u32 rt, u32 rd) // Parallel Multiply Word
 #if X64
     m128i prod = _mm_mul_epi32(gpr[rs], gpr[rt]);
     gpr.set(rd, prod);
-    lo = _mm_cvtepi32_epi64(prod);
-    hi = _mm_cvtepi32_epi64(_mm_srli_epi64(prod, 32));
+    lo = _mm_cvtepi32_epi64(_mm_shuffle_epi32(prod, 2 << 2));
+    hi = _mm_cvtepi32_epi64(_mm_shuffle_epi32(prod, 3 << 2 | 1));
 #endif
 }
 
