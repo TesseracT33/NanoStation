@@ -422,14 +422,45 @@ void plzcw(u32 rs, u32 rd) // Parallel Leading Zero or One Count Word
 
 void pmaddh(u32 rs, u32 rt, u32 rd) // Parallel Multiply-Add Halfword
 {
+#if X64
+    m128i lo_prods = _mm_mullo_epi16(gpr[rs], gpr[rt]);
+    m128i hi_prods = _mm_mulhi_epi16(gpr[rs], gpr[rt]);
+    m128i prods0 = _mm_unpacklo_epi16(lo_prods, hi_prods);
+    m128i prods1 = _mm_unpackhi_epi16(lo_prods, hi_prods);
+    m128i blend0 = _mm_blend_epi32(_mm_slli_si128(hi, 8), lo, 3);
+    m128i blend1 = _mm_blend_epi32(hi, _mm_srli_si128(lo, 8), 3);
+    m128i sums0 = _mm_add_epi32(blend0, prods0);
+    m128i sums1 = _mm_add_epi32(blend1, prods1);
+    m128i shuffle0 = _mm_shuffle_epi32(sums0, 2 << 2);
+    m128i shuffle1 = _mm_shuffle_epi32(sums1, 2 << 6);
+    gpr.set(rd, _mm_blend_epi32(shuffle1, shuffle0, 3));
+    lo = _mm_blend_epi32(_mm_slli_si128(sums1, 8), sums0, 3);
+    hi = _mm_blend_epi32(sums1, _mm_srli_si128(sums0, 8), 3);
+#endif
 }
 
 void pmadduw(u32 rs, u32 rt, u32 rd) // Parallel Multiply-Add Unsigned Word
 {
+#if X64
+    m128i prod = _mm_mul_epu32(gpr[rs], gpr[rt]);
+    m128i blend = _mm_blend_epi32(_mm_slli_si128(hi, 4), lo, 5);
+    m128i sum = _mm_add_epi64(blend, prod);
+    gpr.set(rd, sum);
+    lo = _mm_cvtepi32_epi64(_mm_shuffle_epi32(sum, 2 << 2));
+    hi = _mm_cvtepi32_epi64(_mm_shuffle_epi32(sum, 3 << 2 | 1));
+#endif
 }
 
 void pmaddw(u32 rs, u32 rt, u32 rd) // Parallel Multiply-Add Word
 {
+#if X64
+    m128i prod = _mm_mul_epi32(gpr[rs], gpr[rt]);
+    m128i blend = _mm_blend_epi32(_mm_slli_si128(hi, 4), lo, 5);
+    m128i sum = _mm_add_epi64(blend, prod);
+    gpr.set(rd, sum);
+    lo = _mm_cvtepi32_epi64(_mm_shuffle_epi32(sum, 2 << 2));
+    hi = _mm_cvtepi32_epi64(_mm_shuffle_epi32(sum, 3 << 2 | 1));
+#endif
 }
 
 void pmaxh(u32 rs, u32 rt, u32 rd) // Parallel Maximum Halfword
