@@ -52,7 +52,8 @@ struct GPR {
     void set(std::integral auto index, m128i data);
     template<uint lane> void set(std::integral auto index, std::integral auto data);
 
-    Reg128& operator[](std::integral auto index);
+    // return by value so that writes have to be made through 'set'
+    Reg128 operator[](std::integral auto index) const;
 
 private:
     std::array<Reg128, 32> gpr{};
@@ -81,19 +82,22 @@ template<std::integral Int, uint lane> Int ee::GPR::get(std::integral auto index
 void ee::GPR::set(std::integral auto index, std::integral auto data)
 {
     gpr[index].set(data);
+    std::memset(&gpr[index], 0, sizeof(gpr[index]));
 }
 
 void ee::GPR::set(std::integral auto index, m128i data)
 {
     gpr[index].set(data);
+    std::memset(&gpr[index], 0, sizeof(gpr[index]));
 }
 
 template<uint lane> void ee::GPR::set(std::integral auto index, std::integral auto data)
 {
     gpr[index].set<lane>(data);
+    std::memset(&gpr[index], 0, sizeof(gpr[index]));
 }
 
-Reg128& ee::GPR::operator[](std::integral auto index)
+Reg128 ee::GPR::operator[](std::integral auto index) const
 {
     return gpr[index];
 }
