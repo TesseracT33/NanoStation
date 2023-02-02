@@ -203,7 +203,7 @@ void bnel(u32 rs, u32 rt, s16 imm)
 
 void break_()
 {
-    // TODO
+    breakpoint_exception();
 }
 
 void cache()
@@ -459,7 +459,7 @@ void ldr(u32 rs, u32 rt, s16 imm)
     s32 addr = gpr[rs].s32() + imm;
     s64 val = virtual_read<8, Alignment::Unaligned>(addr);
     if (!exception_occurred) {
-        s64 bits_offset = 8 * (addr & 7);
+        s32 bits_offset = 8 * (addr & 7);
         u64 load_mask = 0xFFFF'FFFF'FFFF'FFFF >> bits_offset;
         val >>= bits_offset;
         gpr.set(rt, val & load_mask | gpr[rt].s64() & ~load_mask);
@@ -484,6 +484,10 @@ void lhu(u32 rs, u32 rt, s16 imm)
 
 void lq(u32 rs, u32 rt, s16 imm)
 {
+    m128i val = virtual_read<16>((gpr[rs].s32() + imm) & ~15);
+    if (!exception_occurred) {
+        gpr.set(rt, val);
+    }
 }
 
 void lui(u32 rt, s16 imm)
@@ -551,7 +555,7 @@ void mflo1(u32 rd)
 
 void mfsa(u32 rd)
 {
-
+    gpr.set(rd, sa);
 }
 
 void movn(u32 rs, u32 rt, u32 rd)
@@ -705,6 +709,7 @@ void sltu(u32 rs, u32 rt, u32 rd)
 
 void sq(u32 rs, u32 rt, s16 imm)
 {
+    virtual_write<16>((gpr[rs].s32() + imm) & ~15, gpr[rt].m128i());
 }
 
 void sra(u32 rt, u32 rd, u32 sa)
@@ -746,6 +751,7 @@ void sync()
 
 void syscall()
 {
+    syscall_exception();
 }
 
 void sub(u32 rs, u32 rt, u32 rd)

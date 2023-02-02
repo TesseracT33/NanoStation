@@ -85,6 +85,7 @@ template<bool raw> void Cop0Registers::set(int reg, u32 value)
     case 0:
         if constexpr (raw) write(index);
         else write_masked(index, 0x8000'003F);
+        break;
 
     case 1:
         if constexpr (raw) write(random);
