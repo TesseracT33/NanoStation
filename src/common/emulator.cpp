@@ -38,6 +38,9 @@ void resume()
 
 void run()
 {
+    while (1) {
+        ee::run(64);
+    }
 }
 
 void stop()

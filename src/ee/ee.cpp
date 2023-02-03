@@ -1,4 +1,9 @@
+#include "cop0.hpp"
+#include "disassembler.hpp"
 #include "ee.hpp"
+#include "mmu.hpp"
+
+#include <cassert>
 
 namespace ee {
 bool in_branch_delay_slot;
@@ -7,11 +12,21 @@ u32 sa;
 Reg128 lo, hi;
 GPR gpr;
 
-static bool jump_is_pending;
+static u64 cycle_counter;
 
-void cancel_jump()
+static void fetch_decode_exec();
+
+void advance_pipeline(u64 cycles)
 {
-    in_branch_delay_slot = jump_is_pending = false;
+    cycle_counter += cycles;
+    cop0.count += cycles;
+}
+
+void fetch_decode_exec()
+{
+    u32 instr = virtual_read<4, ee::Alignment::Aligned, ee::MemOp::InstrFetch>(pc);
+    pc += 4;
+    interpreter::disassemble(instr);
 }
 
 bool init()
@@ -25,9 +40,22 @@ bool init()
     return true;
 }
 
-void prepare_jump(u32 target)
+void jump(u32 target)
 {
-    in_branch_delay_slot = jump_is_pending = true;
+    assert(!in_branch_delay_slot); // TODO: going beyond this can result in stack overflow. First need to know what the behaviour is
+    in_branch_delay_slot = true;
+    fetch_decode_exec();
+    in_branch_delay_slot = false;
+    if (!exception_occurred) pc = target;
+}
+
+u64 run(u64 cycles)
+{
+    cycle_counter = 0;
+    while (cycle_counter < cycles) {
+        fetch_decode_exec();
+    }
+    return cycle_counter - cycles;
 }
 
 } // namespace ee

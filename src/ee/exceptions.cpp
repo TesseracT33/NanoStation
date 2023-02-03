@@ -69,7 +69,6 @@ void handle_lvl1_exception()
         cop0.cause.bd = in_branch_delay_slot;
         cop0.epc = pc - (in_branch_delay_slot ? 8 : 4);
     }
-    cancel_jump();
 }
 
 void handle_lvl2_exception()
@@ -77,7 +76,6 @@ void handle_lvl2_exception()
     cop0.status.erl = 1;
     cop0.cause.bd2 = in_branch_delay_slot;
     cop0.error_epc = pc - (in_branch_delay_slot ? 8 : 4);
-    cancel_jump();
 }
 
 void integer_overflow_exception()

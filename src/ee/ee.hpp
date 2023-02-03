@@ -64,9 +64,10 @@ extern u32 jump_addr, pc;
 extern Reg128 lo, hi;
 extern u32 sa;
 
-void cancel_jump();
+void advance_pipeline(u64 cycles);
 bool init();
-void prepare_jump(u32 target);
+void jump(u32 target);
+u64 run(u64 cycles);
 
 } // namespace ee
 

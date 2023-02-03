@@ -72,14 +72,14 @@ void andi(u32 rs, u32 rt, u16 imm)
 void beq(u32 rs, u32 rt, s16 imm)
 {
     if (gpr[rs].s64() == gpr[rt].s64()) {
-        prepare_jump(pc + (imm << 2));
+        jump(pc + (imm << 2));
     }
 }
 
 void beql(u32 rs, u32 rt, s16 imm)
 {
     if (gpr[rs].s64() == gpr[rt].s64()) {
-        prepare_jump(pc + (imm << 2));
+        jump(pc + (imm << 2));
     } else {
         pc += 4;
     }
@@ -88,7 +88,7 @@ void beql(u32 rs, u32 rt, s16 imm)
 void bgez(u32 rs, s16 imm)
 {
     if (gpr[rs].s64() >= 0) {
-        prepare_jump(pc + (imm << 2));
+        jump(pc + (imm << 2));
     }
 }
 
@@ -96,7 +96,7 @@ void bgezal(u32 rs, s16 imm)
 {
     gpr[31] = 4 + (in_branch_delay_slot ? jump_addr : pc);
     if (gpr[rs].s64() >= 0) {
-        prepare_jump(pc + (imm << 2));
+        jump(pc + (imm << 2));
     }
 }
 
@@ -104,7 +104,7 @@ void bgezall(u32 rs, s16 imm)
 {
     gpr[31] = 4 + (in_branch_delay_slot ? jump_addr : pc);
     if (gpr[rs].s64() >= 0) {
-        prepare_jump(pc + (imm << 2));
+        jump(pc + (imm << 2));
     } else {
         pc += 4;
     }
@@ -113,7 +113,7 @@ void bgezall(u32 rs, s16 imm)
 void bgezl(u32 rs, s16 imm)
 {
     if (gpr[rs].s64() >= 0) {
-        prepare_jump(pc + (imm << 2));
+        jump(pc + (imm << 2));
     } else {
         pc += 4;
     }
@@ -122,14 +122,14 @@ void bgezl(u32 rs, s16 imm)
 void bgtz(u32 rs, s16 imm)
 {
     if (gpr[rs].s64() > 0) {
-        prepare_jump(pc + (imm << 2));
+        jump(pc + (imm << 2));
     }
 }
 
 void bgtzl(u32 rs, s16 imm)
 {
     if (gpr[rs].s64() > 0) {
-        prepare_jump(pc + (imm << 2));
+        jump(pc + (imm << 2));
     } else {
         pc += 4;
     }
@@ -138,14 +138,14 @@ void bgtzl(u32 rs, s16 imm)
 void blez(u32 rs, s16 imm)
 {
     if (gpr[rs].s64() <= 0) {
-        prepare_jump(pc + (imm << 2));
+        jump(pc + (imm << 2));
     }
 }
 
 void blezl(u32 rs, s16 imm)
 {
     if (gpr[rs].s64() <= 0) {
-        prepare_jump(pc + (imm << 2));
+        jump(pc + (imm << 2));
     } else {
         pc += 4;
     }
@@ -154,7 +154,7 @@ void blezl(u32 rs, s16 imm)
 void bltz(u32 rs, s16 imm)
 {
     if (gpr[rs].s64() < 0) {
-        prepare_jump(pc + (imm << 2));
+        jump(pc + (imm << 2));
     }
 }
 
@@ -162,7 +162,7 @@ void bltzal(u32 rs, s16 imm)
 {
     gpr[31] = 4 + (in_branch_delay_slot ? jump_addr : pc);
     if (gpr[rs].s64() < 0) {
-        prepare_jump(pc + (imm << 2));
+        jump(pc + (imm << 2));
     }
 }
 
@@ -170,7 +170,7 @@ void bltzall(u32 rs, s16 imm)
 {
     gpr[31] = 4 + (in_branch_delay_slot ? jump_addr : pc);
     if (gpr[rs].s64() < 0) {
-        prepare_jump(pc + (imm << 2));
+        jump(pc + (imm << 2));
     } else {
         pc += 4;
     }
@@ -179,7 +179,7 @@ void bltzall(u32 rs, s16 imm)
 void bltzl(u32 rs, s16 imm)
 {
     if (gpr[rs].s64() < 0) {
-        prepare_jump(pc + (imm << 2));
+        jump(pc + (imm << 2));
     } else {
         pc += 4;
     }
@@ -188,14 +188,14 @@ void bltzl(u32 rs, s16 imm)
 void bne(u32 rs, u32 rt, s16 imm)
 {
     if (gpr[rs].s64() != gpr[rt].s64()) {
-        prepare_jump(pc + (imm << 2));
+        jump(pc + (imm << 2));
     }
 }
 
 void bnel(u32 rs, u32 rt, s16 imm)
 {
     if (gpr[rs].s64() != gpr[rt].s64()) {
-        prepare_jump(pc + (imm << 2));
+        jump(pc + (imm << 2));
     } else {
         pc += 4;
     }
@@ -383,14 +383,14 @@ void dsubu(u32 rs, u32 rt, u32 rd)
 void j(u32 imm26)
 {
     if (!in_branch_delay_slot) {
-        prepare_jump(pc & 0xF000'0000 | imm26 << 2);
+        jump(pc & 0xF000'0000 | imm26 << 2);
     }
 }
 
 void jal(u32 imm26)
 {
     if (!in_branch_delay_slot) {
-        prepare_jump(pc & 0xF000'0000 | imm26 << 2);
+        jump(pc & 0xF000'0000 | imm26 << 2);
     }
     gpr.set(31, 4 + (in_branch_delay_slot ? jump_addr : pc));
 }
@@ -402,7 +402,7 @@ void jalr(u32 rs, u32 rd)
         if (target & 3) {
             address_error_exception(target, MemOp::InstrFetch);
         } else {
-            prepare_jump(target);
+            jump(target);
         }
     }
     gpr.set(rd, 4 + (in_branch_delay_slot ? jump_addr : pc));
@@ -415,7 +415,7 @@ void jr(u32 rs)
         if (target & 3) {
             address_error_exception(target, MemOp::InstrFetch);
         } else {
-            prepare_jump(target);
+            jump(target);
         }
     }
 }

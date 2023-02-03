@@ -211,6 +211,13 @@ struct Cop0Registers {
 
     u32 unused_31;
 
+    struct { // (24)
+        u32 : 2;
+        u32 value : 30;
+    } debug_iab, debug_iabm;
+
+    u32 debug_dab, debug_dabm, debug_dvb, debug_dvbm;
+
     struct { // (25; PCR0, PCR1)
         u32 value : 31;
         u32 ovfl  : 1;
