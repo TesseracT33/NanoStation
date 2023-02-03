@@ -594,7 +594,7 @@ void mtlo1(u32 rs)
 
 void mtsa(u32 rs)
 {
-    sa = gpr[rs].u64();
+    sa = gpr[rs].u32();
 }
 
 void mtsab(u32 rs, s16 imm)
