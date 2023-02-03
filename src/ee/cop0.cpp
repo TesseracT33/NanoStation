@@ -27,14 +27,29 @@ void bc0tl(s16 imm)
 
 void di()
 {
+    u32 edi_erl_exi = std::bit_cast<u32>(cop0.status) & 0x20006;
+    if ((cop0.status.ksu == 0) | edi_erl_exi) {
+        cop0.status.eie = 0;
+    }
 }
 
 void ei()
 {
+    u32 edi_erl_exi = std::bit_cast<u32>(cop0.status) & 0x20006;
+    if ((cop0.status.ksu == 0) | edi_erl_exi) {
+        cop0.status.eie = 1;
+    }
 }
 
 void eret()
 {
+    if (cop0.status.erl) {
+        pc = cop0.error_epc;
+        cop0.status.erl = 0;
+    } else {
+        pc = cop0.epc;
+        cop0.status.exl = 0;
+    }
 }
 
 void mfc0(u32 rd, u32 rt)
