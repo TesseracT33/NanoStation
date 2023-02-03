@@ -276,14 +276,14 @@ void div1(u32 rs, u32 rt)
     s32 op1 = gpr[rs].s32();
     s32 op2 = gpr[rt].s32();
     if (op2 == 0) {
-        lo1 = op1 >= 0 ? -1 : 1;
-        hi1 = op1;
+        lo.set_upper_dword(op1 >= 0 ? -1 : 1);
+        hi.set_upper_dword(op1);
     } else if (op1 == std::numeric_limits<s32>::min() && op2 == -1) {
-        lo1 = op1;
-        hi1 = 0;
+        lo.set_upper_dword(op1);
+        hi.set_upper_dword(0);
     } else [[likely]] {
-        lo1 = op1 / op2;
-        hi1 = op1 % op2;
+        lo.set_upper_dword(op1 / op2);
+        hi.set_upper_dword(op1 % op2);
     }
 }
 
@@ -305,11 +305,11 @@ void divu1(u32 rs, u32 rt)
     u32 op1 = gpr[rs].u32();
     u32 op2 = gpr[rt].u32();
     if (op2 == 0) {
-        lo1 = -1;
-        hi1 = s32(op1);
+        lo.set_upper_dword(-1);
+        hi.set_upper_dword(s32(op1));
     } else {
-        lo1 = s32(op1 / op2);
-        hi1 = s32(op1 % op2);
+        lo.set_upper_dword(s32(op1 / op2));
+        hi.set_upper_dword(s32(op1 % op2));
     }
 }
 
@@ -540,7 +540,7 @@ void mfhi(u32 rd)
 
 void mfhi1(u32 rd)
 {
-    gpr.set(rd, hi1);
+    gpr.set(rd, hi.get_upper_dword());
 }
 
 void mflo(u32 rd)
@@ -550,7 +550,7 @@ void mflo(u32 rd)
 
 void mflo1(u32 rd)
 {
-    gpr.set(rd, lo1);
+    gpr.set(rd, lo.get_upper_dword());
 }
 
 void mfsa(u32 rd)
@@ -579,7 +579,7 @@ void mthi(u32 rs)
 
 void mthi1(u32 rs)
 {
-    hi1 = gpr[rs].s64();
+    hi.set_upper_dword(gpr[rs].s64());
 }
 
 void mtlo(u32 rs)
@@ -589,7 +589,7 @@ void mtlo(u32 rs)
 
 void mtlo1(u32 rs)
 {
-    lo1 = gpr[rs].s64();
+    lo.set_upper_dword(gpr[rs].s64());
 }
 
 void mtsa(u32 rs)
@@ -617,8 +617,8 @@ void mult(u32 rs, u32 rt)
 void mult1(u32 rs, u32 rt)
 {
     s64 prod = s64(gpr[rs].s32()) * s64(gpr[rt].s32());
-    lo1 = s32(prod);
-    hi1 = prod >> 32;
+    lo.set_upper_dword(s32(prod));
+    hi.set_upper_dword(prod >> 32);
 }
 
 void multu(u32 rs, u32 rt)
@@ -631,8 +631,8 @@ void multu(u32 rs, u32 rt)
 void multu1(u32 rs, u32 rt)
 {
     u64 prod = u64(gpr[rs].u32()) * u64(gpr[rt].u32());
-    lo1 = s32(prod);
-    hi1 = s32(prod >> 32);
+    lo.set_upper_dword(s32(prod));
+    hi.set_upper_dword(s32(prod >> 32));
 }
 
 void nor(u32 rs, u32 rt, u32 rd)

@@ -4,7 +4,7 @@ namespace ee {
 bool in_branch_delay_slot;
 u32 jump_addr, pc;
 u32 sa;
-Reg128 lo, lo1, hi, hi1;
+Reg128 lo, hi;
 GPR gpr;
 
 static bool jump_is_pending;
@@ -17,7 +17,9 @@ void cancel_jump()
 bool init()
 {
     std::memset(&gpr, 0, sizeof(gpr));
-    lo = lo1 = hi = hi1 = jump_addr = pc = 0;
+    std::memset(&lo, 0, sizeof(lo));
+    std::memset(&hi, 0, sizeof(hi));
+    jump_addr = pc = 0;
     in_branch_delay_slot = false;
 
     return true;

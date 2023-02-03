@@ -22,6 +22,8 @@ struct Reg128 {
     template<uint lane = 0>::s64 s64() const { return get<::s64, lane>(); }
     template<uint lane = 0>::u64 u64() const { return get<::u64, lane>(); }
     ::m128i m128i() const { return std::bit_cast<::m128i>(*this); }
+    ::u64 get_lower_dword() { return lo; }
+    ::u64 get_upper_dword() { return hi; }
     void set(std::integral auto val) { lo = val; }
     void set_lower_dword(std::integral auto val) { set(val); }
     void set_upper_dword(std::integral auto val) { hi = val; }

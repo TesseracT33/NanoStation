@@ -61,7 +61,7 @@ private:
 
 extern bool in_branch_delay_slot;
 extern u32 jump_addr, pc;
-extern Reg128 lo, lo1, hi, hi1;
+extern Reg128 lo, hi;
 extern u32 sa;
 
 void cancel_jump();
