@@ -1,6 +1,7 @@
 #include "cop0.hpp"
 #include "ee.hpp"
 #include "mmu.hpp"
+#include "scheduler.hpp"
 
 #include <algorithm>
 #include <array>
@@ -95,6 +96,26 @@ void tlbwr()
 {
     tlb_entries[cop0.random % tlb_entries.size()].write();
 }
+
+template<bool initial_add> void reload_count_compare_event()
+{
+    u64 cycles_until_match = cop0.compare - cop0.count;
+    if (cop0.count >= cop0.compare) {
+        cycles_until_match += 0x1'0000'0000;
+    }
+    if constexpr (initial_add) {
+        scheduler::add_event(scheduler::EventType::CountCompareMatch, cycles_until_match, [] {
+            cop0.cause.ip7 = 1;
+            check_interrupts();
+            reload_count_compare_event<false>();
+        });
+    } else {
+        scheduler::change_event_time(scheduler::EventType::CountCompareMatch, cycles_until_match);
+    }
+}
+
+template void reload_count_compare_event<true>();
+template void reload_count_compare_event<false>();
 
 u32 Cop0Registers::get(int reg)
 {

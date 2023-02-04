@@ -28,7 +28,8 @@ struct TlbEntry {
             u32 d   : 1;
             u32 c   : 3;
             u32 pfn : 20;
-            u32     : 6;
+            u32     : 5;
+            u32 s   : 1; // scratchpad. applies only to lo1
         };
         u32 raw;
     } lo[2];

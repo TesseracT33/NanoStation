@@ -17,6 +17,8 @@ void tlbr();
 void tlbwi();
 void tlbwr();
 
+template<bool initial_add = false> void reload_count_compare_event();
+
 struct Cop0Registers {
     struct { /* (0) */
         u32 value : 6; /* Index to the TLB entry affected by the TLB Read (TLBR) and TLB Write (TLBW) instructions. */
@@ -27,7 +29,7 @@ struct Cop0Registers {
     u32 random; /* (1) 6 bits; Decremented every instruction, and specifies the entry in the TLB that is affected by the
                    TLB Write instruction. */
 
-    union EntryLo { /* (2), (3); Used to rewrite the TLB or to check coincidence of a TLB entry when addresses are
+    union { /* (2), (3); Used to rewrite the TLB or to check coincidence of a TLB entry when addresses are
                         converted. */
         struct {
             u32 g : 1; /* Global. If this bit is set in both EntryLo0 and EntryLo1, then the processor ignores the ASID
@@ -37,7 +39,9 @@ struct Cop0Registers {
             u32 d : 1; /* Dirty. If this bit is set, the page is marked as dirty, and therefore writable. */
             u32 c : 3; /* Specifies the TLB page attribute. */
             u32 pfn : 20; /* Page frame number -- the high-order bits of the physical address. */
-            u32     : 6;
+            u32     : 5;
+            u32 s   : 1; // Scratchpad. When set, the virtual mapping goes to scratchpad instead of main memory. Only
+                       // applies to entryLo0
         };
         u32 raw;
     } entry_lo[2];
@@ -64,7 +68,7 @@ struct Cop0Registers {
     u32 count; /* (9); Increments every other PClock. When equal to the Compare register, interrupt bit IP(7) in the
                   Cause register is set. */
 
-    union EntryHi { /* (10) */
+    union { /* (10) */
         struct {
             u32 asid : 8; /* Address space ID field. Lets multiple processes share the TLB; virtual addresses for each
                  process can be shared. */

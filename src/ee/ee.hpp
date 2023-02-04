@@ -65,6 +65,7 @@ extern u32 jump_addr, pc;
 extern Reg128 lo, hi;
 extern u32 sa;
 
+void add_initial_events();
 void advance_pipeline(u32 cycles);
 void check_interrupts();
 bool init();

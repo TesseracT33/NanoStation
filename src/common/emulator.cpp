@@ -1,5 +1,6 @@
 #include "emulator.hpp"
 #include "ee/ee.hpp"
+#include "scheduler.hpp"
 
 namespace emulator {
 static bool bios_loaded;
@@ -11,6 +12,7 @@ bool init()
     if (!ee::init()) {
         return false;
     }
+    scheduler::init();
     return true;
 }
 
@@ -38,13 +40,12 @@ void resume()
 
 void run()
 {
-    while (1) {
-        ee::run(64);
-    }
+    scheduler::run();
 }
 
 void stop()
 {
+    scheduler::stop();
 }
 
 } // namespace emulator

@@ -3,6 +3,7 @@
 #include "disassembler.hpp"
 #include "exceptions.hpp"
 #include "mmu.hpp"
+#include "scheduler.hpp"
 
 #include <cassert>
 
@@ -16,6 +17,11 @@ GPR gpr;
 static u32 cycle_counter;
 
 static void fetch_decode_exec();
+
+void add_initial_events()
+{
+    reload_count_compare_event<true>();
+}
 
 void advance_pipeline(u32 cycles)
 {

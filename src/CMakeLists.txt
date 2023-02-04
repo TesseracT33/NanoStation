@@ -4,6 +4,7 @@ add_executable(NanoStation
 	main.cpp
 
 	common/emulator.cpp
+	common/scheduler.cpp
 
 	ee/cop0.cpp
 	ee/cop1.cpp
