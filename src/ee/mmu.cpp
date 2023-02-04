@@ -9,7 +9,7 @@ namespace ee {
 
 std::array<TlbEntry, 48> tlb_entries;
 
-template<size_t size> static SizeToUInt<size>::type physical_read(u32 addr);
+template<size_t size> static typename SizeToUInt<size>::type physical_read(u32 addr);
 static void physical_write(u32 addr, auto data);
 template<MemOp> static u32 tlb_addr_translation(u32 vaddr);
 template<MemOp> static u32 virt_to_phys_addr(u32 vaddr);
@@ -78,7 +78,7 @@ template<MemOp mem_op> u32 virt_to_phys_addr(u32 vaddr)
     return tlb_addr_translation<mem_op>(vaddr);
 }
 
-template<size_t size, Alignment alignment, MemOp mem_op> SizeToUInt<size>::type virtual_read(u32 addr)
+template<size_t size, Alignment alignment, MemOp mem_op> typename SizeToUInt<size>::type virtual_read(u32 addr)
 {
     static_assert(std::has_single_bit(size) && size <= 16);
     if constexpr (alignment == Alignment::Aligned && size > 1 && size < 16 && mem_op == MemOp::DataRead) {

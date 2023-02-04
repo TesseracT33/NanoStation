@@ -53,7 +53,7 @@ struct TlbEntry {
 extern std::array<TlbEntry, 48> tlb_entries;
 
 template<size_t size, Alignment alignment = Alignment::Aligned, MemOp mem_op = MemOp::DataRead>
-SizeToUInt<size>::type virtual_read(u32 addr);
+typename SizeToUInt<size>::type virtual_read(u32 addr);
 
 template<size_t size, Alignment alignment = Alignment::Aligned> void virtual_write(u32 addr, auto data);
 
