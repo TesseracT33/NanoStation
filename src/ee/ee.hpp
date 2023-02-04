@@ -66,6 +66,7 @@ extern Reg128 lo, hi;
 extern u32 sa;
 
 void advance_pipeline(u32 cycles);
+void check_interrupts();
 bool init();
 void jump(u32 target);
 u32 run(u32 cycles);

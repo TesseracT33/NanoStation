@@ -84,11 +84,11 @@ struct Cop0Registers {
         u32 erl : 1; /* Error level (0: normal; 1: error) */
         u32 ksu : 2; /* Specifies and indicates mode bits (00: kernel; 01: supervisor; 10: user; 11: reserved) */
         u32     : 5;
-        u32 im2 : 1; // Interrupt Mask bit 2 (0: disabled; 1: enabled)
-        u32 im3 : 1; // Interrupt Mask bit 3 (0: disabled; 1: enabled)
+        u32 im2 : 1; // Interrupt Mask bit 2 (INTC) (0: disabled; 1: enabled)
+        u32 im3 : 1; // Interrupt Mask bit 3 (DMAC) (0: disabled; 1: enabled)
         u32 bem : 1;
         u32     : 2;
-        u32 im7 : 1; // Interrupt Mask bit 7 (0: disabled; 1: enabled)
+        u32 im7 : 1; // Interrupt Mask bit 7 (COP0 timer) (0: disabled; 1: enabled)
         u32 eie : 1; // Enable IE (0: disabled; 1: enabled)
         u32 edi : 1; // EI/DI instruction Enable in supervisor/user modes (0: disabled; 1: enabled)
         u32 ch  : 1; /* Cache Hit (0: miss; 1: hit) */
@@ -110,11 +110,11 @@ struct Cop0Registers {
         u32          : 2;
         u32 exc_code : 5; /* Exception code field; written to when an exception is signalled. */
         u32          : 3;
-        u32 ip2      : 1; // Indicates that an interrupt is pending, bit 2 (0: no interrupt; 1: interrupt)
-        u32 ip3      : 1; // Indicates that an interrupt is pending, bit 3 (0: no interrupt; 1: interrupt)
+        u32 ip2      : 1; // Indicates that an interrupt is pending, bit 2 (INTC) (0: no interrupt; 1: interrupt)
+        u32 ip3      : 1; // Indicates that an interrupt is pending, bit 3 (DMAC) (0: no interrupt; 1: interrupt)
         u32 siop     : 1;
         u32          : 2;
-        u32 ip7      : 1; // Indicates that an interrupt is pending, bit 7 (0: no interrupt; 1: interrupt)
+        u32 ip7      : 1; // Indicates that an interrupt is pending, bit 7 (COP0 timer) (0: no interrupt; 1: interrupt)
         u32 exc2 : 3; //  Indicates the exception codes for level 2 exceptions (Performance Counter, Reset, Debug, SIO
                       //  and NMI exceptions) (0: Reset; 1: NMI; 2: PerfC; 3: Debug and SIO; 4-7: reserved)
         u32      : 9;
@@ -229,14 +229,16 @@ struct Cop0Registers {
         u32 ovfl  : 1;
     } perf_pcr0, perf_pcr1;
 
-    u32 get(int reg) const;
+    u32 get(int reg);
     template<bool raw = false> void set(int reg, u32 value);
     void set_raw(int reg, u32 value) { set<true>(reg, value); }
     void on_write_to_cause();
     void on_write_to_compare();
     void on_write_to_count();
     void on_write_to_status();
-    void on_write_to_wired();
+    void update_random();
 } extern cop0;
+
+extern u64 cycles_since_updated_random;
 
 } // namespace ee

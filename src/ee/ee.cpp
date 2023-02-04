@@ -21,7 +21,11 @@ void advance_pipeline(u32 cycles)
 {
     cycle_counter += cycles;
     cop0.count += cycles;
-    cop0.random++;
+    cycles_since_updated_random += cycles;
+}
+
+void check_interrupts()
+{
 }
 
 void fetch_decode_exec()

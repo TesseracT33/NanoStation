@@ -10,6 +10,7 @@
 
 namespace ee {
 Cop0Registers cop0;
+u64 cycles_since_updated_random;
 
 void bc0f(s16 imm)
 {
@@ -95,11 +96,16 @@ void tlbwr()
     tlb_entries[cop0.random % tlb_entries.size()].write();
 }
 
-u32 Cop0Registers::get(int reg) const
+u32 Cop0Registers::get(int reg)
 {
-    u32 ret;
-    std::memcpy(&ret, reinterpret_cast<u8*>(&cop0) + reg * 4, 4);
-    return ret;
+    if (reg == 1) {
+        update_random();
+        return random;
+    } else {
+        u32 ret;
+        std::memcpy(&ret, reinterpret_cast<u8*>(&cop0) + reg * 4, 4);
+        return ret;
+    }
 }
 
 template<bool raw> void Cop0Registers::set(int reg, u32 value)
@@ -143,9 +149,9 @@ template<bool raw> void Cop0Registers::set(int reg, u32 value)
         break;
 
     case 6:
+        update_random();
         if constexpr (raw) write(wired);
         else write_masked(wired, 0x3F);
-        on_write_to_wired();
         break;
 
     case 7: unused_7 = value; break;
@@ -240,8 +246,15 @@ void Cop0Registers::on_write_to_status()
 {
 }
 
-void Cop0Registers::on_write_to_wired()
+void Cop0Registers::update_random()
 {
+    // wired <= random < 48, 0 <= wired < 48
+    if (random < wired + cycles_since_updated_random) {
+        random = 47 - (cycles_since_updated_random - (random - wired + 1)) % (48 - wired);
+    } else {
+        random -= cycles_since_updated_random;
+    }
+    cycles_since_updated_random = 0;
 }
 
 } // namespace ee
