@@ -3,8 +3,12 @@
 #include "types.hpp"
 
 #include <array>
+#include <concepts>
 
 namespace ee {
+
+template<typename T>
+concept EeUInt = std::unsigned_integral<T> || std::same_as<T, u128>;
 
 enum class Alignment {
     Aligned,
@@ -53,8 +57,11 @@ struct TlbEntry {
 
 extern std::array<TlbEntry, 48> tlb_entries;
 
-template<size_t size, Alignment alignment = Alignment::Aligned, MemOp mem_op = MemOp::DataRead>
-typename SizeToUInt<size>::type virtual_read(u32 addr);
+extern std::array<u8, 4 * 1024 * 1024> bios;
+extern std::array<u8, 32 * 1024 * 1024> rdram;
+
+template<EeUInt Int, Alignment alignment = Alignment::Aligned, MemOp mem_op = MemOp::DataRead>
+Int virtual_read(u32 addr);
 
 template<size_t size, Alignment alignment = Alignment::Aligned> void virtual_write(u32 addr, auto data);
 

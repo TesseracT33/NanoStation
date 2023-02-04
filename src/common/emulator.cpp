@@ -18,12 +18,12 @@ bool init()
 
 bool load_bios(std::filesystem::path const& bios_path)
 {
-    return false;
+    return ee::load_bios(bios_path);
 }
 
 bool load_game(std::filesystem::path const& game_path)
 {
-    return false;
+    return true;
 }
 
 void pause()

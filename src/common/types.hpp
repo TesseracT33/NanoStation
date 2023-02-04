@@ -16,11 +16,14 @@ using s64 = int64_t;
 #define INT128_AVAILABLE 1
 using u128 = __uint128_t;
 using s128 = __int128_t;
-#endif
-
-struct u64x2 {
+#else
+using u128 = struct {
     u64 lo, hi;
 };
+using s128 = struct {
+    s64 lo, hi;
+};
+#endif
 
 using uint = unsigned;
 
@@ -45,5 +48,5 @@ template<> struct SizeToUInt<8> {
 };
 
 template<> struct SizeToUInt<16> {
-    using type = u64x2;
+    using type = u128;
 };

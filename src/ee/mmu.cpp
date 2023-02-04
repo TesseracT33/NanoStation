@@ -2,33 +2,33 @@
 #include "cop0.hpp"
 #include "exceptions.hpp"
 
-#include <bit>
+#include <cassert>
 #include <cstring>
 
 namespace ee {
 
+std::array<u8, 4 * 1024 * 1024> bios;
+std::array<u8, 32 * 1024 * 1024> rdram;
 std::array<TlbEntry, 48> tlb_entries;
 
-template<size_t size> static typename SizeToUInt<size>::type physical_read(u32 addr);
-static void physical_write(u32 addr, auto data);
+template<EeUInt Int> static Int read_bios(u32 addr);
+template<EeUInt Int> static Int read_rdram(u32 addr);
 template<MemOp> static u32 tlb_addr_translation(u32 vaddr);
 template<MemOp> static u32 virt_to_phys_addr(u32 vaddr);
 
 void TlbEntry::read() const
 {
-    for (int i = 0; i < 2; ++i) {
-        cop0.entry_lo[i].raw = lo[i].raw;
-        cop0.entry_lo[i].g = hi.g;
-    }
+    cop0.entry_lo[0].raw = lo[0].raw;
+    cop0.entry_lo[1].raw = lo[1].raw;
+    cop0.entry_lo[0].g = cop0.entry_lo[1].g = hi.g;
     cop0.entry_hi.raw = hi.raw & ~page_mask & ~0x1F00;
     cop0.page_mask = page_mask;
 }
 
 void TlbEntry::write()
 {
-    for (int i = 0; i < 2; ++i) {
-        lo[i].raw = cop0.entry_lo[i].raw & ~1;
-    }
+    lo[0].raw = cop0.entry_lo[0].raw & ~1;
+    lo[1].raw = cop0.entry_lo[1].raw & ~1;
     hi.raw = cop0.entry_hi.raw & ~cop0.page_mask;
     hi.g = cop0.entry_lo[0].g & cop0.entry_lo[1].g;
     page_mask = cop0.page_mask;
@@ -36,6 +36,20 @@ void TlbEntry::write()
     vpn2_addr_mask = ~page_mask & ~0x1FFF;
     vpn2_compare = hi.raw & vpn2_addr_mask;
     offset_addr_mask = page_mask >> 1 | 0xFFF;
+}
+
+template<EeUInt Int> Int read_bios(u32 addr)
+{
+    Int ret;
+    std::memcpy(&ret, &bios[addr & 0x3F'FFFF], sizeof(Int));
+    return ret;
+}
+
+template<EeUInt Int> Int read_rdram(u32 addr)
+{
+    Int ret;
+    std::memcpy(&ret, &rdram[addr & 0x1FF'FFFF], sizeof(Int));
+    return ret;
 }
 
 template<MemOp mem_op> u32 tlb_addr_translation(u32 vaddr)
@@ -78,9 +92,9 @@ template<MemOp mem_op> u32 virt_to_phys_addr(u32 vaddr)
     return tlb_addr_translation<mem_op>(vaddr);
 }
 
-template<size_t size, Alignment alignment, MemOp mem_op> typename SizeToUInt<size>::type virtual_read(u32 addr)
+template<EeUInt Int, Alignment alignment, MemOp mem_op> Int virtual_read(u32 addr)
 {
-    static_assert(std::has_single_bit(size) && size <= 16);
+    static constexpr size_t size = sizeof(Int);
     if constexpr (alignment == Alignment::Aligned && size > 1 && size < 16 && mem_op == MemOp::DataRead) {
         if (addr & (size - 1)) {
             address_error_exception(addr, mem_op);
@@ -90,16 +104,25 @@ template<size_t size, Alignment alignment, MemOp mem_op> typename SizeToUInt<siz
 
     u32 paddr = virt_to_phys_addr<mem_op>(addr);
     if (exception_occurred) return {};
-    return {};
+
+    if (paddr < 0x0200'0000) return read_rdram<Int>(paddr);
+    if (paddr < 0x1000'0000) assert(false);
+    if (paddr < 0x1100'0000) {}
+    if (paddr < 0x1101'0000) {}
+    if (paddr < 0x1200'0000) {}
+    if (paddr < 0x1200'2000) {}
+    if (paddr < 0x1C00'0000) assert(false);
+    if (paddr < 0x2000'0000) return read_bios<Int>(paddr);
+    assert(false);
 }
 
-template u8 virtual_read<1, Alignment::Aligned, MemOp::DataRead>(u32);
-template u16 virtual_read<2, Alignment::Aligned, MemOp::DataRead>(u32);
-template u32 virtual_read<4, Alignment::Aligned, MemOp::DataRead>(u32);
-template u64 virtual_read<8, Alignment::Aligned, MemOp::DataRead>(u32);
-template u64x2 virtual_read<16, Alignment::Aligned, MemOp::DataRead>(u32);
-template u32 virtual_read<4, Alignment::Unaligned, MemOp::DataRead>(u32);
-template u64 virtual_read<8, Alignment::Unaligned, MemOp::DataRead>(u32);
-template u32 virtual_read<4, Alignment::Aligned, MemOp::InstrFetch>(u32);
+template u8 virtual_read<u8, Alignment::Aligned, MemOp::DataRead>(u32);
+template u16 virtual_read<u16, Alignment::Aligned, MemOp::DataRead>(u32);
+template u32 virtual_read<u32, Alignment::Aligned, MemOp::DataRead>(u32);
+template u64 virtual_read<u64, Alignment::Aligned, MemOp::DataRead>(u32);
+template u128 virtual_read<u128, Alignment::Aligned, MemOp::DataRead>(u32);
+template u32 virtual_read<u32, Alignment::Unaligned, MemOp::DataRead>(u32);
+template u64 virtual_read<u64, Alignment::Unaligned, MemOp::DataRead>(u32);
+template u32 virtual_read<u32, Alignment::Aligned, MemOp::InstrFetch>(u32);
 
 } // namespace ee

@@ -422,7 +422,7 @@ void jr(u32 rs)
 
 void lb(u32 rs, u32 rt, s16 imm)
 {
-    s8 val = virtual_read<1>(gpr[rs].s32() + imm);
+    s8 val = virtual_read<u8>(gpr[rs].s32() + imm);
     if (!exception_occurred) {
         gpr.set(rt, val);
     }
@@ -430,7 +430,7 @@ void lb(u32 rs, u32 rt, s16 imm)
 
 void lbu(u32 rs, u32 rt, s16 imm)
 {
-    u8 val = virtual_read<1>(gpr[rs].s32() + imm);
+    u8 val = virtual_read<u8>(gpr[rs].s32() + imm);
     if (!exception_occurred) {
         gpr.set(rt, val);
     }
@@ -438,7 +438,7 @@ void lbu(u32 rs, u32 rt, s16 imm)
 
 void ld(u32 rs, u32 rt, s16 imm)
 {
-    s64 val = virtual_read<8>(gpr[rs].s32() + imm);
+    s64 val = virtual_read<u64>(gpr[rs].s32() + imm);
     if (!exception_occurred) {
         gpr.set(rt, val);
     }
@@ -447,7 +447,7 @@ void ld(u32 rs, u32 rt, s16 imm)
 void ldl(u32 rs, u32 rt, s16 imm)
 {
     s32 addr = gpr[rs].s32() + imm;
-    s64 val = virtual_read<8, Alignment::Unaligned>(addr);
+    s64 val = virtual_read<u64, Alignment::Unaligned>(addr);
     if (!exception_occurred) {
         s64 load_mask = s64(0xFF00'0000'0000'0000) >> (8 * (addr & 7));
         gpr.set(rt, val & load_mask | gpr[rt].s64() & ~load_mask);
@@ -457,7 +457,7 @@ void ldl(u32 rs, u32 rt, s16 imm)
 void ldr(u32 rs, u32 rt, s16 imm)
 {
     s32 addr = gpr[rs].s32() + imm;
-    s64 val = virtual_read<8, Alignment::Unaligned>(addr);
+    s64 val = virtual_read<u64, Alignment::Unaligned>(addr);
     if (!exception_occurred) {
         s32 bits_offset = 8 * (addr & 7);
         u64 load_mask = 0xFFFF'FFFF'FFFF'FFFF >> bits_offset;
@@ -468,7 +468,7 @@ void ldr(u32 rs, u32 rt, s16 imm)
 
 void lh(u32 rs, u32 rt, s16 imm)
 {
-    s16 val = virtual_read<2>(gpr[rs].s32() + imm);
+    s16 val = virtual_read<u16>(gpr[rs].s32() + imm);
     if (!exception_occurred) {
         gpr.set(rt, val);
     }
@@ -476,7 +476,7 @@ void lh(u32 rs, u32 rt, s16 imm)
 
 void lhu(u32 rs, u32 rt, s16 imm)
 {
-    u16 val = virtual_read<2>(gpr[rs].s32() + imm);
+    u16 val = virtual_read<u16>(gpr[rs].s32() + imm);
     if (!exception_occurred) {
         gpr.set(rt, val);
     }
@@ -484,7 +484,7 @@ void lhu(u32 rs, u32 rt, s16 imm)
 
 void lq(u32 rs, u32 rt, s16 imm)
 {
-    u64x2 val = virtual_read<16>((gpr[rs].s32() + imm) & ~15);
+    u128 val = virtual_read<u128>((gpr[rs].s32() + imm) & ~15);
     if (!exception_occurred) {
         gpr.set(rt, val);
     }
@@ -497,7 +497,7 @@ void lui(u32 rt, s16 imm)
 
 void lw(u32 rs, u32 rt, s16 imm)
 {
-    s32 val = virtual_read<4>(gpr[rs].s32() + imm);
+    s32 val = virtual_read<u32>(gpr[rs].s32() + imm);
     if (!exception_occurred) {
         gpr.set(rt, val);
     }
@@ -506,7 +506,7 @@ void lw(u32 rs, u32 rt, s16 imm)
 void lwl(u32 rs, u32 rt, s16 imm)
 {
     s32 addr = gpr[rs].s32() + imm;
-    s32 val = virtual_read<4, Alignment::Unaligned>(addr);
+    s32 val = virtual_read<u32, Alignment::Unaligned>(addr);
     if (!exception_occurred) {
         s32 load_mask = s32(0xFF00'0000) >> (8 * (addr & 3));
         gpr.set(rt, val & load_mask | gpr[rt].s32() & ~load_mask);
@@ -516,7 +516,7 @@ void lwl(u32 rs, u32 rt, s16 imm)
 void lwr(u32 rs, u32 rt, s16 imm)
 {
     s32 addr = gpr[rs].s32() + imm;
-    s32 val = virtual_read<4, Alignment::Unaligned>(addr);
+    s32 val = virtual_read<u32, Alignment::Unaligned>(addr);
     if (!exception_occurred) {
         s32 bits_offset = 8 * (addr & 3);
         u32 load_mask = 0xFFFF'FFFF >> bits_offset;
@@ -527,7 +527,7 @@ void lwr(u32 rs, u32 rt, s16 imm)
 
 void lwu(u32 rs, u32 rt, s16 imm)
 {
-    u32 val = virtual_read<4>(gpr[rs].s32() + imm);
+    u32 val = virtual_read<u32>(gpr[rs].s32() + imm);
     if (!exception_occurred) {
         gpr.set(rt, val);
     }

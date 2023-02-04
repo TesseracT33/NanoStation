@@ -4,8 +4,11 @@
 #include "exceptions.hpp"
 #include "mmu.hpp"
 #include "scheduler.hpp"
+#include "util.hpp"
 
+#include <algorithm>
 #include <cassert>
+#include <optional>
 
 namespace ee {
 bool in_branch_delay_slot;
@@ -36,7 +39,7 @@ void check_interrupts()
 
 void fetch_decode_exec()
 {
-    u32 instr = virtual_read<4, ee::Alignment::Aligned, ee::MemOp::InstrFetch>(pc);
+    u32 instr = virtual_read<u32, ee::Alignment::Aligned, ee::MemOp::InstrFetch>(pc);
     pc += 4;
     interpreter::disassemble(instr);
 }
@@ -60,6 +63,19 @@ void jump(u32 target)
     fetch_decode_exec();
     in_branch_delay_slot = false;
     if (!exception_occurred) pc = target;
+}
+
+bool load_bios(std::filesystem::path const& path)
+{
+    static constexpr size_t bios_size = 4 * 1024 * 1024;
+    std::optional<std::array<u8, bios_size>> opt_bios = ReadFileIntoArray<bios_size>(path);
+    if (opt_bios) {
+        std::array<u8, bios_size> const& bios_val = opt_bios.value();
+        std::copy(bios_val.cbegin(), bios_val.cend(), bios.begin());
+        return true;
+    } else {
+        return false;
+    }
 }
 
 u32 run(u32 cycles)

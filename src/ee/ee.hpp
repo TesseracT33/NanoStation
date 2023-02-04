@@ -6,6 +6,7 @@
 #include <array>
 #include <concepts>
 #include <cstring>
+#include <filesystem>
 #include <utility>
 
 namespace ee {
@@ -50,7 +51,7 @@ struct GPR {
     template<std::integral Int, uint lane> Int get(std::integral auto index) const;
     void set(std::integral auto index, std::integral auto data);
     void set(std::integral auto index, m128i data);
-    void set(std::integral auto index, u64x2 data);
+    void set(std::integral auto index, u128 data);
     template<uint lane> void set(std::integral auto index, std::integral auto data);
 
     // return by value so that writes have to be made through 'set'
@@ -70,6 +71,7 @@ void advance_pipeline(u32 cycles);
 void check_interrupts();
 bool init();
 void jump(u32 target);
+bool load_bios(std::filesystem::path const& path);
 u32 run(u32 cycles);
 
 } // namespace ee
@@ -96,7 +98,7 @@ void ee::GPR::set(std::integral auto index, m128i data)
     std::memset(&gpr[index], 0, sizeof(gpr[index]));
 }
 
-void ee::GPR::set(std::integral auto index, u64x2 data)
+void ee::GPR::set(std::integral auto index, u128 data)
 {
     gpr[index].set(data);
     std::memset(&gpr[index], 0, sizeof(gpr[index]));
