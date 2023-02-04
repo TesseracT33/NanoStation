@@ -50,6 +50,7 @@ struct GPR {
     template<std::integral Int, uint lane> Int get(std::integral auto index) const;
     void set(std::integral auto index, std::integral auto data);
     void set(std::integral auto index, m128i data);
+    void set(std::integral auto index, u64x2 data);
     template<uint lane> void set(std::integral auto index, std::integral auto data);
 
     // return by value so that writes have to be made through 'set'
@@ -64,10 +65,10 @@ extern u32 jump_addr, pc;
 extern Reg128 lo, hi;
 extern u32 sa;
 
-void advance_pipeline(u64 cycles);
+void advance_pipeline(u32 cycles);
 bool init();
 void jump(u32 target);
-u64 run(u64 cycles);
+u32 run(u32 cycles);
 
 } // namespace ee
 
@@ -88,6 +89,12 @@ void ee::GPR::set(std::integral auto index, std::integral auto data)
 }
 
 void ee::GPR::set(std::integral auto index, m128i data)
+{
+    gpr[index].set(data);
+    std::memset(&gpr[index], 0, sizeof(gpr[index]));
+}
+
+void ee::GPR::set(std::integral auto index, u64x2 data)
 {
     gpr[index].set(data);
     std::memset(&gpr[index], 0, sizeof(gpr[index]));

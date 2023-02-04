@@ -1,11 +1,11 @@
 #pragma once
 
-#include "exceptions.hpp"
 #include "types.hpp"
 
-#include <bit>
+#include <array>
 
 namespace ee {
+
 enum class Alignment {
     Aligned,
     Unaligned
@@ -17,32 +17,52 @@ enum class MemOp {
     InstrFetch
 };
 
+struct TlbEntry {
+    void read() const;
+    void write();
+
+    union {
+        struct {
+            u32     : 1;
+            u32 v   : 1;
+            u32 d   : 1;
+            u32 c   : 3;
+            u32 pfn : 20;
+            u32     : 6;
+        };
+        u32 raw;
+    } lo[2];
+
+    union {
+        struct {
+            u32 asid : 8;
+            u32      : 4;
+            u32 g    : 1; // Global. If set in both LO0 and LO1, the ASID is ignored during TLB lookup.
+            u32 vpn2 : 19;
+        };
+        u32 raw;
+    } hi;
+
+    u32 page_mask;
+
+    u32 vpn2_addr_mask; // AND with vaddr => VPN2
+    u32 vpn2_compare; // hi.vpn2 shifted left according to page_mask
+    u32 offset_addr_mask; // AND with vaddr => offset
+};
+
+extern std::array<TlbEntry, 48> tlb_entries;
+
 template<size_t size, Alignment alignment = Alignment::Aligned, MemOp mem_op = MemOp::DataRead>
-auto virtual_read(s32 addr);
+SizeToUInt<size>::type virtual_read(u32 addr);
 
-template<size_t size, Alignment alignment = Alignment::Aligned> void virtual_write(s32 addr, auto data);
+template<size_t size, Alignment alignment = Alignment::Aligned> void virtual_write(u32 addr, auto data);
 
-template<size_t size, Alignment alignment, MemOp mem_op> auto virtual_read(s32 addr)
-{
-    static_assert(std::has_single_bit(size) && size <= 16);
-    if constexpr (alignment == Alignment::Aligned && size > 1 && size < 16 && mem_op == MemOp::DataRead) {
-        if (addr & (size - 1)) {
-            address_error_exception(addr, mem_op);
-        }
-    }
-    if constexpr (size == 1) return u8{};
-    if constexpr (size == 2) return u16{};
-    if constexpr (size == 4) return u32{};
-    if constexpr (size == 8) return u64{};
-    if constexpr (size == 16) return m128i{};
-}
-
-template<size_t size, Alignment alignment> void virtual_write(s32 addr, auto data)
+template<size_t size, Alignment alignment> void virtual_write(u32 addr, auto data)
 {
     static_assert(std::has_single_bit(size) && size <= 16 && size == sizeof(data));
     if constexpr (alignment == Alignment::Aligned && size > 1) {
         if (addr & (size - 1)) {
-            address_error_exception(addr, MemOp::DataWrite);
+            // address_error_exception(addr, MemOp::DataWrite);
             return;
         }
     }

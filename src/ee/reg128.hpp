@@ -28,6 +28,7 @@ struct Reg128 {
     void set_lower_dword(std::integral auto val) { set(val); }
     void set_upper_dword(std::integral auto val) { hi = val; }
     void set(::m128i val) { *this = std::bit_cast<Reg128>(val); }
+    void set(u64x2 val) { *this = std::bit_cast<Reg128>(val); }
 
     template<std::integral Int> Int get() const
     {

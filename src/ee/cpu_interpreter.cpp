@@ -484,7 +484,7 @@ void lhu(u32 rs, u32 rt, s16 imm)
 
 void lq(u32 rs, u32 rt, s16 imm)
 {
-    m128i val = virtual_read<16>((gpr[rs].s32() + imm) & ~15);
+    u64x2 val = virtual_read<16>((gpr[rs].s32() + imm) & ~15);
     if (!exception_occurred) {
         gpr.set(rt, val);
     }

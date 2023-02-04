@@ -13,6 +13,7 @@ add_executable(NanoStation
 	ee/ee.cpp
 	ee/exceptions.cpp
 	ee/mmi.cpp
+	ee/mmu.cpp
 )
 
 target_include_directories(NanoStation PRIVATE

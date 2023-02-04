@@ -1,6 +1,7 @@
+#include "ee.hpp"
 #include "cop0.hpp"
 #include "disassembler.hpp"
-#include "ee.hpp"
+#include "exceptions.hpp"
 #include "mmu.hpp"
 
 #include <cassert>
@@ -12,14 +13,15 @@ u32 sa;
 Reg128 lo, hi;
 GPR gpr;
 
-static u64 cycle_counter;
+static u32 cycle_counter;
 
 static void fetch_decode_exec();
 
-void advance_pipeline(u64 cycles)
+void advance_pipeline(u32 cycles)
 {
     cycle_counter += cycles;
     cop0.count += cycles;
+    cop0.random++;
 }
 
 void fetch_decode_exec()
@@ -42,14 +44,15 @@ bool init()
 
 void jump(u32 target)
 {
-    assert(!in_branch_delay_slot); // TODO: going beyond this can result in stack overflow. First need to know what the behaviour is
+    assert(!in_branch_delay_slot); // TODO: going beyond this can result in stack overflow. First need to know what the
+                                   // behaviour is
     in_branch_delay_slot = true;
     fetch_decode_exec();
     in_branch_delay_slot = false;
     if (!exception_occurred) pc = target;
 }
 
-u64 run(u64 cycles)
+u32 run(u32 cycles)
 {
     cycle_counter = 0;
     while (cycle_counter < cycles) {

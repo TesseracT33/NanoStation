@@ -1,6 +1,8 @@
 #include "cop0.hpp"
 #include "ee.hpp"
+#include "mmu.hpp"
 
+#include <algorithm>
 #include <array>
 #include <bit>
 #include <cstring>
@@ -64,23 +66,37 @@ void mtc0(u32 rd, u32 rt)
 
 void tlbp()
 {
+    auto tlb_idx = std::ranges::find_if(tlb_entries, [](TlbEntry const& entry) {
+        return (entry.hi.raw & entry.vpn2_addr_mask) == (cop0.entry_hi.raw & entry.vpn2_addr_mask)
+            && (entry.hi.g || entry.hi.asid == cop0.entry_hi.asid);
+    });
+    if (tlb_idx == tlb_entries.end()) {
+        cop0.index.p = 1;
+        cop0.index.value = 0;
+    } else {
+        cop0.index.p = 0;
+        cop0.index.value = std::distance(tlb_entries.begin(), tlb_idx);
+    }
 }
 
 void tlbr()
 {
+    // TODO: what should happen if index >= size?
+    tlb_entries[cop0.index.value % tlb_entries.size()].read();
 }
 
 void tlbwi()
 {
+    tlb_entries[cop0.index.value % tlb_entries.size()].write();
 }
 
 void tlbwr()
 {
+    tlb_entries[cop0.random % tlb_entries.size()].write();
 }
 
 u32 Cop0Registers::get(int reg) const
 {
-    // TODO: update 'random'
     u32 ret;
     std::memcpy(&ret, reinterpret_cast<u8*>(&cop0) + reg * 4, 4);
     return ret;
@@ -122,8 +138,8 @@ template<bool raw> void Cop0Registers::set(int reg, u32 value)
         break;
 
     case 5:
-        if constexpr (raw) write(page_mask);
-        else write_masked(page_mask, 0x01FF'E000);
+        if constexpr (raw) page_mask = value;
+        else page_mask = value & 0x01FF'E000;
         break;
 
     case 6:

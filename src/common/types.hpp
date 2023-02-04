@@ -18,6 +18,32 @@ using u128 = __uint128_t;
 using s128 = __int128_t;
 #endif
 
+struct u64x2 {
+    u64 lo, hi;
+};
+
 using uint = unsigned;
 
 using std::size_t;
+
+template<size_t> struct SizeToUInt {};
+
+template<> struct SizeToUInt<1> {
+    using type = u8;
+};
+
+template<> struct SizeToUInt<2> {
+    using type = u16;
+};
+
+template<> struct SizeToUInt<4> {
+    using type = u32;
+};
+
+template<> struct SizeToUInt<8> {
+    using type = u64;
+};
+
+template<> struct SizeToUInt<16> {
+    using type = u64x2;
+};

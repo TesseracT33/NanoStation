@@ -27,16 +27,19 @@ struct Cop0Registers {
     u32 random; /* (1) 6 bits; Decremented every instruction, and specifies the entry in the TLB that is affected by the
                    TLB Write instruction. */
 
-    struct EntryLo { /* (2), (3); Used to rewrite the TLB or to check coincidence of a TLB entry when addresses are
+    union EntryLo { /* (2), (3); Used to rewrite the TLB or to check coincidence of a TLB entry when addresses are
                         converted. */
-        u32 g   : 1; /* Global. If this bit is set in both EntryLo0 and EntryLo1, then the processor ignores the ASID
-                        during TLB lookup. */
-        u32 v   : 1; /* Valid. If this bit is set, it indicates that the TLB entry is valid; otherwise, a TLBL or TLBS
-                        miss occurs. */
-        u32 d   : 1; /* Dirty. If this bit is set, the page is marked as dirty, and therefore writable. */
-        u32 c   : 3; /* Specifies the TLB page attribute. */
-        u32 pfn : 20; /* Page frame number -- the high-order bits of the physical address. */
-        u32     : 6;
+        struct {
+            u32 g : 1; /* Global. If this bit is set in both EntryLo0 and EntryLo1, then the processor ignores the ASID
+              during TLB lookup. */
+            u32 v : 1; /* Valid. If this bit is set, it indicates that the TLB entry is valid; otherwise, a TLBL or TLBS
+                          miss occurs. */
+            u32 d : 1; /* Dirty. If this bit is set, the page is marked as dirty, and therefore writable. */
+            u32 c : 3; /* Specifies the TLB page attribute. */
+            u32 pfn : 20; /* Page frame number -- the high-order bits of the physical address. */
+            u32     : 6;
+        };
+        u32 raw;
     } entry_lo[2];
 
     struct { /* (4) */
@@ -61,11 +64,14 @@ struct Cop0Registers {
     u32 count; /* (9); Increments every other PClock. When equal to the Compare register, interrupt bit IP(7) in the
                   Cause register is set. */
 
-    struct EntryHi { /* (10) */
-        u32 asid : 8; /* Address space ID field. Lets multiple processes share the TLB; virtual addresses for each
-                         process can be shared. */
-        u32      : 5;
-        u32 vpn2 : 19; /* Virtual page number divided by two (maps to two pages). */
+    union EntryHi { /* (10) */
+        struct {
+            u32 asid : 8; /* Address space ID field. Lets multiple processes share the TLB; virtual addresses for each
+                 process can be shared. */
+            u32      : 5;
+            u32 vpn2 : 19; /* Virtual page number divided by two (maps to two pages). */
+        };
+        u32 raw;
     } entry_hi;
 
     u32 compare; /* (11); When equal to the Count register, interrupt bit IP(7) in the Cause register is set. Writes to
@@ -212,7 +218,7 @@ struct Cop0Registers {
     u32 unused_31;
 
     struct { // (24)
-        u32 : 2;
+        u32       : 2;
         u32 value : 30;
     } debug_iab, debug_iabm;
 
