@@ -2,8 +2,6 @@
 
 namespace iop {
 
-bool exception_occurred;
-
 void address_error_exception(u32 vaddr, MemOp mem_op)
 {
 }

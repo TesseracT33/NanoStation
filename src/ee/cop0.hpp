@@ -242,8 +242,8 @@ struct Cop0Registers {
     void on_write_to_count();
     void on_write_to_status();
     void update_random();
-} extern cop0;
+} inline cop0;
 
-extern u64 cycles_since_updated_random;
+inline u64 cycles_since_updated_random;
 
 } // namespace ee

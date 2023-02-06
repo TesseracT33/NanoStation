@@ -21,10 +21,10 @@ struct GPR {
 
 private:
     std::array<u32, 32> gpr{};
-} extern gpr;
+} inline gpr;
 
-extern bool in_branch_delay_slot;
-extern u32 lo, hi, jump_addr, pc;
+inline bool in_branch_delay_slot;
+inline u32 lo, hi, jump_addr, pc;
 
 void jump(u32 target);
 

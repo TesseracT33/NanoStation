@@ -12,11 +12,6 @@
 #include <optional>
 
 namespace ee {
-bool in_branch_delay_slot;
-u32 jump_addr, pc;
-u32 sa;
-Reg128 lo, hi;
-mips::Gpr<Reg128> gpr;
 
 static u32 cycle_counter;
 

@@ -11,11 +11,6 @@
 
 namespace ee {
 
-using namespace mips;
-
-Cop0Registers cop0;
-u64 cycles_since_updated_random;
-
 using enum mips::CpuImpl;
 
 template<> void bc0f<Interpreter>(s16 imm)

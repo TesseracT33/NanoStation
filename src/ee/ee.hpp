@@ -13,11 +13,11 @@
 
 namespace ee {
 
-extern mips::Gpr<Reg128> gpr;
-extern bool in_branch_delay_slot;
-extern u32 jump_addr, pc;
-extern Reg128 lo, hi;
-extern u32 sa;
+inline mips::Gpr<Reg128> gpr;
+inline bool in_branch_delay_slot;
+inline u32 jump_addr, pc;
+inline Reg128 lo, hi;
+inline u32 sa;
 
 void add_initial_events();
 void advance_pipeline(u32 cycles);

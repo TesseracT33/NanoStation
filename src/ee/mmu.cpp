@@ -7,10 +7,6 @@
 
 namespace ee {
 
-std::array<u8, 4 * 1024 * 1024> bios;
-std::array<u8, 32 * 1024 * 1024> rdram;
-std::array<TlbEntry, 48> tlb_entries;
-
 template<EeUInt Int> static Int read_bios(u32 addr);
 template<EeUInt Int> static Int read_io(u32 addr);
 template<EeUInt Int> static Int read_rdram(u32 addr);

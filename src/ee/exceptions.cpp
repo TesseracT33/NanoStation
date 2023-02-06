@@ -4,7 +4,6 @@
 #include "mmu.hpp"
 
 namespace ee {
-bool exception_occurred;
 
 static u32 get_common_vector();
 static void handle_lvl1_exception();
@@ -133,7 +132,8 @@ void reset_exception()
     cop0.wired = 0;
     cop0.perf_pccr.cte = 0;
     cop0.debug.dre = cop0.debug.dwe = cop0.debug.iae = 0; // TODO: it's only breakpoint control register
-    // TODO: Valid, Dirty, LRF, and Lock bits of the data cache and the Valid and LRF bits of the instruction cache are initialized to 0 on reset.
+    // TODO: Valid, Dirty, LRF, and Lock bits of the data cache and the Valid and LRF bits of the instruction cache are
+    // initialized to 0 on reset.
 }
 
 void sio_exception()

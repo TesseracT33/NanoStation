@@ -55,10 +55,10 @@ struct TlbEntry {
     u32 offset_addr_mask; // AND with vaddr => offset
 };
 
-extern std::array<TlbEntry, 48> tlb_entries;
+inline std::array<TlbEntry, 48> tlb_entries;
 
-extern std::array<u8, 4 * 1024 * 1024> bios;
-extern std::array<u8, 32 * 1024 * 1024> rdram;
+inline std::array<u8, 4 * 1024 * 1024> bios;
+inline std::array<u8, 32 * 1024 * 1024> rdram;
 
 template<EeUInt Int, Alignment alignment = Alignment::Aligned, MemOp mem_op = MemOp::DataRead>
 Int virtual_read(u32 addr);

@@ -5,7 +5,7 @@
 namespace iop {
 enum class MemOp;
 
-extern bool exception_occurred;
+inline bool exception_occurred;
 
 void address_error_exception(u32 vaddr, MemOp mem_op);
 void breakpoint_exception();
