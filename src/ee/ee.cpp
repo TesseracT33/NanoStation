@@ -1,7 +1,8 @@
 #include "ee.hpp"
 #include "cop0.hpp"
-#include "disassembler.hpp"
 #include "exceptions.hpp"
+#include "mips/disassembler.hpp"
+#include "mips/mips.hpp"
 #include "mmu.hpp"
 #include "scheduler.hpp"
 #include "util.hpp"
@@ -15,7 +16,7 @@ bool in_branch_delay_slot;
 u32 jump_addr, pc;
 u32 sa;
 Reg128 lo, hi;
-GPR gpr;
+mips::Gpr<Reg128> gpr;
 
 static u32 cycle_counter;
 
@@ -41,7 +42,7 @@ void fetch_decode_exec()
 {
     u32 instr = virtual_read<u32, ee::Alignment::Aligned, ee::MemOp::InstrFetch>(pc);
     pc += 4;
-    interpreter::disassemble(instr);
+    mips::disassemble_ee<mips::CpuImpl::Interpreter>(instr);
 }
 
 bool init()
@@ -68,7 +69,7 @@ void jump(u32 target)
 bool load_bios(std::filesystem::path const& path)
 {
     static constexpr size_t bios_size = 4 * 1024 * 1024;
-    std::optional<std::array<u8, bios_size>> opt_bios = ReadFileIntoArray<bios_size>(path);
+    std::optional<std::array<u8, bios_size>> opt_bios = read_file_into_array<bios_size>(path);
     if (opt_bios) {
         std::array<u8, bios_size> const& bios_val = opt_bios.value();
         std::copy(bios_val.cbegin(), bios_val.cend(), bios.begin());

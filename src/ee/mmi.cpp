@@ -11,7 +11,10 @@
 // reference: https://wiki.qemu.org/File:C790.pdf
 
 namespace ee {
-void madd(u32 rs, u32 rt, u32 rd) // Multiply/Add
+
+using enum mips::CpuImpl;
+
+template<> void madd<Interpreter>(u32 rs, u32 rt, u32 rd) // Multiply/Add
 {
     s64 res = s64(gpr[rs].s32()) * s64(gpr[rs].s32()) + lo.s32() + (hi.s64() << 32);
     gpr.set(rd, s32(res));
@@ -19,11 +22,11 @@ void madd(u32 rs, u32 rt, u32 rd) // Multiply/Add
     hi = s32(res >> 32);
 }
 
-void madd1(u32 rs, u32 rt, u32 rd) // Multiply-Add Pipeline 1
+template<> void madd1<Interpreter>(u32 rs, u32 rt, u32 rd) // Multiply-Add Pipeline 1
 {
 }
 
-void maddu(u32 rs, u32 rt, u32 rd) // Multiply/Add Unsigned
+template<> void maddu<Interpreter>(u32 rs, u32 rt, u32 rd) // Multiply/Add Unsigned
 {
     u64 res = u64(gpr[rs].u32()) * u64(gpr[rs].u32()) + lo.u32() + (hi.u64() << 32);
     gpr.set(rd, s32(res));
@@ -31,53 +34,53 @@ void maddu(u32 rs, u32 rt, u32 rd) // Multiply/Add Unsigned
     hi = s32(res >> 32);
 }
 
-void maddu1(u32 rs, u32 rt, u32 rd) // Multiply-Add Unsigned Pipeline 1
+template<> void maddu1<Interpreter>(u32 rs, u32 rt, u32 rd) // Multiply-Add Unsigned Pipeline 1
 {
 }
 
-void pabsh(u32 rt, u32 rd) // Parallel Absolute Halfword
+template<> void pabsh<Interpreter>(u32 rt, u32 rd) // Parallel Absolute Halfword
 {
 #if X64
     gpr.set(rd, _mm_abs_epi16(gpr[rt]));
 #endif
 }
 
-void pabsw(u32 rt, u32 rd) // Parallel Absolute Word
+template<> void pabsw<Interpreter>(u32 rt, u32 rd) // Parallel Absolute Word
 {
 #if X64
     gpr.set(rd, _mm_abs_epi32(gpr[rt]));
 #endif
 }
 
-void paddb(u32 rs, u32 rt, u32 rd) // Parallel Add Byte
+template<> void paddb<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Add Byte
 {
 #if X64
     gpr.set(rd, _mm_add_epi8(gpr[rs], gpr[rt]));
 #endif
 }
 
-void paddh(u32 rs, u32 rt, u32 rd) // Parallel Add Halfword
+template<> void paddh<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Add Halfword
 {
 #if X64
     gpr.set(rd, _mm_add_epi16(gpr[rs], gpr[rt]));
 #endif
 }
 
-void paddsb(u32 rs, u32 rt, u32 rd) // Parallel Add with Signed Saturation Byte
+template<> void paddsb<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Add with Signed Saturation Byte
 {
 #if X64
     gpr.set(rd, _mm_adds_epi8(gpr[rs], gpr[rt]));
 #endif
 }
 
-void paddsh(u32 rs, u32 rt, u32 rd) // Parallel Add with Signed Saturation Halfword
+template<> void paddsh<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Add with Signed Saturation Halfword
 {
 #if X64
     gpr.set(rd, _mm_adds_epi16(gpr[rs], gpr[rt]));
 #endif
 }
 
-void paddsw(u32 rs, u32 rt, u32 rd) // Parallel Add with Signed Saturation Word
+template<> void paddsw<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Add with Signed Saturation Word
 {
 #if X64
     m128i ov, rt_neg, sat_sum, sum;
@@ -91,35 +94,35 @@ void paddsw(u32 rs, u32 rt, u32 rd) // Parallel Add with Signed Saturation Word
 #endif
 }
 
-void paddub(u32 rs, u32 rt, u32 rd) // Parallel Add with Unsigned saturation Byte
+template<> void paddub<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Add with Unsigned saturation Byte
 {
 #if X64
     gpr.set(rd, _mm_adds_epu8(gpr[rs], gpr[rt]));
 #endif
 }
 
-void padduh(u32 rs, u32 rt, u32 rd) // Parallel Add with Unsigned saturation Halfword
+template<> void padduh<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Add with Unsigned saturation Halfword
 {
 #if X64
     gpr.set(rd, _mm_adds_epu16(gpr[rs], gpr[rt]));
 #endif
 }
 
-void padduw(u32 rs, u32 rt, u32 rd) // Parallel Add with Unsigned saturation Word
+template<> void padduw<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Add with Unsigned saturation Word
 {
 #if X64
     gpr.set(rd, _mm_add_epi32(gpr[rt], _mm_min_epu32(gpr[rs], _mm_xor_si128(gpr[rt], _mm_set1_epi8(0xFF)))));
 #endif
 }
 
-void paddw(u32 rs, u32 rt, u32 rd) // Parallel Add Word
+template<> void paddw<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Add Word
 {
 #if X64
     gpr.set(rd, _mm_add_epi32(gpr[rs], gpr[rt]));
 #endif
 }
 
-void padsbh(u32 rs, u32 rt, u32 rd) // Parallel Add/Subtract Halfword
+template<> void padsbh<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Add/Subtract Halfword
 {
 #if X64
     m128i res;
@@ -135,75 +138,75 @@ void padsbh(u32 rs, u32 rt, u32 rd) // Parallel Add/Subtract Halfword
 #endif
 }
 
-void pand(u32 rs, u32 rt, u32 rd) // Parallel AND
+template<> void pand<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel AND
 {
 #if X64
     gpr.set(rd, _mm_and_si128(gpr[rs], gpr[rt]));
 #endif
 }
 
-void pceqb(u32 rs, u32 rt, u32 rd) // Parallel Compare for Equal Byte
+template<> void pceqb<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Compare for Equal Byte
 {
 #if X64
     gpr.set(rd, _mm_cmpeq_epi8(gpr[rs], gpr[rt]));
 #endif
 }
 
-void pceqh(u32 rs, u32 rt, u32 rd) // Parallel Compare for Equal Halfword
+template<> void pceqh<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Compare for Equal Halfword
 {
 #if X64
     gpr.set(rd, _mm_cmpeq_epi16(gpr[rs], gpr[rt]));
 #endif
 }
 
-void pceqw(u32 rs, u32 rt, u32 rd) // Parallel Compare for Equal Word
+template<> void pceqw<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Compare for Equal Word
 {
 #if X64
     gpr.set(rd, _mm_cmpeq_epi32(gpr[rs], gpr[rt]));
 #endif
 }
 
-void pcgtb(u32 rs, u32 rt, u32 rd) // Parallel Compare for Greater Than Byte
+template<> void pcgtb<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Compare for Greater Than Byte
 {
 #if X64
     gpr.set(rd, _mm_cmpgt_epi8(gpr[rs], gpr[rt]));
 #endif
 }
 
-void pcgth(u32 rs, u32 rt, u32 rd) // Parallel Compare for Greater Than Halfword
+template<> void pcgth<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Compare for Greater Than Halfword
 {
 #if X64
     gpr.set(rd, _mm_cmpgt_epi16(gpr[rs], gpr[rt]));
 #endif
 }
 
-void pcgtw(u32 rs, u32 rt, u32 rd) // Parallel Compare for Greater Than Word
+template<> void pcgtw<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Compare for Greater Than Word
 {
 #if X64
     gpr.set(rd, _mm_cmpgt_epi32(gpr[rs], gpr[rt]));
 #endif
 }
 
-void pcpyh(u32 rt, u32 rd) // Parallel Copy Halfword
+template<> void pcpyh<Interpreter>(u32 rt, u32 rd) // Parallel Copy Halfword
 {
     gpr.set(rd, gpr[rt]);
 }
 
-void pcpyld(u32 rs, u32 rt, u32 rd) // Parallel Copy Lower Doubleword
+template<> void pcpyld<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Copy Lower Doubleword
 {
 #if X64
     gpr.set(rd, _mm_blend_epi16(_mm_slli_si128(gpr[rs], 8), gpr[rt], 0xF));
 #endif
 }
 
-void pcpyud(u32 rs, u32 rt, u32 rd) // Parallel Copy Upper Doubleword
+template<> void pcpyud<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Copy Upper Doubleword
 {
 #if X64
     gpr.set(rd, _mm_blend_epi16(gpr[rt], _mm_srli_si128(gpr[rs], 8), 0xF));
 #endif
 }
 
-void pdivbw(u32 rs, u32 rt) // Parallel Divide Broadcast Word
+template<> void pdivbw<Interpreter>(u32 rs, u32 rt) // Parallel Divide Broadcast Word
 {
 #if X64
     m128i src_rs = gpr[rs];
@@ -230,7 +233,7 @@ void pdivbw(u32 rs, u32 rt) // Parallel Divide Broadcast Word
 #endif
 }
 
-void pdivuw(u32 rs, u32 rt) // Parallel Divide Unsigned Word
+template<> void pdivuw<Interpreter>(u32 rs, u32 rt) // Parallel Divide Unsigned Word
 {
 #if X64
     m128i src_rs = gpr[rs];
@@ -254,7 +257,7 @@ void pdivuw(u32 rs, u32 rt) // Parallel Divide Unsigned Word
 #endif
 }
 
-void pdivw(u32 rs, u32 rt) // Parallel Divide Word
+template<> void pdivw<Interpreter>(u32 rs, u32 rt) // Parallel Divide Word
 {
 #if X64
     m128i src_rs = gpr[rs];
@@ -281,35 +284,35 @@ void pdivw(u32 rs, u32 rt) // Parallel Divide Word
 #endif
 }
 
-void pexch(u32 rt, u32 rd) // Parallel Exchange Center Halfword
+template<> void pexch<Interpreter>(u32 rt, u32 rd) // Parallel Exchange Center Halfword
 {
 #if X64
     gpr.set(rd, _mm_shuffle_epi8(gpr[rt], _mm_set_epi8(15, 14, 11, 10, 13, 12, 9, 8, 7, 6, 3, 2, 5, 4, 1, 0)));
 #endif
 }
 
-void pexcw(u32 rt, u32 rd) // Parallel Exchange Center Word
+template<> void pexcw<Interpreter>(u32 rt, u32 rd) // Parallel Exchange Center Word
 {
 #if X64
     gpr.set(rd, _mm_shuffle_epi32(gpr[rt], 2 << 2 | 1 << 4 | 3 << 6));
 #endif
 }
 
-void pexeh(u32 rt, u32 rd) // Parallel Exchange Even Halfword
+template<> void pexeh<Interpreter>(u32 rt, u32 rd) // Parallel Exchange Even Halfword
 {
 #if X64
     gpr.set(rd, _mm_shuffle_epi8(gpr[rt], _mm_set_epi8(15, 14, 9, 8, 11, 10, 13, 12, 7, 6, 1, 0, 3, 2, 5, 4)));
 #endif
 }
 
-void pexew(u32 rt, u32 rd) // Parallel Exchange Even Word
+template<> void pexew<Interpreter>(u32 rt, u32 rd) // Parallel Exchange Even Word
 {
 #if X64
     gpr.set(rd, _mm_shuffle_epi32(gpr[rt], 2 | 1 << 2 | 3 << 6));
 #endif
 }
 
-void pext5(u32 rt, u32 rd) // Parallel Extend Upper from 5 bits
+template<> void pext5<Interpreter>(u32 rt, u32 rd) // Parallel Extend Upper from 5 bits
 {
 #if X64
     m128i src = gpr[rt];
@@ -324,49 +327,49 @@ void pext5(u32 rt, u32 rd) // Parallel Extend Upper from 5 bits
 #endif
 }
 
-void pextlb(u32 rs, u32 rt, u32 rd) // Parallel Extend Lower from Byte
+template<> void pextlb<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Extend Lower from Byte
 {
 #if X64
     gpr.set(rd, _mm_unpacklo_epi8(gpr[rt], gpr[rs]));
 #endif
 }
 
-void pextlh(u32 rs, u32 rt, u32 rd) // Parallel Extend Lower from Halfword
+template<> void pextlh<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Extend Lower from Halfword
 {
 #if X64
     gpr.set(rd, _mm_unpacklo_epi16(gpr[rt], gpr[rs]));
 #endif
 }
 
-void pextlw(u32 rs, u32 rt, u32 rd) // Parallel Extend Lower from Word
+template<> void pextlw<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Extend Lower from Word
 {
 #if X64
     gpr.set(rd, _mm_unpacklo_epi32(gpr[rt], gpr[rs]));
 #endif
 }
 
-void pextub(u32 rs, u32 rt, u32 rd) // Parallel Extend Upper from Byte
+template<> void pextub<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Extend Upper from Byte
 {
 #if X64
     gpr.set(rd, _mm_unpackhi_epi8(gpr[rt], gpr[rs]));
 #endif
 }
 
-void pextuh(u32 rs, u32 rt, u32 rd) // Parallel Extend Upper from Halfword
+template<> void pextuh<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Extend Upper from Halfword
 {
 #if X64
     gpr.set(rd, _mm_unpackhi_epi16(gpr[rt], gpr[rs]));
 #endif
 }
 
-void pextuw(u32 rs, u32 rt, u32 rd) // Parallel Extend Upper from Word
+template<> void pextuw<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Extend Upper from Word
 {
 #if X64
     gpr.set(rd, _mm_unpackhi_epi32(gpr[rt], gpr[rs]));
 #endif
 }
 
-void phmadh(u32 rs, u32 rt, u32 rd) // Parallel Horizontal Multiply-Add Halfword
+template<> void phmadh<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Horizontal Multiply-Add Halfword
 {
 #if X64
     gpr.set(rd, _mm_madd_epi16(gpr[rs], gpr[rt]));
@@ -375,7 +378,7 @@ void phmadh(u32 rs, u32 rt, u32 rd) // Parallel Horizontal Multiply-Add Halfword
 #endif
 }
 
-void phmsbh(u32 rs, u32 rt, u32 rd) // Parallel Horizontal Multiply-Subtract Halfword
+template<> void phmsbh<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Horizontal Multiply-Subtract Halfword
 {
 #if X64
     m128i src_rs = gpr[rs];
@@ -397,7 +400,7 @@ void phmsbh(u32 rs, u32 rt, u32 rd) // Parallel Horizontal Multiply-Subtract Hal
 #endif
 }
 
-void pinteh(u32 rs, u32 rt, u32 rd) // Parallel Interleave Even Halfword
+template<> void pinteh<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Interleave Even Halfword
 {
 #if X64
     m128i op1 = _mm_slli_si128(gpr[rs], 2);
@@ -406,21 +409,21 @@ void pinteh(u32 rs, u32 rt, u32 rd) // Parallel Interleave Even Halfword
 #endif
 }
 
-void pinth(u32 rs, u32 rt, u32 rd) // Parallel Interleave Halfword
+template<> void pinth<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Interleave Halfword
 {
 #if X64
     gpr.set(rd, _mm_unpacklo_epi16(gpr[rt], _mm_srli_si128(gpr[rs], 8)));
 #endif
 }
 
-void plzcw(u32 rs, u32 rd) // Parallel Leading Zero or One Count Word
+template<> void plzcw<Interpreter>(u32 rs, u32 rd) // Parallel Leading Zero or One Count Word
 {
     u32 leading_ones = std::countl_one(gpr[rs].u32()) - 1; // TODO: should it be able to underflow?
     u32 leading_zeroes = std::countl_zero(u32(gpr[rs].u64() >> 32)) - 1;
     gpr.set(rd, u64(leading_zeroes) << 32 | leading_ones);
 }
 
-void pmaddh(u32 rs, u32 rt, u32 rd) // Parallel Multiply-Add Halfword
+template<> void pmaddh<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Multiply-Add Halfword
 {
 #if X64
     m128i lo_prods = _mm_mullo_epi16(gpr[rs], gpr[rt]);
@@ -439,7 +442,7 @@ void pmaddh(u32 rs, u32 rt, u32 rd) // Parallel Multiply-Add Halfword
 #endif
 }
 
-void pmadduw(u32 rs, u32 rt, u32 rd) // Parallel Multiply-Add Unsigned Word
+template<> void pmadduw<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Multiply-Add Unsigned Word
 {
 #if X64
     m128i prod = _mm_mul_epu32(gpr[rs], gpr[rt]);
@@ -451,7 +454,7 @@ void pmadduw(u32 rs, u32 rt, u32 rd) // Parallel Multiply-Add Unsigned Word
 #endif
 }
 
-void pmaddw(u32 rs, u32 rt, u32 rd) // Parallel Multiply-Add Word
+template<> void pmaddw<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Multiply-Add Word
 {
 #if X64
     m128i prod = _mm_mul_epi32(gpr[rs], gpr[rt]);
@@ -463,26 +466,26 @@ void pmaddw(u32 rs, u32 rt, u32 rd) // Parallel Multiply-Add Word
 #endif
 }
 
-void pmaxh(u32 rs, u32 rt, u32 rd) // Parallel Maximum Halfword
+template<> void pmaxh<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Maximum Halfword
 {
 #if X64
     gpr.set(rd, _mm_max_epi16(gpr[rs], gpr[rt]));
 #endif
 }
 
-void pmaxw(u32 rs, u32 rt, u32 rd) //  Parallel Maximum Word
+template<> void pmaxw<Interpreter>(u32 rs, u32 rt, u32 rd) //  Parallel Maximum Word
 {
 #if X64
     gpr.set(rd, _mm_max_epi32(gpr[rs], gpr[rt]));
 #endif
 }
 
-void pmfhi(u32 rd) //  Parallel Move From HI Register
+template<> void pmfhi<Interpreter>(u32 rd) //  Parallel Move From HI Register
 {
     gpr.set(rd, hi);
 }
 
-void pmfhl(u32 rd, u32 fmt) // Parallel Move From HI/LO Register
+template<> void pmfhl<Interpreter>(u32 rd, u32 fmt) // Parallel Move From HI/LO Register
 {
 #if X64
     if (fmt == 0) {
@@ -506,26 +509,26 @@ void pmfhl(u32 rd, u32 fmt) // Parallel Move From HI/LO Register
 #endif
 }
 
-void pmflo(u32 rd) // Parallel Move From LO Register
+template<> void pmflo<Interpreter>(u32 rd) // Parallel Move From LO Register
 {
     gpr.set(rd, lo);
 }
 
-void pminh(u32 rs, u32 rt, u32 rd) // Parallel Minimum Halfword
+template<> void pminh<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Minimum Halfword
 {
 #if X64
     gpr.set(rd, _mm_min_epi16(gpr[rs], gpr[rt]));
 #endif
 }
 
-void pminw(u32 rs, u32 rt, u32 rd) // Parallel Minimum Word
+template<> void pminw<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Minimum Word
 {
 #if X64
     gpr.set(rd, _mm_min_epi32(gpr[rs], gpr[rt]));
 #endif
 }
 
-void pmsubh(u32 rs, u32 rt, u32 rd) // Parallel Multiply-Subtract Halfword
+template<> void pmsubh<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Multiply-Subtract Halfword
 {
 #if X64
     m128i lo_prods = _mm_mullo_epi16(gpr[rs], gpr[rt]);
@@ -544,7 +547,7 @@ void pmsubh(u32 rs, u32 rt, u32 rd) // Parallel Multiply-Subtract Halfword
 #endif
 }
 
-void pmsubw(u32 rs, u32 rt, u32 rd) // Parallel Multiply-Subtract Word
+template<> void pmsubw<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Multiply-Subtract Word
 {
 #if X64
     m128i prod = _mm_mul_epi32(gpr[rs], gpr[rt]);
@@ -556,12 +559,12 @@ void pmsubw(u32 rs, u32 rt, u32 rd) // Parallel Multiply-Subtract Word
 #endif
 }
 
-void pmthi(u32 rs) // Parallel Move To HI Register
+template<> void pmthi<Interpreter>(u32 rs) // Parallel Move To HI Register
 {
     hi = gpr[rs];
 }
 
-void pmthl(u32 rs, u32 fmt) // Parallel Move To HI/LO Register
+template<> void pmthl<Interpreter>(u32 rs, u32 fmt) // Parallel Move To HI/LO Register
 {
     if (fmt) return;
 #if X64
@@ -570,12 +573,12 @@ void pmthl(u32 rs, u32 fmt) // Parallel Move To HI/LO Register
 #endif
 }
 
-void pmtlo(u32 rs) // Parallel Move To LO Register
+template<> void pmtlo<Interpreter>(u32 rs) // Parallel Move To LO Register
 {
     lo = gpr[rs];
 }
 
-void pmulth(u32 rs, u32 rt, u32 rd) // Parallel Multiply Halfword
+template<> void pmulth<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Multiply Halfword
 {
 #if X64
     m128i prod_lo = _mm_mullo_epi16(gpr[rs], gpr[rt]);
@@ -588,7 +591,7 @@ void pmulth(u32 rs, u32 rt, u32 rd) // Parallel Multiply Halfword
 #endif
 }
 
-void pmultuw(u32 rs, u32 rt, u32 rd) // Parallel Multiply Unsigned Word
+template<> void pmultuw<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Multiply Unsigned Word
 {
 #if X64
     m128i prod = _mm_mul_epu32(gpr[rs], gpr[rt]);
@@ -598,7 +601,7 @@ void pmultuw(u32 rs, u32 rt, u32 rd) // Parallel Multiply Unsigned Word
 #endif
 }
 
-void pmultw(u32 rs, u32 rt, u32 rd) // Parallel Multiply Word
+template<> void pmultw<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Multiply Word
 {
 #if X64
     m128i prod = _mm_mul_epi32(gpr[rs], gpr[rt]);
@@ -608,21 +611,21 @@ void pmultw(u32 rs, u32 rt, u32 rd) // Parallel Multiply Word
 #endif
 }
 
-void pnor(u32 rs, u32 rt, u32 rd) // Parallel NOR
+template<> void pnor<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel NOR
 {
 #if X64
     gpr.set(rd, _mm_xor_si128(_mm_or_si128(gpr[rs], gpr[rt]), _mm_set1_epi8(0xFF)));
 #endif
 }
 
-void por(u32 rs, u32 rt, u32 rd) // Parallel OR
+template<> void por<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel OR
 {
 #if X64
     gpr.set(rd, _mm_or_si128(gpr[rs], gpr[rt]));
 #endif
 }
 
-void ppac5(u32 rt, u32 rd) // Parallel Pack to 5 bits
+template<> void ppac5<Interpreter>(u32 rt, u32 rd) // Parallel Pack to 5 bits
 {
     m128i src = gpr[rt];
     u16 dst_hw[4];
@@ -634,7 +637,7 @@ void ppac5(u32 rt, u32 rd) // Parallel Pack to 5 bits
     gpr.set(rd, _mm_set_epi16(0, dst_hw[3], 0, dst_hw[2], 0, dst_hw[1], 0, dst_hw[0]));
 }
 
-void ppacb(u32 rs, u32 rt, u32 rd) // Parallel Pack to Byte
+template<> void ppacb<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Pack to Byte
 {
 #if X64
     m128i lo = _mm_shuffle_epi8(gpr[rt], _mm_set_epi8(0, 0, 0, 0, 0, 0, 0, 0, 14, 12, 10, 8, 6, 4, 2, 0));
@@ -643,7 +646,7 @@ void ppacb(u32 rs, u32 rt, u32 rd) // Parallel Pack to Byte
 #endif
 }
 
-void ppach(u32 rs, u32 rt, u32 rd) // Parallel Pack to Halfword
+template<> void ppach<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Pack to Halfword
 {
 #if X64
     m128i lo = _mm_shuffle_epi8(gpr[rt], _mm_set_epi8(0, 0, 0, 0, 0, 0, 0, 0, 13, 12, 9, 8, 5, 4, 1, 0));
@@ -652,7 +655,7 @@ void ppach(u32 rs, u32 rt, u32 rd) // Parallel Pack to Halfword
 #endif
 }
 
-void ppacw(u32 rs, u32 rt, u32 rd) // Parallel Pack to Word
+template<> void ppacw<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Pack to Word
 {
 #if X64
     m128i lo = _mm_shuffle_epi32(gpr[rt], 2 << 2);
@@ -661,112 +664,112 @@ void ppacw(u32 rs, u32 rt, u32 rd) // Parallel Pack to Word
 #endif
 }
 
-void prevh(u32 rt, u32 rd) // Parallel Reverse Halfword
+template<> void prevh<Interpreter>(u32 rt, u32 rd) // Parallel Reverse Halfword
 {
 #if X64
     gpr.set(rd, _mm_shuffle_epi8(gpr[rt], _mm_set_epi8(9, 8, 11, 10, 13, 12, 15, 14, 1, 0, 3, 2, 5, 4, 7, 6)));
 #endif
 }
 
-void prot3w(u32 rt, u32 rd) // Parallel Rotate 3 Words
+template<> void prot3w<Interpreter>(u32 rt, u32 rd) // Parallel Rotate 3 Words
 {
 #if X64
     gpr.set(rd, _mm_shuffle_epi32(gpr[rt], 1 | 2 << 2 | 3 << 6));
 #endif
 }
 
-void psllh(u32 rt, u32 rd, u32 sa) // Parallel Shift Left Logical Halfword
+template<> void psllh<Interpreter>(u32 rt, u32 rd, u32 sa) // Parallel Shift Left Logical Halfword
 {
 #if X64
     gpr.set(rd, _mm_slli_epi16(gpr[rt], sa));
 #endif
 }
 
-void psllvw(u32 rs, u32 rt, u32 rd) // Parallel Shift Left Logical Variable Word
+template<> void psllvw<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Shift Left Logical Variable Word
 {
 #if X64
     gpr.set(rd, _mm_sll_epi32(gpr[rt], gpr[rs]));
 #endif
 }
 
-void psllw(u32 rt, u32 rd, u32 sa) // Parallel Shift Left Logical Word
+template<> void psllw<Interpreter>(u32 rt, u32 rd, u32 sa) // Parallel Shift Left Logical Word
 {
 #if X64
     gpr.set(rd, _mm_slli_epi32(gpr[rt], sa));
 #endif
 }
 
-void psrah(u32 rt, u32 rd, u32 sa) // Parallel Shift Right Arithmetic Halfword
+template<> void psrah<Interpreter>(u32 rt, u32 rd, u32 sa) // Parallel Shift Right Arithmetic Halfword
 {
 #if X64
     gpr.set(rd, _mm_srai_epi16(gpr[rt], sa));
 #endif
 }
 
-void psravw(u32 rs, u32 rt, u32 rd) // Parallel Shift Right Arithmetic Variable Word
+template<> void psravw<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Shift Right Arithmetic Variable Word
 {
 #if X64
     gpr.set(rd, _mm_sra_epi32(gpr[rt], gpr[rs]));
 #endif
 }
 
-void psraw(u32 rt, u32 rd, u32 sa) // Parallel Shift Right Arithmetic Word
+template<> void psraw<Interpreter>(u32 rt, u32 rd, u32 sa) // Parallel Shift Right Arithmetic Word
 {
 #if X64
     gpr.set(rd, _mm_srai_epi32(gpr[rt], sa));
 #endif
 }
 
-void psrlh(u32 rt, u32 rd, u32 sa) // Parallel Shift Right Logical Halfword
+template<> void psrlh<Interpreter>(u32 rt, u32 rd, u32 sa) // Parallel Shift Right Logical Halfword
 {
 #if X64
     gpr.set(rd, _mm_srli_epi16(gpr[rt], sa));
 #endif
 }
 
-void psrlvw(u32 rs, u32 rt, u32 rd) // Parallel Shift Right Logical Variable Word
+template<> void psrlvw<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Shift Right Logical Variable Word
 {
 #if X64
     gpr.set(rd, _mm_srl_epi32(gpr[rt], gpr[rs]));
 #endif
 }
 
-void psrlw(u32 rt, u32 rd, u32 sa) // Parallel Shift Right Logical Word
+template<> void psrlw<Interpreter>(u32 rt, u32 rd, u32 sa) // Parallel Shift Right Logical Word
 {
 #if X64
     gpr.set(rd, _mm_srli_epi32(gpr[rt], sa));
 #endif
 }
 
-void psubb(u32 rs, u32 rt, u32 rd) // Parallel Subtract Byte
+template<> void psubb<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Subtract Byte
 {
 #if X64
     gpr.set(rd, _mm_sub_epi8(gpr[rs], gpr[rt]));
 #endif
 }
 
-void psubh(u32 rs, u32 rt, u32 rd) // Parallel Subtract Halfword
+template<> void psubh<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Subtract Halfword
 {
 #if X64
     gpr.set(rd, _mm_sub_epi16(gpr[rs], gpr[rt]));
 #endif
 }
 
-void psubsb(u32 rs, u32 rt, u32 rd) // Parallel Subtract with Signed Saturation Byte
+template<> void psubsb<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Subtract with Signed Saturation Byte
 {
 #if X64
     gpr.set(rd, _mm_subs_epi8(gpr[rs], gpr[rt]));
 #endif
 }
 
-void psubsh(u32 rs, u32 rt, u32 rd) // Parallel Subtract with Signed Saturation Halfword
+template<> void psubsh<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Subtract with Signed Saturation Halfword
 {
 #if X64
     gpr.set(rd, _mm_subs_epi16(gpr[rs], gpr[rt]));
 #endif
 }
 
-void psubsw(u32 rs, u32 rt, u32 rd) // Parallel Subtract with Signed Saturation Word
+template<> void psubsw<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Subtract with Signed Saturation Word
 {
 #if X64
     m128i ov, rt_neg, sat_sub, sub;
@@ -780,42 +783,42 @@ void psubsw(u32 rs, u32 rt, u32 rd) // Parallel Subtract with Signed Saturation 
 #endif
 }
 
-void psubub(u32 rs, u32 rt, u32 rd) // Parallel Subtract with Unsigned saturation Byte
+template<> void psubub<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Subtract with Unsigned saturation Byte
 {
 #if X64
     gpr.set(rd, _mm_subs_epu8(gpr[rs], gpr[rt]));
 #endif
 }
 
-void psubuh(u32 rs, u32 rt, u32 rd) // Parallel Subtract with Unsigned saturation Halfword
+template<> void psubuh<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Subtract with Unsigned saturation Halfword
 {
 #if X64
     gpr.set(rd, _mm_subs_epu16(gpr[rs], gpr[rt]));
 #endif
 }
 
-void psubuw(u32 rs, u32 rt, u32 rd) // Parallel Subtract with Unsigned saturation Word
+template<> void psubuw<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Subtract with Unsigned saturation Word
 {
 #if X64
     gpr.set(rd, _mm_sub_epi32(_mm_max_epu32(gpr[rs], gpr[rt]), gpr[rt]));
 #endif
 }
 
-void psubw(u32 rs, u32 rt, u32 rd) // Parallel Subtract Word
+template<> void psubw<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel Subtract Word
 {
 #if X64
     gpr.set(rd, _mm_sub_epi32(gpr[rs], gpr[rt]));
 #endif
 }
 
-void pxor(u32 rs, u32 rt, u32 rd) // Parallel XOR
+template<> void pxor<Interpreter>(u32 rs, u32 rt, u32 rd) // Parallel XOR
 {
 #if X64
     gpr.set(rd, _mm_xor_si128(gpr[rs], gpr[rt]));
 #endif
 }
 
-void qfsrv(u32 rs, u32 rt, u32 rd) // Quadword Funnel Shift Right Variable
+template<> void qfsrv<Interpreter>(u32 rs, u32 rt, u32 rd) // Quadword Funnel Shift Right Variable
 {
     assert(!(sa & 7));
     if (sa > 255) {

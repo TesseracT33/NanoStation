@@ -28,25 +28,3 @@ using s128 = struct {
 using uint = unsigned;
 
 using std::size_t;
-
-template<size_t> struct SizeToUInt {};
-
-template<> struct SizeToUInt<1> {
-    using type = u8;
-};
-
-template<> struct SizeToUInt<2> {
-    using type = u16;
-};
-
-template<> struct SizeToUInt<4> {
-    using type = u32;
-};
-
-template<> struct SizeToUInt<8> {
-    using type = u64;
-};
-
-template<> struct SizeToUInt<16> {
-    using type = u128;
-};

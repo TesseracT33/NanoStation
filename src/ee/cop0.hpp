@@ -1,21 +1,22 @@
 #pragma once
 
+#include "mips/mips.hpp"
 #include "types.hpp"
 
 namespace ee {
-void bc0f(s16 imm);
-void bc0fl(s16 imm);
-void bc0t(s16 imm);
-void bc0tl(s16 imm);
-void di();
-void ei();
-void eret();
-void mfc0(u32 rd, u32 rt);
-void mtc0(u32 rd, u32 rt);
-void tlbp();
-void tlbr();
-void tlbwi();
-void tlbwr();
+template<mips::CpuImpl> void bc0f(s16 imm);
+template<mips::CpuImpl> void bc0fl(s16 imm);
+template<mips::CpuImpl> void bc0t(s16 imm);
+template<mips::CpuImpl> void bc0tl(s16 imm);
+template<mips::CpuImpl> void di();
+template<mips::CpuImpl> void ei();
+template<mips::CpuImpl> void eret();
+template<mips::CpuImpl> void mfc0(u32 rd, u32 rt);
+template<mips::CpuImpl> void mtc0(u32 rd, u32 rt);
+template<mips::CpuImpl> void tlbp();
+template<mips::CpuImpl> void tlbr();
+template<mips::CpuImpl> void tlbwi();
+template<mips::CpuImpl> void tlbwr();
 
 template<bool initial_add = false> void reload_count_compare_event();
 

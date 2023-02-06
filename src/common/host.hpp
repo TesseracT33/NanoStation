@@ -18,4 +18,13 @@ struct Arch {
 #error Unsupported architecture; only x86-64 and arm64 are supported.
 #endif
 
+#ifdef __has_builtin
+#if __has_builtin(__builtin_add_overflow)
+#define HAS_BUILTIN_ADD_OVERFLOW 1
+#endif
+#if __has_builtin(__builtin_sub_overflow)
+#define HAS_BUILTIN_SUB_OVERFLOW 1
+#endif
+#endif
+
 static_assert(std::endian::native == std::endian::little, "Only little-endian hosts are supported.");

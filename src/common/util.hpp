@@ -16,7 +16,15 @@ template<typename K, typename V1, typename... V2> constexpr bool one_of(K key, V
     }
 }
 
-template<size_t size> std::optional<std::array<u8, size>> ReadFileIntoArray(auto const& path)
+/////////// Tests /////////////
+static_assert(one_of(0, 0));
+static_assert(!one_of(0, 1));
+static_assert(one_of(0, 1, 2, 0, 3));
+static_assert(one_of(0, 1, 2, 3, 0));
+static_assert(!one_of(0, 1, 2, 3, 4));
+//////////////////////////////
+
+template<size_t size> std::optional<std::array<u8, size>> read_file_into_array(auto const& path)
 {
     std::ifstream ifs{ path, std::ifstream::in | std::ifstream::binary };
     if (!ifs) {
@@ -34,7 +42,7 @@ template<size_t size> std::optional<std::array<u8, size>> ReadFileIntoArray(auto
     return arr;
 }
 
-std::optional<std::vector<u8>> ReadFileIntoVector(auto const& path)
+std::optional<std::vector<u8>> read_file_into_vector(auto const& path)
 {
     std::ifstream ifs{ path, std::ifstream::in | std::ifstream::binary };
     if (!ifs) {
@@ -52,9 +60,24 @@ std::optional<std::vector<u8>> ReadFileIntoVector(auto const& path)
     return vec;
 }
 
-/////////// Tests /////////////
-static_assert(one_of(0, 0));
-static_assert(!one_of(0, 1));
-static_assert(one_of(0, 1, 2, 0, 3));
-static_assert(one_of(0, 1, 2, 3, 0));
-static_assert(!one_of(0, 1, 2, 3, 4));
+template<size_t> struct SizeToUInt {};
+
+template<> struct SizeToUInt<1> {
+    using type = u8;
+};
+
+template<> struct SizeToUInt<2> {
+    using type = u16;
+};
+
+template<> struct SizeToUInt<4> {
+    using type = u32;
+};
+
+template<> struct SizeToUInt<8> {
+    using type = u64;
+};
+
+template<> struct SizeToUInt<16> {
+    using type = u128;
+};

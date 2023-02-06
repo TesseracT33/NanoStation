@@ -10,26 +10,31 @@
 #include <utility>
 
 namespace ee {
+
+using namespace mips;
+
 Cop0Registers cop0;
 u64 cycles_since_updated_random;
 
-void bc0f(s16 imm)
+using enum mips::CpuImpl;
+
+template<> void bc0f<Interpreter>(s16 imm)
 {
 }
 
-void bc0fl(s16 imm)
+template<> void bc0fl<Interpreter>(s16 imm)
 {
 }
 
-void bc0t(s16 imm)
+template<> void bc0t<Interpreter>(s16 imm)
 {
 }
 
-void bc0tl(s16 imm)
+template<> void bc0tl<Interpreter>(s16 imm)
 {
 }
 
-void di()
+template<> void di<Interpreter>()
 {
     u32 edi_erl_exi = std::bit_cast<u32>(cop0.status) & 0x20006;
     if ((cop0.status.ksu == 0) | edi_erl_exi) {
@@ -37,7 +42,7 @@ void di()
     }
 }
 
-void ei()
+template<> void ei<Interpreter>()
 {
     u32 edi_erl_exi = std::bit_cast<u32>(cop0.status) & 0x20006;
     if ((cop0.status.ksu == 0) | edi_erl_exi) {
@@ -45,7 +50,7 @@ void ei()
     }
 }
 
-void eret()
+template<> void eret<Interpreter>()
 {
     if (cop0.status.erl) {
         pc = cop0.error_epc;
@@ -56,17 +61,17 @@ void eret()
     }
 }
 
-void mfc0(u32 rd, u32 rt)
+template<> void mfc0<Interpreter>(u32 rd, u32 rt)
 {
     gpr.set(rt, s32(cop0.get(rd)));
 }
 
-void mtc0(u32 rd, u32 rt)
+template<> void mtc0<Interpreter>(u32 rd, u32 rt)
 {
     cop0.set(rd, gpr[rt].u32());
 }
 
-void tlbp()
+template<> void tlbp<Interpreter>()
 {
     auto tlb_idx = std::ranges::find_if(tlb_entries, [](TlbEntry const& entry) {
         return (entry.hi.raw & entry.vpn2_addr_mask) == (cop0.entry_hi.raw & entry.vpn2_addr_mask)
@@ -81,18 +86,18 @@ void tlbp()
     }
 }
 
-void tlbr()
+template<> void tlbr<Interpreter>()
 {
     // TODO: what should happen if index >= size?
     tlb_entries[cop0.index.value % tlb_entries.size()].read();
 }
 
-void tlbwi()
+template<> void tlbwi<Interpreter>()
 {
     tlb_entries[cop0.index.value % tlb_entries.size()].write();
 }
 
-void tlbwr()
+template<> void tlbwr<Interpreter>()
 {
     tlb_entries[cop0.random % tlb_entries.size()].write();
 }

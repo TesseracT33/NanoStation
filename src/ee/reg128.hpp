@@ -51,13 +51,7 @@ struct Reg128 {
         std::memcpy(reinterpret_cast<::u8*>(this) + lane * sizeof(val), &val, sizeof(val));
     }
 
-    Reg128& operator=(std::integral auto val) noexcept
-    {
-        set(val);
-        return *this;
-    }
-
-    Reg128& operator=(::m128i val) noexcept
+    Reg128& operator=(auto val) noexcept
     {
         set(val);
         return *this;

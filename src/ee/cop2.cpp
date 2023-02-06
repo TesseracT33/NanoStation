@@ -1,523 +1,526 @@
 #include "cop2.hpp"
 
 namespace ee {
-void bc2f()
+
+using enum mips::CpuImpl;
+
+template<> void bc2f<Interpreter>()
 {
 }
 
-void bc2fl()
+template<> void bc2fl<Interpreter>()
 {
 }
 
-void bc2t()
+template<> void bc2t<Interpreter>()
 {
 }
 
-void bc2tl()
+template<> void bc2tl<Interpreter>()
 {
 }
 
-void cfc2()
+template<> void cfc2<Interpreter>()
 {
 }
 
-void ctc2()
+template<> void ctc2<Interpreter>()
 {
 }
 
-void lqc2()
+template<> void lqc2<Interpreter>()
 {
 }
 
-void qmfc2()
+template<> void qmfc2<Interpreter>()
 {
 }
 
-void qmtc2()
+template<> void qmtc2<Interpreter>()
 {
 }
 
-void sqc2()
+template<> void sqc2<Interpreter>()
 {
 }
 
-void vabs()
+template<> void vabs<Interpreter>()
 {
 }
 
-void vadd()
+template<> void vadd<Interpreter>()
 {
 }
 
-void vadda()
+template<> void vadda<Interpreter>()
 {
 }
 
-void vaddai()
+template<> void vaddai<Interpreter>()
 {
 }
 
-void vaddaq()
+template<> void vaddaq<Interpreter>()
 {
 }
 
-void vaddaw()
+template<> void vaddaw<Interpreter>()
 {
 }
 
-void vaddax()
+template<> void vaddax<Interpreter>()
 {
 }
 
-void vadday()
+template<> void vadday<Interpreter>()
 {
 }
 
-void vaddaz()
+template<> void vaddaz<Interpreter>()
 {
 }
 
-void vaddi()
+template<> void vaddi<Interpreter>()
 {
 }
 
-void vaddq()
+template<> void vaddq<Interpreter>()
 {
 }
 
-void vaddw()
+template<> void vaddw<Interpreter>()
 {
 }
 
-void vaddx()
+template<> void vaddx<Interpreter>()
 {
 }
 
-void vaddy()
+template<> void vaddy<Interpreter>()
 {
 }
 
-void vaddz()
+template<> void vaddz<Interpreter>()
 {
 }
 
-void vcallms()
+template<> void vcallms<Interpreter>()
 {
 }
 
-void vcallmsr()
+template<> void vcallmsr<Interpreter>()
 {
 }
 
-void vclipw()
+template<> void vclipw<Interpreter>()
 {
 }
 
-void vdiv()
+template<> void vdiv<Interpreter>()
 {
 }
 
-void vftoi0()
+template<> void vftoi0<Interpreter>()
 {
 }
 
-void vftoi4()
+template<> void vftoi4<Interpreter>()
 {
 }
 
-void vftoi12()
+template<> void vftoi12<Interpreter>()
 {
 }
 
-void vftoi15()
+template<> void vftoi15<Interpreter>()
 {
 }
 
-void viadd()
+template<> void viadd<Interpreter>()
 {
 }
 
-void viaddi()
+template<> void viaddi<Interpreter>()
 {
 }
 
-void viand()
+template<> void viand<Interpreter>()
 {
 }
 
-void vilwr()
+template<> void vilwr<Interpreter>()
 {
 }
 
-void vior()
+template<> void vior<Interpreter>()
 {
 }
 
-void visub()
+template<> void visub<Interpreter>()
 {
 }
 
-void viswr()
+template<> void viswr<Interpreter>()
 {
 }
 
-void vitof0()
+template<> void vitof0<Interpreter>()
 {
 }
 
-void vitof4()
+template<> void vitof4<Interpreter>()
 {
 }
 
-void vitof12()
+template<> void vitof12<Interpreter>()
 {
 }
 
-void vitof15()
+template<> void vitof15<Interpreter>()
 {
 }
 
-void vlqd()
+template<> void vlqd<Interpreter>()
 {
 }
 
-void vlqi()
+template<> void vlqi<Interpreter>()
 {
 }
 
-void vmadd()
+template<> void vmadd<Interpreter>()
 {
 }
 
-void vmadda()
+template<> void vmadda<Interpreter>()
 {
 }
 
-void vmaddai()
+template<> void vmaddai<Interpreter>()
 {
 }
 
-void vmaddaq()
+template<> void vmaddaq<Interpreter>()
 {
 }
 
-void vmaddaw()
+template<> void vmaddaw<Interpreter>()
 {
 }
 
-void vmaddax()
+template<> void vmaddax<Interpreter>()
 {
 }
 
-void vmadday()
+template<> void vmadday<Interpreter>()
 {
 }
 
-void vmaddaz()
+template<> void vmaddaz<Interpreter>()
 {
 }
 
-void vmaddi()
+template<> void vmaddi<Interpreter>()
 {
 }
 
-void vmaddq()
+template<> void vmaddq<Interpreter>()
 {
 }
 
-void vmaddw()
+template<> void vmaddw<Interpreter>()
 {
 }
 
-void vmaddx()
+template<> void vmaddx<Interpreter>()
 {
 }
 
-void vmaddy()
+template<> void vmaddy<Interpreter>()
 {
 }
 
-void vmaddz()
+template<> void vmaddz<Interpreter>()
 {
 }
 
-void vmax()
+template<> void vmax<Interpreter>()
 {
 }
 
-void vmaxi()
+template<> void vmaxi<Interpreter>()
 {
 }
 
-void vmaxw()
+template<> void vmaxw<Interpreter>()
 {
 }
 
-void vmaxx()
+template<> void vmaxx<Interpreter>()
 {
 }
 
-void vmaxy()
+template<> void vmaxy<Interpreter>()
 {
 }
 
-void vmaxz()
+template<> void vmaxz<Interpreter>()
 {
 }
 
-void vmfir()
+template<> void vmfir<Interpreter>()
 {
 }
 
-void vmini()
+template<> void vmini<Interpreter>()
 {
 }
 
-void vminii()
+template<> void vminii<Interpreter>()
 {
 }
 
-void vminiw()
+template<> void vminiw<Interpreter>()
 {
 }
 
-void vminix()
+template<> void vminix<Interpreter>()
 {
 }
 
-void vminiy()
+template<> void vminiy<Interpreter>()
 {
 }
 
-void vminiz()
+template<> void vminiz<Interpreter>()
 {
 }
 
-void vmove()
+template<> void vmove<Interpreter>()
 {
 }
 
-void vmr32()
+template<> void vmr32<Interpreter>()
 {
 }
 
-void vmsub()
+template<> void vmsub<Interpreter>()
 {
 }
 
-void vmsubai()
+template<> void vmsubai<Interpreter>()
 {
 }
 
-void vmsubaq()
+template<> void vmsubaq<Interpreter>()
 {
 }
 
-void vmsubaw()
+template<> void vmsubaw<Interpreter>()
 {
 }
 
-void vmsubax()
+template<> void vmsubax<Interpreter>()
 {
 }
 
-void vmsubay()
+template<> void vmsubay<Interpreter>()
 {
 }
 
-void vmsubaz()
+template<> void vmsubaz<Interpreter>()
 {
 }
 
-void vmsuba()
+template<> void vmsuba<Interpreter>()
 {
 }
 
-void vmsubi()
+template<> void vmsubi<Interpreter>()
 {
 }
 
-void vmsubq()
+template<> void vmsubq<Interpreter>()
 {
 }
 
-void vmsubw()
+template<> void vmsubw<Interpreter>()
 {
 }
 
-void vmsubx()
+template<> void vmsubx<Interpreter>()
 {
 }
 
-void vmsuby()
+template<> void vmsuby<Interpreter>()
 {
 }
 
-void vmsubz()
+template<> void vmsubz<Interpreter>()
 {
 }
 
-void vmtir()
+template<> void vmtir<Interpreter>()
 {
 }
 
-void vmul()
+template<> void vmul<Interpreter>()
 {
 }
 
-void vmula()
+template<> void vmula<Interpreter>()
 {
 }
 
-void vmulai()
+template<> void vmulai<Interpreter>()
 {
 }
 
-void vmulaq()
+template<> void vmulaq<Interpreter>()
 {
 }
 
-void vmulaw()
+template<> void vmulaw<Interpreter>()
 {
 }
 
-void vmulax()
+template<> void vmulax<Interpreter>()
 {
 }
 
-void vmulay()
+template<> void vmulay<Interpreter>()
 {
 }
 
-void vmulaz()
+template<> void vmulaz<Interpreter>()
 {
 }
 
-void vmuli()
+template<> void vmuli<Interpreter>()
 {
 }
 
-void vmulq()
+template<> void vmulq<Interpreter>()
 {
 }
 
-void vmulw()
+template<> void vmulw<Interpreter>()
 {
 }
 
-void vmulx()
+template<> void vmulx<Interpreter>()
 {
 }
 
-void vmuly()
+template<> void vmuly<Interpreter>()
 {
 }
 
-void vmulz()
+template<> void vmulz<Interpreter>()
 {
 }
 
-void vnop()
+template<> void vnop<Interpreter>()
 {
 }
 
-void vopmsub()
+template<> void vopmsub<Interpreter>()
 {
 }
 
-void vopmula()
+template<> void vopmula<Interpreter>()
 {
 }
 
-void vrget()
+template<> void vrget<Interpreter>()
 {
 }
 
-void vrinit()
+template<> void vrinit<Interpreter>()
 {
 }
 
-void vrnext()
+template<> void vrnext<Interpreter>()
 {
 }
 
-void vrsqrt()
+template<> void vrsqrt<Interpreter>()
 {
 }
 
-void vrxor()
+template<> void vrxor<Interpreter>()
 {
 }
 
-void vsqd()
+template<> void vsqd<Interpreter>()
 {
 }
 
-void vsqi()
+template<> void vsqi<Interpreter>()
 {
 }
 
-void vsqrt()
+template<> void vsqrt<Interpreter>()
 {
 }
 
-void vsub()
+template<> void vsub<Interpreter>()
 {
 }
 
-void vsuba()
+template<> void vsuba<Interpreter>()
 {
 }
 
-void vsubai()
+template<> void vsubai<Interpreter>()
 {
 }
 
-void vsubaq()
+template<> void vsubaq<Interpreter>()
 {
 }
 
-void vsubaw()
+template<> void vsubaw<Interpreter>()
 {
 }
 
-void vsubax()
+template<> void vsubax<Interpreter>()
 {
 }
 
-void vsubay()
+template<> void vsubay<Interpreter>()
 {
 }
 
-void vsubaz()
+template<> void vsubaz<Interpreter>()
 {
 }
 
-void vsubi()
+template<> void vsubi<Interpreter>()
 {
 }
 
-void vsubq()
+template<> void vsubq<Interpreter>()
 {
 }
 
-void vsubw()
+template<> void vsubw<Interpreter>()
 {
 }
 
-void vsubx()
+template<> void vsubx<Interpreter>()
 {
 }
 
-void vsuby()
+template<> void vsuby<Interpreter>()
 {
 }
 
-void vsubz()
+template<> void vsubz<Interpreter>()
 {
 }
 
-void vwaitq()
+template<> void vwaitq<Interpreter>()
 {
 }
 

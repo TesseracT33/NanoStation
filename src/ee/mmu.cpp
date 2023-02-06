@@ -12,6 +12,7 @@ std::array<u8, 32 * 1024 * 1024> rdram;
 std::array<TlbEntry, 48> tlb_entries;
 
 template<EeUInt Int> static Int read_bios(u32 addr);
+template<EeUInt Int> static Int read_io(u32 addr);
 template<EeUInt Int> static Int read_rdram(u32 addr);
 template<MemOp> static u32 tlb_addr_translation(u32 vaddr);
 template<MemOp> static u32 virt_to_phys_addr(u32 vaddr);
@@ -43,6 +44,11 @@ template<EeUInt Int> Int read_bios(u32 addr)
     Int ret;
     std::memcpy(&ret, &bios[addr & 0x3F'FFFF], sizeof(Int));
     return ret;
+}
+
+template<EeUInt Int> Int read_io(u32 addr)
+{
+    return {};
 }
 
 template<EeUInt Int> Int read_rdram(u32 addr)
@@ -107,7 +113,7 @@ template<EeUInt Int, Alignment alignment, MemOp mem_op> Int virtual_read(u32 add
 
     if (paddr < 0x0200'0000) return read_rdram<Int>(paddr);
     if (paddr < 0x1000'0000) assert(false);
-    if (paddr < 0x1100'0000) {}
+    if (paddr < 0x1100'0000) return read_io<Int>(paddr);
     if (paddr < 0x1101'0000) {}
     if (paddr < 0x1200'0000) {}
     if (paddr < 0x1200'2000) {}
