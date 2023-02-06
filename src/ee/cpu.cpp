@@ -257,7 +257,7 @@ template<> void div<Interpreter>(u32 rs, u32 rt)
         lo = op1 >= 0 ? -1 : 1;
         hi = op1;
     } else if (op1 == std::numeric_limits<s32>::min() && op2 == -1) {
-        lo = op1;
+        lo = std::numeric_limits<s32>::min();
         hi = 0;
     } else [[likely]] {
         lo = op1 / op2;
@@ -273,7 +273,7 @@ template<> void div1<Interpreter>(u32 rs, u32 rt)
         lo.set_upper_dword(op1 >= 0 ? -1 : 1);
         hi.set_upper_dword(op1);
     } else if (op1 == std::numeric_limits<s32>::min() && op2 == -1) {
-        lo.set_upper_dword(op1);
+        lo.set_upper_dword(std::numeric_limits<s32>::min());
         hi.set_upper_dword(0);
     } else [[likely]] {
         lo.set_upper_dword(op1 / op2);

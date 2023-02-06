@@ -134,7 +134,7 @@ template<> void div<Interpreter>(u32 rs, u32 rt)
         lo = op1 >= 0 ? -1 : 1;
         hi = op1;
     } else if (op1 == std::numeric_limits<s32>::min() && op2 == -1) {
-        lo = op1;
+        lo = std::numeric_limits<s32>::min();
         hi = 0;
     } else [[likely]] {
         lo = op1 / op2;
