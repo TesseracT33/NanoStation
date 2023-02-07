@@ -55,9 +55,11 @@ struct TlbEntry {
     u32 offset_addr_mask; // AND with vaddr => offset
 };
 
+inline constexpr size_t bios_size = 4 * 1024 * 1024;
+
 inline std::array<TlbEntry, 48> tlb_entries;
 
-inline std::array<u8, 4 * 1024 * 1024> bios;
+inline std::array<u8, bios_size> bios;
 inline std::array<u8, 32 * 1024 * 1024> rdram;
 
 template<EeUInt Int, Alignment alignment = Alignment::Aligned, MemOp mem_op = MemOp::DataRead>

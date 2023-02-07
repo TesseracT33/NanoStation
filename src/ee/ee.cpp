@@ -35,7 +35,7 @@ void check_interrupts()
 
 void fetch_decode_exec()
 {
-    u32 instr = virtual_read<u32, ee::Alignment::Aligned, ee::MemOp::InstrFetch>(pc);
+    u32 instr = virtual_read<u32, Alignment::Aligned, MemOp::InstrFetch>(pc);
     pc += 4;
     mips::disassemble_ee<mips::CpuImpl::Interpreter>(instr);
 }
@@ -63,7 +63,6 @@ void jump(u32 target)
 
 bool load_bios(std::filesystem::path const& path)
 {
-    static constexpr size_t bios_size = 4 * 1024 * 1024;
     std::optional<std::array<u8, bios_size>> opt_bios = read_file_into_array<bios_size>(path);
     if (opt_bios) {
         std::array<u8, bios_size> const& bios_val = opt_bios.value();

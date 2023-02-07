@@ -2,6 +2,7 @@
 
 #include "types.hpp"
 
+#include <array>
 #include <concepts>
 
 namespace iop {
@@ -19,6 +20,10 @@ enum class MemOp {
     DataWrite,
     InstrFetch
 };
+
+inline constexpr size_t bios_size = 512 * 1024;
+
+inline std::array<u8, bios_size> bios;
 
 template<IopUInt Int, Alignment alignment = Alignment::Aligned, MemOp mem_op = MemOp::DataRead> Int read(u32 addr);
 

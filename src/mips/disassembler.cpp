@@ -56,7 +56,7 @@ static std::string disassemble_result;
 #define INSTR_IOP(instr_name, ...)                                                             \
     {                                                                                          \
         if constexpr (cpu == Cpu::EE) reserved_instruction<Cpu::EE, make_string>(#instr_name); \
-        else iop::instr_name<cpu_impl>(__VA_ARGS__)                                            \
+        else iop::instr_name<cpu_impl>(__VA_ARGS__);                                           \
     } // namespace mips
 
 template<Cpu cpu, CpuImpl cpu_impl, bool make_string> void cop0(u32 instr)
@@ -81,6 +81,7 @@ template<Cpu cpu, CpuImpl cpu_impl, bool make_string> void cop0(u32 instr)
         case 0x02: INSTR_EE(tlbwi); break;
         case 0x06: INSTR_EE(tlbwr); break;
         case 0x08: INSTR_EE(tlbp); break;
+        case 0x10: INSTR_IOP(rfe); break;
         case 0x18: INSTR_EE(eret); break;
         case 0x38: INSTR_EE(ei); break;
         case 0x39: INSTR_EE(di); break;

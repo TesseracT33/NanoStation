@@ -1,9 +1,18 @@
 #include "memory.hpp"
+#include "exceptions.hpp"
 
 namespace iop {
 
 template<IopUInt Int, Alignment alignment, MemOp mem_op> Int read(u32 addr)
 {
+    static constexpr size_t size = sizeof(Int);
+    if constexpr (alignment == Alignment::Aligned && size > 1 && mem_op == MemOp::DataRead) {
+        if (addr & (size - 1)) {
+            address_error_exception(addr, mem_op);
+            return {};
+        }
+    }
+
     return {};
 }
 

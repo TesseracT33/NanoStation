@@ -124,7 +124,7 @@ u32 Cop0Registers::get(int reg)
         return random;
     } else {
         u32 ret;
-        std::memcpy(&ret, reinterpret_cast<u8*>(&cop0) + reg * 4, 4);
+        std::memcpy(&ret, reinterpret_cast<u8*>(this) + reg * 4, 4);
         return ret;
     }
 }
