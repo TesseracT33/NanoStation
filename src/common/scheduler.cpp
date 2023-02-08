@@ -1,5 +1,6 @@
 #include "scheduler.hpp"
 #include "ee/ee.hpp"
+#include "iop/iop.hpp"
 
 #include <vector>
 
@@ -46,10 +47,10 @@ void change_event_time(EventType event_type, s64 cpu_cycles_until_fire)
     }
 }
 
-void check_events(s64 cpu_cycle_step)
+void check_events(s64 ee_cycles)
 {
     for (auto it = events.begin(); it != events.end();) {
-        it->cpu_cycles_until_fire -= cpu_cycle_step;
+        it->cpu_cycles_until_fire -= ee_cycles;
         if (it->cpu_cycles_until_fire <= 0) {
             /* erase element before invoking callback, in case it mutates the event list */
             EventCallback callback = it->callback;
@@ -84,11 +85,15 @@ void run()
 {
     init();
 
+    // EE 294.912 MHz, IOP 36.864 Mhz in ps2 mode. Ratio: 8
     static constexpr s64 ee_cycles_per_update = 1024;
-    s64 ee_cycle_overrun = 0;
+    static constexpr s64 iop_cycles_per_update = 1024 / 8;
+    s64 ee_cycle_overrun = 0, iop_cycle_overrun = 0;
     while (!quit) {
         s64 ee_step_dur = ee_cycles_per_update - ee_cycle_overrun;
+        s64 iop_step_dur = iop_cycles_per_update - iop_cycle_overrun;
         ee_cycle_overrun = ee::run(ee_step_dur);
+        iop_cycle_overrun = iop::run(iop_step_dur);
         check_events(ee_step_dur);
     }
 }
