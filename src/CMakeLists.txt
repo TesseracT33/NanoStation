@@ -1,6 +1,6 @@
-cmake_minimum_required (VERSION 3.8)
+cmake_minimum_required (VERSION 3.13)
 
-add_executable(NanoStation
+target_sources(NanoStation PRIVATE
 	main.cpp
 
 	common/emulator.cpp

@@ -1,0 +1,15 @@
+cmake_minimum_required(VERSION 3.13)
+
+##### SDL #####
+set(SDL2_DISABLE_SDL2MAIN "" ON)
+set(SDL2_DISABLE_INSTALL "" ON)
+set(SDL2_DISABLE_UNINSTALL "" ON)
+set(SDL_SHARED OFF)
+set(SDL_STATIC ON)
+set(SDL_TEST OFF)
+set(SDL_SHARED_ENABLED_BY_DEFAULT OFF)
+set(SDL_STATIC_ENABLED_BY_DEFAULT ON)
+set(SDL_TEST_ENABLED_BY_DEFAULT OFF)
+add_subdirectory(SDL)
+target_link_libraries(NanoStation SDL3-static)
+target_include_directories(NanoStation PUBLIC SDL/include SDL/include/SDL3)

@@ -1,9 +1,12 @@
-﻿cmake_minimum_required(VERSION 3.8)
+﻿cmake_minimum_required(VERSION 3.13)
 
 project(NanoStation LANGUAGES C CXX)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+add_executable(NanoStation)
+
+add_subdirectory(ext)
 add_subdirectory(src)
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
