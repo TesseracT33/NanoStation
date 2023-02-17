@@ -77,7 +77,7 @@ template<> void tlbp<Interpreter>()
         cop0.index.value = 0;
     } else {
         cop0.index.p = 0;
-        cop0.index.value = std::distance(tlb_entries.begin(), tlb_idx);
+        cop0.index.value = u32(std::distance(tlb_entries.begin(), tlb_idx));
     }
 }
 
@@ -273,7 +273,7 @@ void Cop0Registers::update_random()
     if (random < wired + cycles_since_updated_random) {
         random = 47 - (cycles_since_updated_random - (random - wired + 1)) % (48 - wired);
     } else {
-        random -= cycles_since_updated_random;
+        random -= u32(cycles_since_updated_random);
     }
     cycles_since_updated_random = 0;
 }

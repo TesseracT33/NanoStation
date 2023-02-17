@@ -81,6 +81,7 @@ template<MemOp mem_op> u32 tlb_addr_translation(u32 vaddr)
     }
     // TLB miss
     tlb_refill_exception(vaddr, mem_op);
+    return 0;
 }
 
 template<MemOp mem_op> u32 virt_to_phys_addr(u32 vaddr)
@@ -116,6 +117,7 @@ template<EeUInt Int, Alignment alignment, MemOp mem_op> Int virtual_read(u32 add
     if (paddr < 0x1C00'0000) assert(false);
     if (paddr < 0x2000'0000) return read_bios<Int>(paddr);
     assert(false);
+    return {};
 }
 
 template u8 virtual_read<u8, Alignment::Aligned, MemOp::DataRead>(u32);

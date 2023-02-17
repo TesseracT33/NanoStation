@@ -97,63 +97,62 @@ template<Cpu cpu, CpuImpl cpu_impl, bool make_string> void cop1(u32 instr)
 {
     if constexpr (cpu == Cpu::IOP) {
         reserved_instruction<Cpu::IOP, make_string>(instr);
-        return;
-    }
+    } else {
+        switch (instr >> 21 & 31) {
+        case 0x00: INSTR_EE(mfc1, FS, RT); break;
+        case 0x02: INSTR_EE(cfc1, FS, RT); break;
+        case 0x04: INSTR_EE(mtc1, FS, RT); break;
+        case 0x06: INSTR_EE(ctc1, FS, RT); break;
 
-    switch (instr >> 21 & 31) {
-    case 0x00: INSTR_EE(mfc1, FS, RT); break;
-    case 0x02: INSTR_EE(cfc1, FS, RT); break;
-    case 0x04: INSTR_EE(mtc1, FS, RT); break;
-    case 0x06: INSTR_EE(ctc1, FS, RT); break;
+        case 0x08: { // BC1
+            switch (instr >> 16 & 31) {
+            case 0: INSTR_EE(bc1f, IMM16); break;
+            case 1: INSTR_EE(bc1t, IMM16); break;
+            case 2: INSTR_EE(bc1fl, IMM16); break;
+            case 3: INSTR_EE(bc1tl, IMM16); break;
+            default: reserved_instruction<cpu, make_string>(instr);
+            }
+        } break;
 
-    case 0x08: { // BC1
-        switch (instr >> 16 & 31) {
-        case 0: INSTR_EE(bc1f, IMM16); break;
-        case 1: INSTR_EE(bc1t, IMM16); break;
-        case 2: INSTR_EE(bc1fl, IMM16); break;
-        case 3: INSTR_EE(bc1tl, IMM16); break;
+        case 0x10: { // FPU.S
+            switch (instr & 63) {
+            case 0x00: INSTR_EE(add_s, FD, FS, FT); break;
+            case 0x01: INSTR_EE(sub_s, FD, FS, FT); break;
+            case 0x02: INSTR_EE(mul_s, FD, FS, FT); break;
+            case 0x03: INSTR_EE(div_s, FD, FS, FT); break;
+            case 0x04: INSTR_EE(sqrt_s, FD, FS); break;
+            case 0x05: INSTR_EE(abs_s, FD, FS); break;
+            case 0x06: INSTR_EE(mov_s, FD, FS); break;
+            case 0x07: INSTR_EE(neg_s, FD, FS); break;
+            case 0x16: INSTR_EE(rsqrt_s, FD, FS); break;
+            case 0x18: INSTR_EE(adda_s, FS, FT); break;
+            case 0x19: INSTR_EE(suba_s, FS, FT); break;
+            case 0x1A: INSTR_EE(mula_s, FS, FT); break;
+            case 0x1C: INSTR_EE(madd_s, FD, FS, FT); break;
+            case 0x1D: INSTR_EE(msub_s, FD, FS, FT); break;
+            case 0x1E: INSTR_EE(madda_s, FS, FT); break;
+            case 0x1F: INSTR_EE(msuba_s, FS, FT); break;
+            case 0x24: INSTR_EE(cvt_w, FD, FS); break;
+            case 0x28: INSTR_EE(max_s, FD, FS, FT); break;
+            case 0x29: INSTR_EE(min_s, FD, FS, FT); break;
+            case 0x30: INSTR_EE(c_f, FS, FT); break;
+            case 0x32: INSTR_EE(c_eq, FS, FT); break;
+            case 0x34: INSTR_EE(c_lt, FS, FT); break;
+            case 0x36: INSTR_EE(c_le, FS, FT); break;
+            default: reserved_instruction<cpu, make_string>(instr);
+            }
+        } break;
+
+        case 0x14: { // FPU.W
+            if ((instr & 63) == 32) {
+                INSTR_EE(cvt_s, FD, FS);
+            } else {
+                reserved_instruction<cpu, make_string>(instr);
+            }
+        } break;
+
         default: reserved_instruction<cpu, make_string>(instr);
         }
-    } break;
-
-    case 0x10: { // FPU.S
-        switch (instr & 63) {
-        case 0x00: INSTR_EE(add_s, FD, FS, FT); break;
-        case 0x01: INSTR_EE(sub_s, FD, FS, FT); break;
-        case 0x02: INSTR_EE(mul_s, FD, FS, FT); break;
-        case 0x03: INSTR_EE(div_s, FD, FS, FT); break;
-        case 0x04: INSTR_EE(sqrt_s, FD, FS); break;
-        case 0x05: INSTR_EE(abs_s, FD, FS); break;
-        case 0x06: INSTR_EE(mov_s, FD, FS); break;
-        case 0x07: INSTR_EE(neg_s, FD, FS); break;
-        case 0x16: INSTR_EE(rsqrt_s, FD, FS); break;
-        case 0x18: INSTR_EE(adda_s, FS, FT); break;
-        case 0x19: INSTR_EE(suba_s, FS, FT); break;
-        case 0x1A: INSTR_EE(mula_s, FS, FT); break;
-        case 0x1C: INSTR_EE(madd_s, FD, FS, FT); break;
-        case 0x1D: INSTR_EE(msub_s, FD, FS, FT); break;
-        case 0x1E: INSTR_EE(madda_s, FS, FT); break;
-        case 0x1F: INSTR_EE(msuba_s, FS, FT); break;
-        case 0x24: INSTR_EE(cvt_w, FD, FS); break;
-        case 0x28: INSTR_EE(max_s, FD, FS, FT); break;
-        case 0x29: INSTR_EE(min_s, FD, FS, FT); break;
-        case 0x30: INSTR_EE(c_f, FS, FT); break;
-        case 0x32: INSTR_EE(c_eq, FS, FT); break;
-        case 0x34: INSTR_EE(c_lt, FS, FT); break;
-        case 0x36: INSTR_EE(c_le, FS, FT); break;
-        default: reserved_instruction<cpu, make_string>(instr);
-        }
-    } break;
-
-    case 0x14: { // FPU.W
-        if ((instr & 63) == 32) {
-            INSTR_EE(cvt_s, FD, FS);
-        } else {
-            reserved_instruction<cpu, make_string>(instr);
-        }
-    } break;
-
-    default: reserved_instruction<cpu, make_string>(instr);
     }
 }
 
@@ -319,7 +318,30 @@ template<Cpu cpu, CpuImpl cpu_impl, bool make_string> void cop2(u32 instr)
         }
 
     } else {
-        // TODO
+        switch (instr & 63) {
+        case 0x01: INSTR_IOP(rtps); break;
+        case 0x06: INSTR_IOP(rtps); break;
+        case 0x0C: INSTR_IOP(rtps); break;
+        case 0x10: INSTR_IOP(rtps); break;
+        case 0x11: INSTR_IOP(rtps); break;
+        case 0x12: INSTR_IOP(rtps); break;
+        case 0x13: INSTR_IOP(rtps); break;
+        case 0x14: INSTR_IOP(rtps); break;
+        case 0x16: INSTR_IOP(rtps); break;
+        case 0x1B: INSTR_IOP(rtps); break;
+        case 0x1C: INSTR_IOP(rtps); break;
+        case 0x1E: INSTR_IOP(rtps); break;
+        case 0x20: INSTR_IOP(rtps); break;
+        case 0x28: INSTR_IOP(rtps); break;
+        case 0x29: INSTR_IOP(rtps); break;
+        case 0x2A: INSTR_IOP(rtps); break;
+        case 0x2D: INSTR_IOP(rtps); break;
+        case 0x2E: INSTR_IOP(rtps); break;
+        case 0x30: INSTR_IOP(rtps); break;
+        case 0x3D: INSTR_IOP(rtps); break;
+        case 0x3E: INSTR_IOP(rtps); break;
+        case 0x3F: INSTR_IOP(rtps); break;
+        }
     }
 }
 
@@ -409,138 +431,137 @@ template<Cpu cpu, CpuImpl cpu_impl, bool make_string> void mmi(u32 instr)
 {
     if constexpr (cpu == Cpu::IOP) {
         reserved_instruction<Cpu::IOP, make_string>(instr);
-        return;
-    }
+    } else {
+        auto mmi0 = [](u32 instr) {
+            switch (instr >> 6 & 31) {
+            case 0x00: INSTR_EE(paddw, RS, RT, RD); break;
+            case 0x01: INSTR_EE(psubw, RS, RT, RD); break;
+            case 0x02: INSTR_EE(pcgtw, RS, RT, RD); break;
+            case 0x03: INSTR_EE(pmaxw, RS, RT, RD); break;
+            case 0x04: INSTR_EE(paddh, RS, RT, RD); break;
+            case 0x05: INSTR_EE(psubh, RS, RT, RD); break;
+            case 0x06: INSTR_EE(pcgth, RS, RT, RD); break;
+            case 0x07: INSTR_EE(pmaxh, RS, RT, RD); break;
+            case 0x08: INSTR_EE(paddb, RS, RT, RD); break;
+            case 0x09: INSTR_EE(psubb, RS, RT, RD); break;
+            case 0x0A: INSTR_EE(pcgtb, RS, RT, RD); break;
+            case 0x10: INSTR_EE(paddsw, RS, RT, RD); break;
+            case 0x11: INSTR_EE(psubsw, RS, RT, RD); break;
+            case 0x12: INSTR_EE(pextlw, RS, RT, RD); break;
+            case 0x13: INSTR_EE(ppacw, RS, RT, RD); break;
+            case 0x14: INSTR_EE(paddsh, RS, RT, RD); break;
+            case 0x15: INSTR_EE(psubsh, RS, RT, RD); break;
+            case 0x16: INSTR_EE(pextlh, RS, RT, RD); break;
+            case 0x17: INSTR_EE(ppach, RS, RT, RD); break;
+            case 0x18: INSTR_EE(paddsb, RS, RT, RD); break;
+            case 0x19: INSTR_EE(psubsb, RS, RT, RD); break;
+            case 0x1A: INSTR_EE(pextlb, RS, RT, RD); break;
+            case 0x1B: INSTR_EE(ppacb, RS, RT, RD); break;
+            case 0x1E: INSTR_EE(pext5, RT, RD); break;
+            case 0x1F: INSTR_EE(ppac5, RT, RD); break;
+            default: reserved_instruction<cpu, make_string>(instr);
+            }
+        };
 
-    auto mmi0 = [](u32 instr) {
-        switch (instr >> 6 & 31) {
-        case 0x00: INSTR_EE(paddw, RS, RT, RD); break;
-        case 0x01: INSTR_EE(psubw, RS, RT, RD); break;
-        case 0x02: INSTR_EE(pcgtw, RS, RT, RD); break;
-        case 0x03: INSTR_EE(pmaxw, RS, RT, RD); break;
-        case 0x04: INSTR_EE(paddh, RS, RT, RD); break;
-        case 0x05: INSTR_EE(psubh, RS, RT, RD); break;
-        case 0x06: INSTR_EE(pcgth, RS, RT, RD); break;
-        case 0x07: INSTR_EE(pmaxh, RS, RT, RD); break;
-        case 0x08: INSTR_EE(paddb, RS, RT, RD); break;
-        case 0x09: INSTR_EE(psubb, RS, RT, RD); break;
-        case 0x0A: INSTR_EE(pcgtb, RS, RT, RD); break;
-        case 0x10: INSTR_EE(paddsw, RS, RT, RD); break;
-        case 0x11: INSTR_EE(psubsw, RS, RT, RD); break;
-        case 0x12: INSTR_EE(pextlw, RS, RT, RD); break;
-        case 0x13: INSTR_EE(ppacw, RS, RT, RD); break;
-        case 0x14: INSTR_EE(paddsh, RS, RT, RD); break;
-        case 0x15: INSTR_EE(psubsh, RS, RT, RD); break;
-        case 0x16: INSTR_EE(pextlh, RS, RT, RD); break;
-        case 0x17: INSTR_EE(ppach, RS, RT, RD); break;
-        case 0x18: INSTR_EE(paddsb, RS, RT, RD); break;
-        case 0x19: INSTR_EE(psubsb, RS, RT, RD); break;
-        case 0x1A: INSTR_EE(pextlb, RS, RT, RD); break;
-        case 0x1B: INSTR_EE(ppacb, RS, RT, RD); break;
-        case 0x1E: INSTR_EE(pext5, RT, RD); break;
-        case 0x1F: INSTR_EE(ppac5, RT, RD); break;
+        auto mmi1 = [](u32 instr) {
+            switch (instr >> 6 & 31) {
+            case 0x01: INSTR_EE(pabsw, RT, RD); break;
+            case 0x02: INSTR_EE(pceqw, RS, RT, RD); break;
+            case 0x03: INSTR_EE(pminw, RS, RT, RD); break;
+            case 0x04: INSTR_EE(padsbh, RS, RT, RD); break;
+            case 0x05: INSTR_EE(pabsh, RT, RD); break;
+            case 0x06: INSTR_EE(pceqh, RS, RT, RD); break;
+            case 0x07: INSTR_EE(pminh, RS, RT, RD); break;
+            case 0x0A: INSTR_EE(pceqb, RS, RT, RD); break;
+            case 0x10: INSTR_EE(padduw, RS, RT, RD); break;
+            case 0x11: INSTR_EE(psubuw, RS, RT, RD); break;
+            case 0x12: INSTR_EE(pextuw, RS, RT, RD); break;
+            case 0x14: INSTR_EE(padduh, RS, RT, RD); break;
+            case 0x15: INSTR_EE(psubuh, RS, RT, RD); break;
+            case 0x16: INSTR_EE(pextuh, RS, RT, RD); break;
+            case 0x18: INSTR_EE(paddub, RS, RT, RD); break;
+            case 0x19: INSTR_EE(psubub, RS, RT, RD); break;
+            case 0x1A: INSTR_EE(pextub, RS, RT, RD); break;
+            case 0x1B: INSTR_EE(qfsrv, RS, RT, RD); break;
+            default: reserved_instruction<cpu, make_string>(instr);
+            }
+        };
+
+        auto mmi2 = [](u32 instr) {
+            switch (instr >> 6 & 31) {
+            case 0x00: INSTR_EE(pmaddw, RS, RT, RD); break;
+            case 0x02: INSTR_EE(psllvw, RS, RT, RD); break;
+            case 0x03: INSTR_EE(psrlvw, RS, RT, RD); break;
+            case 0x04: INSTR_EE(pmsubw, RS, RT, RD); break;
+            case 0x08: INSTR_EE(pmfhi, RD); break;
+            case 0x09: INSTR_EE(pmflo, RD); break;
+            case 0x0A: INSTR_EE(pinth, RS, RT, RD); break;
+            case 0x0C: INSTR_EE(pmultw, RS, RT, RD); break;
+            case 0x0D: INSTR_EE(pdivw, RS, RT); break;
+            case 0x0E: INSTR_EE(pcpyld, RS, RT, RD); break;
+            case 0x10: INSTR_EE(pmaddh, RS, RT, RD); break;
+            case 0x11: INSTR_EE(phmadh, RS, RT, RD); break;
+            case 0x12: INSTR_EE(pand, RS, RT, RD); break;
+            case 0x13: INSTR_EE(pxor, RS, RT, RD); break;
+            case 0x14: INSTR_EE(pmsubh, RS, RT, RD); break;
+            case 0x15: INSTR_EE(phmsbh, RS, RT, RD); break;
+            case 0x1A: INSTR_EE(pexeh, RT, RD); break;
+            case 0x1B: INSTR_EE(prevh, RT, RD); break;
+            case 0x1C: INSTR_EE(pmulth, RS, RT, RD); break;
+            case 0x1D: INSTR_EE(pdivbw, RS, RT); break;
+            case 0x1E: INSTR_EE(pexew, RT, RD); break;
+            case 0x1F: INSTR_EE(prot3w, RT, RD); break;
+            default: reserved_instruction<cpu, make_string>(instr);
+            }
+        };
+
+        auto mmi3 = [](u32 instr) {
+            switch (instr >> 6 & 31) {
+            case 0x00: INSTR_EE(pmadduw, RS, RT, RD); break;
+            case 0x03: INSTR_EE(psravw, RS, RT, RD); break;
+            case 0x08: INSTR_EE(pmthi, RS); break;
+            case 0x09: INSTR_EE(pmtlo, RS); break;
+            case 0x0A: INSTR_EE(pinteh, RS, RT, RD); break;
+            case 0x0C: INSTR_EE(pmultuw, RS, RT, RD); break;
+            case 0x0D: INSTR_EE(pdivuw, RS, RT); break;
+            case 0x0E: INSTR_EE(pcpyud, RS, RT, RD); break;
+            case 0x12: INSTR_EE(por, RS, RT, RD); break;
+            case 0x13: INSTR_EE(pnor, RS, RT, RD); break;
+            case 0x1A: INSTR_EE(pexch, RT, RD); break;
+            case 0x1B: INSTR_EE(pcpyh, RT, RD); break;
+            case 0x1E: INSTR_EE(pexcw, RT, RD); break;
+            default: reserved_instruction<cpu, make_string>(instr);
+            }
+        };
+
+        switch (instr & 63) {
+        case 0x00: INSTR_EE(madd, RS, RT, RD); break;
+        case 0x01: INSTR_EE(maddu, RS, RT, RD); break;
+        case 0x04: INSTR_EE(plzcw, RS, RD); break;
+        case 0x08: mmi0(instr); break;
+        case 0x09: mmi2(instr); break;
+        case 0x10: INSTR_EE(mfhi1, RD); break;
+        case 0x11: INSTR_EE(mthi1, RS); break;
+        case 0x12: INSTR_EE(mflo1, RD); break;
+        case 0x13: INSTR_EE(mtlo1, RS); break;
+        case 0x18: INSTR_EE(mult1, RS, RT); break;
+        case 0x19: INSTR_EE(multu1, RS, RT); break;
+        case 0x1A: INSTR_EE(div1, RS, RT); break;
+        case 0x1B: INSTR_EE(divu1, RS, RT); break;
+        case 0x20: INSTR_EE(madd1, RS, RT, RD); break;
+        case 0x21: INSTR_EE(maddu1, RS, RT, RD); break;
+        case 0x28: mmi1(instr); break;
+        case 0x29: mmi3(instr); break;
+        case 0x30: INSTR_EE(pmfhl, RD, FMT); break;
+        case 0x31: INSTR_EE(pmthl, RS, FMT); break;
+        case 0x34: INSTR_EE(psllh, RT, RD, SA); break;
+        case 0x36: INSTR_EE(psrlh, RT, RD, SA); break;
+        case 0x37: INSTR_EE(psrah, RT, RD, SA); break;
+        case 0x3C: INSTR_EE(psllw, RT, RD, SA); break;
+        case 0x3E: INSTR_EE(psrlw, RT, RD, SA); break;
+        case 0x3F: INSTR_EE(psraw, RT, RD, SA); break;
         default: reserved_instruction<cpu, make_string>(instr);
         }
-    };
-
-    auto mmi1 = [](u32 instr) {
-        switch (instr >> 6 & 31) {
-        case 0x01: INSTR_EE(pabsw, RT, RD); break;
-        case 0x02: INSTR_EE(pceqw, RS, RT, RD); break;
-        case 0x03: INSTR_EE(pminw, RS, RT, RD); break;
-        case 0x04: INSTR_EE(padsbh, RS, RT, RD); break;
-        case 0x05: INSTR_EE(pabsh, RT, RD); break;
-        case 0x06: INSTR_EE(pceqh, RS, RT, RD); break;
-        case 0x07: INSTR_EE(pminh, RS, RT, RD); break;
-        case 0x0A: INSTR_EE(pceqb, RS, RT, RD); break;
-        case 0x10: INSTR_EE(padduw, RS, RT, RD); break;
-        case 0x11: INSTR_EE(psubuw, RS, RT, RD); break;
-        case 0x12: INSTR_EE(pextuw, RS, RT, RD); break;
-        case 0x14: INSTR_EE(padduh, RS, RT, RD); break;
-        case 0x15: INSTR_EE(psubuh, RS, RT, RD); break;
-        case 0x16: INSTR_EE(pextuh, RS, RT, RD); break;
-        case 0x18: INSTR_EE(paddub, RS, RT, RD); break;
-        case 0x19: INSTR_EE(psubub, RS, RT, RD); break;
-        case 0x1A: INSTR_EE(pextub, RS, RT, RD); break;
-        case 0x1B: INSTR_EE(qfsrv, RS, RT, RD); break;
-        default: reserved_instruction<cpu, make_string>(instr);
-        }
-    };
-
-    auto mmi2 = [](u32 instr) {
-        switch (instr >> 6 & 31) {
-        case 0x00: INSTR_EE(pmaddw, RS, RT, RD); break;
-        case 0x02: INSTR_EE(psllvw, RS, RT, RD); break;
-        case 0x03: INSTR_EE(psrlvw, RS, RT, RD); break;
-        case 0x04: INSTR_EE(pmsubw, RS, RT, RD); break;
-        case 0x08: INSTR_EE(pmfhi, RD); break;
-        case 0x09: INSTR_EE(pmflo, RD); break;
-        case 0x0A: INSTR_EE(pinth, RS, RT, RD); break;
-        case 0x0C: INSTR_EE(pmultw, RS, RT, RD); break;
-        case 0x0D: INSTR_EE(pdivw, RS, RT); break;
-        case 0x0E: INSTR_EE(pcpyld, RS, RT, RD); break;
-        case 0x10: INSTR_EE(pmaddh, RS, RT, RD); break;
-        case 0x11: INSTR_EE(phmadh, RS, RT, RD); break;
-        case 0x12: INSTR_EE(pand, RS, RT, RD); break;
-        case 0x13: INSTR_EE(pxor, RS, RT, RD); break;
-        case 0x14: INSTR_EE(pmsubh, RS, RT, RD); break;
-        case 0x15: INSTR_EE(phmsbh, RS, RT, RD); break;
-        case 0x1A: INSTR_EE(pexeh, RT, RD); break;
-        case 0x1B: INSTR_EE(prevh, RT, RD); break;
-        case 0x1C: INSTR_EE(pmulth, RS, RT, RD); break;
-        case 0x1D: INSTR_EE(pdivbw, RS, RT); break;
-        case 0x1E: INSTR_EE(pexew, RT, RD); break;
-        case 0x1F: INSTR_EE(prot3w, RT, RD); break;
-        default: reserved_instruction<cpu, make_string>(instr);
-        }
-    };
-
-    auto mmi3 = [](u32 instr) {
-        switch (instr >> 6 & 31) {
-        case 0x00: INSTR_EE(pmadduw, RS, RT, RD); break;
-        case 0x03: INSTR_EE(psravw, RS, RT, RD); break;
-        case 0x08: INSTR_EE(pmthi, RS); break;
-        case 0x09: INSTR_EE(pmtlo, RS); break;
-        case 0x0A: INSTR_EE(pinteh, RS, RT, RD); break;
-        case 0x0C: INSTR_EE(pmultuw, RS, RT, RD); break;
-        case 0x0D: INSTR_EE(pdivuw, RS, RT); break;
-        case 0x0E: INSTR_EE(pcpyud, RS, RT, RD); break;
-        case 0x12: INSTR_EE(por, RS, RT, RD); break;
-        case 0x13: INSTR_EE(pnor, RS, RT, RD); break;
-        case 0x1A: INSTR_EE(pexch, RT, RD); break;
-        case 0x1B: INSTR_EE(pcpyh, RT, RD); break;
-        case 0x1E: INSTR_EE(pexcw, RT, RD); break;
-        default: reserved_instruction<cpu, make_string>(instr);
-        }
-    };
-
-    switch (instr & 63) {
-    case 0x00: INSTR_EE(madd, RS, RT, RD); break;
-    case 0x01: INSTR_EE(maddu, RS, RT, RD); break;
-    case 0x04: INSTR_EE(plzcw, RS, RD); break;
-    case 0x08: mmi0(instr); break;
-    case 0x09: mmi2(instr); break;
-    case 0x10: INSTR_EE(mfhi1, RD); break;
-    case 0x11: INSTR_EE(mthi1, RS); break;
-    case 0x12: INSTR_EE(mflo1, RD); break;
-    case 0x13: INSTR_EE(mtlo1, RS); break;
-    case 0x18: INSTR_EE(mult1, RS, RT); break;
-    case 0x19: INSTR_EE(multu1, RS, RT); break;
-    case 0x1A: INSTR_EE(div1, RS, RT); break;
-    case 0x1B: INSTR_EE(divu1, RS, RT); break;
-    case 0x20: INSTR_EE(madd1, RS, RT, RD); break;
-    case 0x21: INSTR_EE(maddu1, RS, RT, RD); break;
-    case 0x28: mmi1(instr); break;
-    case 0x29: mmi3(instr); break;
-    case 0x30: INSTR_EE(pmfhl, RD, FMT); break;
-    case 0x31: INSTR_EE(pmthl, RS, FMT); break;
-    case 0x34: INSTR_EE(psllh, RT, RD, SA); break;
-    case 0x36: INSTR_EE(psrlh, RT, RD, SA); break;
-    case 0x37: INSTR_EE(psrah, RT, RD, SA); break;
-    case 0x3C: INSTR_EE(psllw, RT, RD, SA); break;
-    case 0x3E: INSTR_EE(psrlw, RT, RD, SA); break;
-    case 0x3F: INSTR_EE(psraw, RT, RD, SA); break;
-    default: reserved_instruction<cpu, make_string>(instr);
     }
 }
 

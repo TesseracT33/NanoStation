@@ -56,6 +56,10 @@ list(APPEND clang_flags
 	-Wmissing-include-dirs
 	-Wno-bitwise-op-parentheses
 	-Wno-c++98-compat
+	-Wno-c++98-compat-pedantic
+	-Wno-exit-time-destructors
+	-Wno-global-constructors
+	-Wno-gnu-anonymous-struct
 	-Wno-pre-c++14-compat
 	-Wno-pre-c++17-compat
 	-Wno-pre-c++20-compat
@@ -102,6 +106,9 @@ list(APPEND gcc_flags
 	-Wno-c++14-compat
 	-Wno-c++17-compat
 	-Wno-c++20-compat
+	-Wno-exit-time-destructors
+	-Wno-global-constructors
+	-Wno-gnu-anonymous-struct
 	-Wno-sign-conversion
 	-Wnon-virtual-dtor
 	-Wnull-dereference
@@ -129,6 +136,7 @@ if (X64)
 endif()
 
 list(APPEND msvc_flags
+	/EHsc          # Standard stack unwinding
 	/fp:except     # Allows proper reading of floating-point exceptions
 	/fp:strict     # Strict floating-point model
 	/GR            # Enable run-time type information
@@ -140,6 +148,7 @@ list(APPEND msvc_flags
 	/W4            # Warning level 4
 	/w14265        # Class has virtual functions, but destructor is not virtual.
 	/w14555        # Expression has no effect; expected expression with side-effect
+	/wd2401        # Ignore "nonstandard extension used: nameless struct/union"
 	/we4289        # Nonstandard extension used: 'variable': for-loop control variable declared in the for-loop is used outside
                    # the for-loop scope
 )

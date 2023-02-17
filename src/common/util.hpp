@@ -38,7 +38,7 @@ template<size_t size> std::optional<std::array<u8, size>> read_file_into_array(a
     /* Read the file */
     std::array<u8, size> arr;
     ifs.seekg(0, ifs.beg);
-    ifs.read((char*)arr.data(), size);
+    ifs.read(reinterpret_cast<char*>(arr.data()), size);
     return arr;
 }
 
@@ -55,7 +55,7 @@ std::optional<std::vector<u8>> read_file_into_vector(auto const& path)
     vec.resize(size);
 
     ifs.seekg(0, ifs.beg);
-    ifs.read((char*)vec.data(), size);
+    ifs.read(reinterpret_cast<char*>(vec.data()), size);
 
     return vec;
 }
