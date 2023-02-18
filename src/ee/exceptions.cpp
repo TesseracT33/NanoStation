@@ -94,7 +94,7 @@ void interrupt_exception()
 void nmi_exception()
 {
     handle_lvl2_exception();
-    pc = cop0.status.dev ? 0xBFC0'0000 : 0x8000'0000;
+    pc = 0xBFC0'0000;
     cop0.cause.exc2 = 1;
     cop0.status.bev = 1;
 }
@@ -123,7 +123,7 @@ void reserved_instruction_exception()
 void reset_exception()
 {
     handle_lvl2_exception();
-    pc = cop0.status.dev ? 0xBFC0'0000 : 0x8000'0000;
+    pc = 0xBFC0'0000;
     cop0.cause.exc2 = 0;
     cop0.status.bev = 1;
     cop0.status.bem = 0;
