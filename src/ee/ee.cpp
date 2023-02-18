@@ -9,7 +9,6 @@
 
 #include <algorithm>
 #include <cassert>
-#include <optional>
 
 namespace ee {
 
@@ -38,6 +37,7 @@ void fetch_decode_exec()
     u32 instr = virtual_read<u32, Alignment::Aligned, MemOp::InstrFetch>(pc);
     pc += 4;
     mips::disassemble_ee<mips::CpuImpl::Interpreter>(instr);
+    advance_pipeline(1);
 }
 
 bool init()
@@ -47,6 +47,8 @@ bool init()
     std::memset(&hi, 0, sizeof(hi));
     jump_addr = pc = 0;
     in_branch_delay_slot = false;
+
+    reset_exception();
 
     return true;
 }
@@ -63,12 +65,13 @@ void jump(u32 target)
 
 bool load_bios(std::filesystem::path const& path)
 {
-    std::optional<std::array<u8, bios_size>> opt_bios = read_file_into_array<bios_size>(path);
-    if (opt_bios) {
-        std::array<u8, bios_size> const& bios_val = opt_bios.value();
+    std::expected<std::vector<u8>, std::string> expected_bios = read_file(path, bios_size);
+    if (expected_bios) {
+        std::vector<u8> const& bios_val = expected_bios.value();
         std::copy(bios_val.cbegin(), bios_val.cend(), bios.begin());
         return true;
     } else {
+        // TODO: user message
         return false;
     }
 }

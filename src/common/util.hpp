@@ -1,8 +1,9 @@
 #pragma once
 
-#include <array>
+#include <expected>
+#include <format>
 #include <fstream>
-#include <optional>
+#include <string>
 #include <vector>
 
 template<typename... T> constexpr bool always_false{};
@@ -16,47 +17,22 @@ template<typename K, typename V1, typename... V2> constexpr bool one_of(K key, V
     }
 }
 
-/////////// Tests /////////////
-static_assert(one_of(0, 0));
-static_assert(!one_of(0, 1));
-static_assert(one_of(0, 1, 2, 0, 3));
-static_assert(one_of(0, 1, 2, 3, 0));
-static_assert(!one_of(0, 1, 2, 3, 4));
-//////////////////////////////
-
-template<size_t size> std::optional<std::array<u8, size>> read_file_into_array(auto const& path)
+std::expected<std::vector<u8>, std::string> read_file(auto const& path, size_t expected_file_size = 0)
 {
     std::ifstream ifs{ path, std::ifstream::in | std::ifstream::binary };
     if (!ifs) {
-        return {};
+        return std::unexpected("Could not open the file.");
     }
-    /* Test the file size */
     ifs.seekg(0, ifs.end);
-    if (ifs.tellg() != size) {
-        return {};
+    size_t file_size = ifs.tellg();
+    bool test_size = expected_file_size > 0;
+    if (test_size && file_size != expected_file_size) {
+        return std::unexpected(
+          std::format("The file was of the wrong size; expected {}, got {}.", expected_file_size, file_size));
     }
-    /* Read the file */
-    std::array<u8, size> arr;
+    std::vector<u8> vec(file_size);
     ifs.seekg(0, ifs.beg);
-    ifs.read(reinterpret_cast<char*>(arr.data()), size);
-    return arr;
-}
-
-std::optional<std::vector<u8>> read_file_into_vector(auto const& path)
-{
-    std::ifstream ifs{ path, std::ifstream::in | std::ifstream::binary };
-    if (!ifs) {
-        return {};
-    }
-
-    std::vector<u8> vec;
-    ifs.seekg(0, ifs.end);
-    size_t size = ifs.tellg();
-    vec.resize(size);
-
-    ifs.seekg(0, ifs.beg);
-    ifs.read(reinterpret_cast<char*>(vec.data()), size);
-
+    ifs.read(reinterpret_cast<char*>(vec.data()), file_size);
     return vec;
 }
 
@@ -81,3 +57,10 @@ template<> struct SizeToUInt<8> {
 template<> struct SizeToUInt<16> {
     using type = u128;
 };
+
+/////////// Tests /////////////
+static_assert(one_of(0, 0));
+static_assert(!one_of(0, 1));
+static_assert(one_of(0, 1, 2, 0, 3));
+static_assert(one_of(0, 1, 2, 3, 0));
+static_assert(!one_of(0, 1, 2, 3, 4));

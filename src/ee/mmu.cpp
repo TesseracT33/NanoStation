@@ -2,6 +2,7 @@
 #include "cop0.hpp"
 #include "exceptions.hpp"
 
+#include <bit>
 #include <cassert>
 #include <cstring>
 
@@ -37,8 +38,9 @@ void TlbEntry::write()
 
 template<EeUInt Int> Int read_bios(u32 addr)
 {
+    static_assert(std::has_single_bit(bios.size()));
     Int ret;
-    std::memcpy(&ret, &bios[addr & 0x3F'FFFF], sizeof(Int));
+    std::memcpy(&ret, &bios[addr & (bios.size() - 1)], sizeof(Int));
     return ret;
 }
 
@@ -49,8 +51,9 @@ template<EeUInt Int> Int read_io(u32 addr)
 
 template<EeUInt Int> Int read_rdram(u32 addr)
 {
+    static_assert(std::has_single_bit(rdram.size()));
     Int ret;
-    std::memcpy(&ret, &rdram[addr & 0x1FF'FFFF], sizeof(Int));
+    std::memcpy(&ret, &rdram[addr & (rdram.size() - 1)], sizeof(Int));
     return ret;
 }
 
