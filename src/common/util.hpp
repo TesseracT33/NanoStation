@@ -1,9 +1,11 @@
 #pragma once
 
+#include <concepts>
 #include <expected>
 #include <format>
 #include <fstream>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 template<typename... T> constexpr bool always_false{};
@@ -17,7 +19,7 @@ template<typename K, typename V1, typename... V2> constexpr bool one_of(K key, V
     }
 }
 
-std::expected<std::vector<u8>, std::string> read_file(auto const& path, size_t expected_file_size = 0)
+inline std::expected<std::vector<u8>, std::string> read_file(auto const& path, size_t expected_file_size = 0)
 {
     std::ifstream ifs{ path, std::ifstream::in | std::ifstream::binary };
     if (!ifs) {
@@ -34,6 +36,16 @@ std::expected<std::vector<u8>, std::string> read_file(auto const& path, size_t e
     ifs.seekg(0, ifs.beg);
     ifs.read(reinterpret_cast<char*>(vec.data()), file_size);
     return vec;
+}
+
+template<std::integral Int> constexpr auto to_signed(Int val)
+{
+    return static_cast<std::make_signed_t<Int>>(val);
+}
+
+template<std::integral Int> constexpr auto to_unsigned(Int val)
+{
+    return static_cast<std::make_unsigned_t<Int>>(val);
 }
 
 template<size_t> struct SizeToUInt {};

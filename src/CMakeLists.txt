@@ -4,6 +4,7 @@ target_sources(NanoStation PRIVATE
 	main.cpp
 
 	common/emulator.cpp
+	common/log.cpp
 	common/scheduler.cpp
 
 	ee/cop0.cpp
@@ -14,6 +15,8 @@ target_sources(NanoStation PRIVATE
 	ee/exceptions.cpp
 	ee/mmi.cpp
 	ee/mmu.cpp
+
+	frontend/message.cpp
 
 	iop/cop0.cpp
 	iop/cop2.cpp

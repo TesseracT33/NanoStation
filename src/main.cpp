@@ -1,4 +1,5 @@
 #include "emulator.hpp"
+#include "log.hpp"
 
 #include <cstdlib>
 #include <iostream>
@@ -8,6 +9,10 @@ int main(int argc, char* argv[])
     // CLI arguments (mandatory for now):
     //   1: game path
     //   2: bios path
+
+    if (!nanostation::log::init_file()) {
+        std::cerr << "[warning] Failed to create file log\n";
+    }
 
     if (!emulator::init()) return EXIT_FAILURE;
 
