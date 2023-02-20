@@ -3,11 +3,36 @@
 #include "iop.hpp"
 #include "memory.hpp"
 
+#include <algorithm>
 #include <limits>
 
 namespace iop {
 
 using enum mips::CpuImpl;
+
+static u64 muldiv_delay;
+static u64 time_last_muldiv_start;
+
+static void add_muldiv_delay(u64 cycles)
+{
+    u64 global_time = get_global_time();
+    if (global_time < time_last_muldiv_start + muldiv_delay) { // current mult/div hasn't finished yet
+        u64 delta = time_last_muldiv_start + muldiv_delay - global_time;
+        advance_pipeline(delta); // block until current mult/div finishes
+        time_last_muldiv_start = global_time + delta;
+    } else {
+        time_last_muldiv_start = global_time;
+    }
+    muldiv_delay = cycles;
+}
+
+static void block_lohi_read()
+{
+    u64 global_time = get_global_time();
+    if (global_time < time_last_muldiv_start + muldiv_delay) { // current mult/div hasn't finished yet
+        advance_pipeline(time_last_muldiv_start + muldiv_delay - global_time); // block until current mult/div finishes
+    }
+}
 
 template<> void add<Interpreter>(u32 rs, u32 rt, u32 rd)
 {
@@ -140,6 +165,7 @@ template<> void div<Interpreter>(u32 rs, u32 rt)
         lo = op1 / op2;
         hi = op1 % op2;
     }
+    add_muldiv_delay(36);
 }
 
 template<> void divu<Interpreter>(u32 rs, u32 rt)
@@ -153,6 +179,7 @@ template<> void divu<Interpreter>(u32 rs, u32 rt)
         lo = s32(op1 / op2);
         hi = s32(op1 % op2);
     }
+    add_muldiv_delay(36);
 }
 
 template<> void j<Interpreter>(u32 imm26)
@@ -272,16 +299,18 @@ template<> void lwu<Interpreter>(u32 rs, u32 rt, s16 imm)
 
 template<> void mfhi<Interpreter>(u32 rd)
 {
+    block_lohi_read();
     gpr.set(rd, hi);
 }
 
 template<> void mflo<Interpreter>(u32 rd)
 {
+    block_lohi_read();
     gpr.set(rd, lo);
 }
 
 template<> void mthi<Interpreter>(u32 rs)
-{
+{ // TODO: what happens if writing to lo/hi during mult/div?
     hi = gpr[rs];
 }
 
@@ -292,16 +321,37 @@ template<> void mtlo<Interpreter>(u32 rs)
 
 template<> void mult<Interpreter>(u32 rs, u32 rt)
 {
-    s64 prod = s64(gpr[rs]) * s64(gpr[rt]);
+    s64 op1 = u32(gpr[rs]), op2 = u32(gpr[rt]);
+    s64 prod = op1 * op2;
     lo = u32(prod);
     hi = u32(prod >> 32);
+    //  Fast  (6 cycles)   rs = 00000000h..000007FFh, or rs = FFFFF800h..FFFFFFFFh
+    //  Med   (9 cycles)   rs = 00000800h..000FFFFFh, or rs = FFF00000h..FFFFF801h
+    //  Slow  (13 cycles)  rs = 00100000h..7FFFFFFFh, or rs = 80000000h..FFF00001h
+    // https://problemkaputt.de/psx-spx.htm#cpualuopcodes
+    u32 cycles = [op1_abs_s32 = std::abs(s32(op1))] { // abs(int32_min) == int32_min
+        if (u32(op1_abs_s32) < 0x800) return 6;
+        if (u32(op1_abs_s32) < 0x10'0000) return 9;
+        return 13;
+    }();
+    add_muldiv_delay(cycles);
 }
 
 template<> void multu<Interpreter>(u32 rs, u32 rt)
 {
-    u64 prod = u64(gpr[rs]) * u64(gpr[rt]);
+    u64 op1 = u32(gpr[rs]), op2 = u32(gpr[rt]);
+    u64 prod = op1 * op2;
     lo = u32(prod);
     hi = u32(prod >> 32);
+    //  Fast  (6 cycles)   rs = 00000000h..000007FFh
+    //  Med   (9 cycles)   rs = 00000800h..000FFFFFh
+    //  Slow  (13 cycles)  rs = 00100000h..FFFFFFFFh
+    u32 cycles = [op1_u32 = u32(op1)] {
+        if (op1_u32 < 0x800) return 6;
+        if (op1_u32 < 0x10'0000) return 9;
+        return 13;
+    }();
+    add_muldiv_delay(cycles);
 }
 
 template<> void nor<Interpreter>(u32 rs, u32 rt, u32 rd)

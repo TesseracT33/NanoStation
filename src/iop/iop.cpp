@@ -10,6 +10,7 @@
 namespace iop {
 
 static u32 cycle_counter;
+static u64 global_time_last_step_begin;
 
 static void fetch_decode_exec();
 
@@ -24,6 +25,11 @@ void advance_pipeline(u32 cycles)
 
 void check_interrupts()
 {
+}
+
+u64 get_global_time()
+{
+    return global_time_last_step_begin + cycle_counter;
 }
 
 void fetch_decode_exec()
@@ -74,6 +80,7 @@ u32 run(u32 cycles)
     while (cycle_counter < cycles) {
         fetch_decode_exec();
     }
+    global_time_last_step_begin += cycle_counter;
     return cycle_counter - cycles;
 }
 
