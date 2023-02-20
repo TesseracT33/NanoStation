@@ -1,11 +1,13 @@
 #include "iop.hpp"
 #include "exceptions.hpp"
+#include "frontend/message.hpp"
 #include "memory.hpp"
 #include "mips/disassembler.hpp"
 #include "util.hpp"
 
 #include <algorithm>
 #include <cassert>
+#include <string>
 
 namespace iop {
 
@@ -69,7 +71,7 @@ bool load_bios(std::filesystem::path const& path)
         std::copy(bios_val.cbegin(), bios_val.cend(), bios.begin());
         return true;
     } else {
-        // TODO: user message
+        nanostation::message::error(std::string("Failed to load bios; ") + expected_bios.error());
         return false;
     }
 }

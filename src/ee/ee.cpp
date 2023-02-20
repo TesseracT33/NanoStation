@@ -1,6 +1,7 @@
 #include "ee.hpp"
 #include "cop0.hpp"
 #include "exceptions.hpp"
+#include "frontend/message.hpp"
 #include "mips/disassembler.hpp"
 #include "mips/mips.hpp"
 #include "mmu.hpp"
@@ -9,6 +10,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <string>
 
 namespace ee {
 
@@ -71,7 +73,7 @@ bool load_bios(std::filesystem::path const& path)
         std::copy(bios_val.cbegin(), bios_val.cend(), bios.begin());
         return true;
     } else {
-        // TODO: user message
+        nanostation::message::error(std::string("Failed to load bios; ") + expected_bios.error());
         return false;
     }
 }
