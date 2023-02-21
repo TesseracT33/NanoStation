@@ -83,43 +83,46 @@ struct Cop0Registers {
                     this register clear said interrupt. */
     /* On real HW, this register is 32 bits. Here, we make it 64 bits. See the description of the 'Count' register. */
 
-    struct { /* (12) */
-        u32 ie  : 1; /* Interrupt Enable (0: disable interrupts; 1: enable interrupts (if EIEI=1, ERL=0, EXL=0)) */
-        u32 exl : 1; /* Exception Level (0: normal; 1: exception) */
-        u32 erl : 1; /* Error level (0: normal; 1: error) */
-        u32 ksu : 2; /* Specifies and indicates mode bits (00: kernel; 01: supervisor; 10: user; 11: reserved) */
-        u32     : 5;
-        u32 im2 : 1; // Interrupt Mask bit 2 (INTC) (0: disabled; 1: enabled)
-        u32 im3 : 1; // Interrupt Mask bit 3 (DMAC) (0: disabled; 1: enabled)
-        u32 bem : 1;
-        u32     : 2;
-        u32 im7 : 1; // Interrupt Mask bit 7 (COP0 timer) (0: disabled; 1: enabled)
-        u32 eie : 1; // Enable IE (0: disabled; 1: enabled)
-        u32 edi : 1; // EI/DI instruction Enable in supervisor/user modes (0: disabled; 1: enabled)
-        u32 ch  : 1; /* Cache Hit (0: miss; 1: hit) */
-        u32     : 3;
-        u32 bev : 1; /* Controls the location of TLB refill and general exception vectors (0: normal; 1:
-                        bootstrap) */
-        u32 dev : 1; /* Controls the location of Performance counter and debug/SIO exception vectors (0: normal; 1:
-                        bootstrap) */
-        u32     : 2;
-        u32 fr  : 1; /* Enable additional floating-point registers (0: 16 registers; 1: 32 registers) */
-        u32     : 1;
-        u32 cu0 : 1; /* COP0 is usable. If cleared, COP0 instructions signal exceptions, unless in kernel mode */
-        u32 cu1 : 1; /* COP1 is usable. If cleared, COP1 instructions signal exceptions */
-        u32 cu2 : 1; /* COP2 is usable. If cleared, COP2 instructions signal exceptions */
-        u32 cu3 : 1; /* COP3 is usable. If cleared, COP3 instructions signal exceptions */
+    union { /* (12) */
+        struct {
+            u32 ie  : 1; /* Interrupt Enable (0: disable interrupts; 1: enable interrupts (if EIEI=1, ERL=0, EXL=0)) */
+            u32 exl : 1; /* Exception Level (0: normal; 1: exception) */
+            u32 erl : 1; /* Error level (0: normal; 1: error) */
+            u32 ksu : 2; /* Specifies and indicates mode bits (00: kernel; 01: supervisor; 10: user; 11: reserved) */
+            u32     : 5;
+            u32 im_intc  : 1; // Interrupt Mask bit 2 (INTC) (0: disabled; 1: enabled)
+            u32 im_dmac  : 1; // Interrupt Mask bit 3 (DMAC) (0: disabled; 1: enabled)
+            u32 bem      : 1;
+            u32          : 2;
+            u32 im_timer : 1; // Interrupt Mask bit 7 (COP0 timer) (0: disabled; 1: enabled)
+            u32 eie      : 1; // Enable IE (0: disabled; 1: enabled)
+            u32 edi      : 1; // EI/DI instruction Enable in supervisor/user modes (0: disabled; 1: enabled)
+            u32 ch       : 1; /* Cache Hit (0: miss; 1: hit) */
+            u32          : 3;
+            u32 bev      : 1; /* Controls the location of TLB refill and general exception vectors (0: normal; 1:
+                                 bootstrap) */
+            u32 dev : 1; /* Controls the location of Performance counter and debug/SIO exception vectors (0: normal; 1:
+                            bootstrap) */
+            u32     : 2;
+            u32 fr  : 1; /* Enable additional floating-point registers (0: 16 registers; 1: 32 registers) */
+            u32     : 1;
+            u32 cu0 : 1; /* COP0 is usable. If cleared, COP0 instructions signal exceptions, unless in kernel mode */
+            u32 cu1 : 1; /* COP1 is usable. If cleared, COP1 instructions signal exceptions */
+            u32 cu2 : 1; /* COP2 is usable. If cleared, COP2 instructions signal exceptions */
+            u32 cu3 : 1; /* COP3 is usable. If cleared, COP3 instructions signal exceptions */
+        };
+        u32 raw;
     } status;
 
     struct { /* (13) */
         u32          : 2;
         u32 exc_code : 5; /* Exception code field; written to when an exception is signalled. */
         u32          : 3;
-        u32 ip2      : 1; // Indicates that an interrupt is pending, bit 2 (INTC) (0: no interrupt; 1: interrupt)
-        u32 ip3      : 1; // Indicates that an interrupt is pending, bit 3 (DMAC) (0: no interrupt; 1: interrupt)
+        u32 ip_intc  : 1; // Indicates that an interrupt is pending, bit 2 (INTC) (0: no interrupt; 1: interrupt)
+        u32 ip_dmac  : 1; // Indicates that an interrupt is pending, bit 3 (DMAC) (0: no interrupt; 1: interrupt)
         u32 siop     : 1;
         u32          : 2;
-        u32 ip7      : 1; // Indicates that an interrupt is pending, bit 7 (COP0 timer) (0: no interrupt; 1: interrupt)
+        u32 ip_timer : 1; // Indicates that an interrupt is pending, bit 7 (COP0 timer) (0: no interrupt; 1: interrupt)
         u32 exc2 : 3; //  Indicates the exception codes for level 2 exceptions (Performance Counter, Reset, Debug, SIO
                       //  and NMI exceptions) (0: Reset; 1: NMI; 2: PerfC; 3: Debug and SIO; 4-7: reserved)
         u32      : 9;

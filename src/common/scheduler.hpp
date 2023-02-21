@@ -7,7 +7,11 @@ namespace scheduler {
 using EventCallback = void (*)();
 
 enum class EventType {
-    CountCompareMatch,
+    EECopCountCompareMatch,
+    EETimer0CounterCompareMatch,
+    EETimer1CounterCompareMatch,
+    EETimer2CounterCompareMatch,
+    EETimer3CounterCompareMatch,
 };
 
 void add_event(EventType event, s64 cpu_cycles_until_fire, EventCallback callback);

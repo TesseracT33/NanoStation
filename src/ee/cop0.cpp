@@ -1,5 +1,6 @@
 #include "cop0.hpp"
 #include "ee.hpp"
+#include "exceptions.hpp"
 #include "mmu.hpp"
 #include "scheduler.hpp"
 
@@ -31,7 +32,7 @@ template<> void bc0tl<Interpreter>(s16 imm)
 
 template<> void di<Interpreter>()
 {
-    u32 edi_erl_exi = std::bit_cast<u32>(cop0.status) & 0x20006;
+    u32 edi_erl_exi = cop0.status.raw & 0x20006;
     if ((cop0.status.ksu == 0) | edi_erl_exi) {
         cop0.status.eie = 0;
     }
@@ -39,7 +40,7 @@ template<> void di<Interpreter>()
 
 template<> void ei<Interpreter>()
 {
-    u32 edi_erl_exi = std::bit_cast<u32>(cop0.status) & 0x20006;
+    u32 edi_erl_exi = cop0.status.raw & 0x20006;
     if ((cop0.status.ksu == 0) | edi_erl_exi) {
         cop0.status.eie = 1;
     }
@@ -104,13 +105,17 @@ template<bool initial_add> void reload_count_compare_event()
         cycles_until_match += 0x1'0000'0000;
     }
     if constexpr (initial_add) {
-        scheduler::add_event(scheduler::EventType::CountCompareMatch, cycles_until_match, [] {
-            cop0.cause.ip7 = 1;
-            check_interrupts();
+        scheduler::add_event(scheduler::EventType::EECopCountCompareMatch, cycles_until_match, [] {
+            auto int_timer = [] { return cop0.cause.ip_timer & cop0.status.im_timer; };
+            bool prev_int_timer = int_timer();
+            cop0.cause.ip_timer = 1;
+            if (interrupts_are_enabled() && !prev_int_timer && int_timer()) {
+                interrupt_exception();
+            }
             reload_count_compare_event<false>();
         });
     } else {
-        scheduler::change_event_time(scheduler::EventType::CountCompareMatch, cycles_until_match);
+        scheduler::change_event_time(scheduler::EventType::EECopCountCompareMatch, cycles_until_match);
     }
 }
 
@@ -257,6 +262,7 @@ void Cop0Registers::on_write_to_cause()
 
 void Cop0Registers::on_write_to_compare()
 {
+    cop0.cause.ip_timer = 0;
 }
 
 void Cop0Registers::on_write_to_count()

@@ -11,11 +11,14 @@
 #include <algorithm>
 #include <cassert>
 #include <string>
+#include <utility>
 
 namespace ee {
 
+static u16 intc_mask, intc_stat;
 static u32 cycle_counter;
 
+static void check_int0();
 static void fetch_decode_exec();
 
 void add_initial_events()
@@ -30,8 +33,14 @@ void advance_pipeline(u32 cycles)
     cycles_since_updated_random += cycles;
 }
 
-void check_interrupts()
+void check_int0()
 {
+    auto int0 = [] { return cop0.cause.ip_intc & cop0.status.im_intc; };
+    bool prev_int0 = int0();
+    cop0.cause.ip_intc = bool(intc_stat & intc_mask);
+    if (interrupts_are_enabled() && !prev_int0 && int0()) {
+        interrupt_exception();
+    }
 }
 
 void fetch_decode_exec()
@@ -49,10 +58,16 @@ bool init()
     std::memset(&hi, 0, sizeof(hi));
     jump_addr = pc = 0;
     in_branch_delay_slot = false;
+    intc_mask = intc_stat = 0;
 
     reset_exception();
 
     return true;
+}
+
+bool interrupts_are_enabled()
+{
+    return (cop0.status.raw & 0x10007) == 0x10001; // IE = 1, EXL = 0, ERL = 0, EIE = 1
 }
 
 void jump(u32 target)
@@ -78,6 +93,28 @@ bool load_bios(std::filesystem::path const& path)
     }
 }
 
+void lower_intc(Interrupt interrupt)
+{
+    intc_stat &= ~std::to_underlying(interrupt);
+    cop0.cause.ip_intc = bool(intc_stat & intc_mask);
+}
+
+void raise_intc(Interrupt interrupt)
+{
+    intc_stat |= std::to_underlying(interrupt);
+    check_int0();
+}
+
+u16 read_intc_mask()
+{
+    return intc_mask;
+}
+
+u16 read_intc_stat()
+{
+    return intc_stat;
+}
+
 u32 run(u32 cycles)
 {
     cycle_counter = 0;
@@ -85,6 +122,18 @@ u32 run(u32 cycles)
         fetch_decode_exec();
     }
     return cycle_counter - cycles;
+}
+
+void write_intc_mask(u16 data)
+{
+    intc_stat &= ~data;
+    cop0.cause.ip_intc = bool(intc_stat & intc_mask);
+}
+
+void write_intc_stat(u16 data)
+{
+    intc_mask ^= data; // TODO: bit 15?
+    check_int0();
 }
 
 } // namespace ee
