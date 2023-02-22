@@ -31,6 +31,9 @@ enum class Interrupt : u16 {
     VU0Watchdog
 };
 
+inline constexpr u32 ee_clock = 294'912'000;
+inline constexpr u32 bus_clock = ee_clock / 2;
+
 inline mips::Gpr<Reg128> gpr;
 inline bool in_branch_delay_slot;
 inline u32 jump_addr, pc;
@@ -39,6 +42,7 @@ inline u32 sa;
 
 void add_initial_events();
 void advance_pipeline(u32 cycles);
+u64 get_time();
 bool init();
 bool interrupts_are_enabled();
 void jump(u32 target);

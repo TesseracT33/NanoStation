@@ -12,7 +12,7 @@
 namespace iop {
 
 static u32 cycle_counter;
-static u64 global_time_last_step_begin;
+static u64 time_last_step_begin;
 
 static void fetch_decode_exec();
 
@@ -29,9 +29,9 @@ void check_interrupts()
 {
 }
 
-u64 get_global_time()
+u64 get_time()
 {
-    return global_time_last_step_begin + cycle_counter;
+    return time_last_step_begin + cycle_counter;
 }
 
 void fetch_decode_exec()
@@ -71,7 +71,7 @@ bool load_bios(std::filesystem::path const& path)
         std::copy(bios_val.cbegin(), bios_val.cend(), bios.begin());
         return true;
     } else {
-        nanostation::message::error(std::string("Failed to load bios; ") + expected_bios.error());
+        message::error(std::string("Failed to load bios; ") + expected_bios.error());
         return false;
     }
 }
@@ -82,7 +82,7 @@ u32 run(u32 cycles)
     while (cycle_counter < cycles) {
         fetch_decode_exec();
     }
-    global_time_last_step_begin += cycle_counter;
+    time_last_step_begin += cycle_counter;
     return cycle_counter - cycles;
 }
 

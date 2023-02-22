@@ -19,7 +19,7 @@ static std::vector<Event> events; /* sorted by when they will occur */
 
 void add_event(EventType event_type, s64 cpu_cycles_until_fire, EventCallback callback)
 {
-    /* Compensate for the fact that we may be in the middle of a CPU update, and times for other events
+    /* (From N64 code) Compensate for the fact that we may be in the middle of a CPU update, and times for other events
         have not updated yet. TODO: We are assuming that only the main CPU can cause an event to be added.
         Is it ok? */
     s64 elapsed_cycles_since_step_start = 0;
@@ -33,12 +33,28 @@ void add_event(EventType event_type, s64 cpu_cycles_until_fire, EventCallback ca
     events.push_back(Event{ event_type, enqueue_time, callback });
 }
 
-void change_event_time(EventType event_type, s64 cpu_cycles_until_fire)
+void add_event_or_change_time(EventType event_type, s64 cpu_cycles_until_fire, EventCallback callback)
 {
     s64 elapsed_cycles_since_step_start = 0;
     s64 enqueue_time = cpu_cycles_until_fire + elapsed_cycles_since_step_start;
     for (auto it = events.cbegin(); it != events.cend(); ++it) {
         if (it->event_type == event_type) {
+            EventCallback callback = it->callback;
+            events.erase(it);
+            add_event(event_type, enqueue_time, callback);
+            return;
+        }
+    }
+    add_event(event_type, enqueue_time, callback);
+}
+
+void change_event_time(EventType event_type, s64 cpu_cycles_until_fire)
+{
+    s64 elapsed_cycles_since_step_start = 0;
+    s64 enqueue_time = cpu_cycles_until_fire + elapsed_cycles_since_step_start;
+    for (auto it = events.begin(); it != events.end(); ++it) {
+        if (it->event_type == event_type) {
+            it->cpu_cycles_until_fire = enqueue_time;
             EventCallback callback = it->callback;
             events.erase(it);
             add_event(event_type, enqueue_time, callback);

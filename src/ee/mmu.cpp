@@ -1,16 +1,21 @@
 #include "mmu.hpp"
 #include "cop0.hpp"
+#include "ee.hpp"
 #include "exceptions.hpp"
+#include "frontend/message.hpp"
+#include "timers.hpp"
 
 #include <bit>
 #include <cassert>
 #include <cstring>
+#include <format>
 
 namespace ee {
 
 template<EeUInt Int> static Int read_bios(u32 addr);
 template<EeUInt Int> static Int read_io(u32 addr);
 template<EeUInt Int> static Int read_rdram(u32 addr);
+template<EeUInt Int> static void write_io(u32 addr, Int data);
 template<MemOp> static u32 tlb_addr_translation(u32 vaddr);
 template<MemOp> static u32 virt_to_phys_addr(u32 vaddr);
 
@@ -46,7 +51,20 @@ template<EeUInt Int> Int read_bios(u32 addr)
 
 template<EeUInt Int> Int read_io(u32 addr)
 {
-    return {};
+    if constexpr (sizeof(Int) == 4) {
+        if (addr < 0x1000'2000) {
+            return timers::read(addr);
+        }
+        if (addr == 0x1000'F000) {
+            return read_intc_stat();
+        }
+        if (addr == 0x1000'F010) {
+            return read_intc_mask();
+        }
+    } else {
+        message::fatal(std::format("Tried to read {} bytes from IO, when only word reads are supported.", sizeof(Int)));
+        return {};
+    }
 }
 
 template<EeUInt Int> Int read_rdram(u32 addr)
@@ -121,6 +139,23 @@ template<EeUInt Int, Alignment alignment, MemOp mem_op> Int virtual_read(u32 add
     if (paddr < 0x2000'0000) return read_bios<Int>(paddr);
     assert(false);
     return {};
+}
+
+template<EeUInt Int> static void write_io(u32 addr, Int data)
+{
+    if constexpr (sizeof(Int) == 4) {
+        if (addr < 0x1000'2000) {
+            timers::write(addr, data);
+        }
+        if (addr == 0x1000'F000) {
+            write_intc_stat(u16(data));
+        }
+        if (addr == 0x1000'F010) {
+            write_intc_mask(u16(data));
+        }
+    } else {
+        message::fatal(std::format("Tried to write {} bytes to IO, when only word writes are supported.", sizeof(Int)));
+    }
 }
 
 template u8 virtual_read<u8, Alignment::Aligned, MemOp::DataRead>(u32);

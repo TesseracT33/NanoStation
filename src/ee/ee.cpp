@@ -17,6 +17,7 @@ namespace ee {
 
 static u16 intc_mask, intc_stat;
 static u32 cycle_counter;
+static u64 time_last_step_begin;
 
 static void check_int0();
 static void fetch_decode_exec();
@@ -49,6 +50,11 @@ void fetch_decode_exec()
     pc += 4;
     mips::disassemble_ee<mips::CpuImpl::Interpreter>(instr);
     advance_pipeline(1);
+}
+
+u64 get_time()
+{
+    return time_last_step_begin + cycle_counter;
 }
 
 bool init()
@@ -88,7 +94,7 @@ bool load_bios(std::filesystem::path const& path)
         std::copy(bios_val.cbegin(), bios_val.cend(), bios.begin());
         return true;
     } else {
-        nanostation::message::error(std::string("Failed to load bios; ") + expected_bios.error());
+        message::error(std::string("Failed to load bios; ") + expected_bios.error());
         return false;
     }
 }
@@ -121,6 +127,7 @@ u32 run(u32 cycles)
     while (cycle_counter < cycles) {
         fetch_decode_exec();
     }
+    time_last_step_begin += cycle_counter;
     return cycle_counter - cycles;
 }
 

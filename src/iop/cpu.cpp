@@ -15,22 +15,22 @@ static u64 time_last_muldiv_start;
 
 static void add_muldiv_delay(u64 cycles)
 {
-    u64 global_time = get_global_time();
-    if (global_time < time_last_muldiv_start + muldiv_delay) { // current mult/div hasn't finished yet
-        u64 delta = time_last_muldiv_start + muldiv_delay - global_time;
+    u64 time = get_time();
+    if (time < time_last_muldiv_start + muldiv_delay) { // current mult/div hasn't finished yet
+        u64 delta = time_last_muldiv_start + muldiv_delay - time;
         advance_pipeline(delta); // block until current mult/div finishes
-        time_last_muldiv_start = global_time + delta;
+        time_last_muldiv_start = time + delta;
     } else {
-        time_last_muldiv_start = global_time;
+        time_last_muldiv_start = time;
     }
     muldiv_delay = cycles;
 }
 
 static void block_lohi_read()
 {
-    u64 global_time = get_global_time();
-    if (global_time < time_last_muldiv_start + muldiv_delay) { // current mult/div hasn't finished yet
-        advance_pipeline(time_last_muldiv_start + muldiv_delay - global_time); // block until current mult/div finishes
+    u64 time = get_time();
+    if (time < time_last_muldiv_start + muldiv_delay) { // current mult/div hasn't finished yet
+        advance_pipeline(time_last_muldiv_start + muldiv_delay - time); // block until current mult/div finishes
     }
 }
 

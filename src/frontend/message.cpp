@@ -7,7 +7,7 @@
 #include <iostream>
 #include <string>
 
-namespace nanostation::message {
+namespace message {
 
 static SDL_Window* sdl_window; /* Must be set via 'Init' before any messages are shown. */
 
@@ -17,14 +17,14 @@ bool init(SDL_Window* sdl_window_param)
         sdl_window = sdl_window_param;
         return true;
     } else {
-        log::error("nullptr given as argument to Message::SetWindow");
+        nanostation::log::error("nullptr given as argument to Message::SetWindow");
         return false;
     }
 }
 
 void error(std::string_view message)
 {
-    log::error(message);
+    nanostation::log::error(message);
     if (sdl_window) {
         std::string shown_message = std::format("Error: {}", message);
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", shown_message.c_str(), sdl_window);
@@ -34,7 +34,7 @@ void error(std::string_view message)
 // TODO: std::source_location not working with clang-cl for some obscure reason
 void fatal(std::string_view message /*, std::source_location loc*/)
 {
-    log::fatal(message /*, loc*/);
+    nanostation::log::fatal(message /*, loc*/);
     if (sdl_window) {
         // std::string shown_message = std::format("Fatal error at {}({}:{}), function {}: {}",
         //   loc.file_name(),
@@ -49,7 +49,7 @@ void fatal(std::string_view message /*, std::source_location loc*/)
 
 void info(std::string_view message)
 {
-    log::info(message);
+    nanostation::log::info(message);
     if (sdl_window) {
         std::string shown_message = std::format("Info: {}", message);
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Information", shown_message.c_str(), sdl_window);
@@ -58,11 +58,11 @@ void info(std::string_view message)
 
 void warn(std::string_view message)
 {
-    log::warn(message);
+    nanostation::log::warn(message);
     if (sdl_window) {
         std::string shown_message = std::format("Warning: {}", message);
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_WARNING, "Warning", shown_message.c_str(), sdl_window);
     }
 }
 
-} // namespace nanostation::message
+} // namespace message

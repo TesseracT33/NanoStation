@@ -15,6 +15,7 @@ target_sources(NanoStation PRIVATE
 	ee/exceptions.cpp
 	ee/mmi.cpp
 	ee/mmu.cpp
+	ee/timers.cpp
 
 	frontend/message.cpp
 
