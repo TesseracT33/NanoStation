@@ -39,8 +39,9 @@ struct Cop0Registers {
             u32 kup : 1;
             u32 ieo : 1;
             u32 kuo : 1;
-            u32     : 2;
-            u32 im  : 8;
+            u32     : 4;
+            u32 im2 : 1;
+            u32     : 5;
             u32 isc : 1;
             u32 swc : 1;
             u32 pz  : 1;
@@ -61,9 +62,9 @@ struct Cop0Registers {
         struct {
             u32        : 2;
             u32 excode : 5;
-            u32        : 1;
-            u32 ip     : 8;
-            u32        : 12;
+            u32        : 3;
+            u32 ip2    : 1;
+            u32        : 17;
             u32 ce     : 2;
             u32        : 1;
             u32 bd     : 1;

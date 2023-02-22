@@ -38,7 +38,7 @@ void check_int0()
 {
     auto int0 = [] { return cop0.cause.ip_intc & cop0.status.im_intc; };
     bool prev_int0 = int0();
-    cop0.cause.ip_intc = bool(intc_stat & intc_mask);
+    cop0.cause.ip_intc = bool(intc_stat & intc_mask & 0x7FFF);
     if (interrupts_are_enabled() && !prev_int0 && int0()) {
         interrupt_exception();
     }
@@ -134,7 +134,7 @@ u32 run(u32 cycles)
 void write_intc_mask(u16 data)
 {
     intc_stat &= ~data;
-    cop0.cause.ip_intc = bool(intc_stat & intc_mask);
+    cop0.cause.ip_intc = bool(intc_stat & intc_mask & 0x7FFF);
 }
 
 void write_intc_stat(u16 data)
