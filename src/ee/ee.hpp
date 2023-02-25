@@ -14,21 +14,21 @@
 namespace ee {
 
 enum class Interrupt : u16 {
-    GS,
-    SBUS,
-    VBlankStart,
-    VBlankEnd,
-    VIF0,
-    VIF1,
-    VU0,
-    VU1,
-    IPU,
-    Timer0,
-    Timer1,
-    Timer2,
-    Timer3,
-    SFIFO,
-    VU0Watchdog
+    GS = 1 << 0,
+    SBUS = 1 << 1,
+    VBlankStart = 1 << 2,
+    VBlankEnd = 1 << 3,
+    VIF0 = 1 << 4,
+    VIF1 = 1 << 5,
+    VU0 = 1 << 6,
+    VU1 = 1 << 7,
+    IPU = 1 << 8,
+    Timer0 = 1 << 9,
+    Timer1 = 1 << 10,
+    Timer2 = 1 << 11,
+    Timer3 = 1 << 12,
+    SFIFO = 1 << 13,
+    VU0Watchdog = 1 << 14
 };
 
 inline constexpr u32 ee_clock = 294'912'000;
