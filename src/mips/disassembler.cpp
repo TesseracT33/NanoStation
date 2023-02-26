@@ -169,34 +169,34 @@ template<Cpu cpu, CpuImpl cpu_impl, bool make_string> void cop2(u32 instr)
         u32 fmt = instr >> 21 & 31;
         if (fmt >= 16) { // Special1
             switch (instr & 63) {
-            case 0x00: INSTR_VU(vaddx); break;
-            case 0x01: INSTR_VU(vaddy); break;
-            case 0x02: INSTR_VU(vaddz); break;
-            case 0x03: INSTR_VU(vaddw); break;
-            case 0x04: INSTR_VU(vsubx); break;
-            case 0x05: INSTR_VU(vsuby); break;
-            case 0x06: INSTR_VU(vsubz); break;
-            case 0x07: INSTR_VU(vsubw); break;
-            case 0x08: INSTR_VU(vmaddx); break;
-            case 0x09: INSTR_VU(vmaddy); break;
-            case 0x0A: INSTR_VU(vmaddz); break;
-            case 0x0B: INSTR_VU(vmaddw); break;
-            case 0x0C: INSTR_VU(vmsubx); break;
-            case 0x0D: INSTR_VU(vmsuby); break;
-            case 0x0E: INSTR_VU(vmsubz); break;
-            case 0x0F: INSTR_VU(vmsubw); break;
-            case 0x10: INSTR_VU(vmaxx); break;
-            case 0x11: INSTR_VU(vmaxy); break;
-            case 0x12: INSTR_VU(vmaxz); break;
-            case 0x13: INSTR_VU(vmaxw); break;
-            case 0x14: INSTR_VU(vminix); break;
-            case 0x15: INSTR_VU(vminiy); break;
-            case 0x16: INSTR_VU(vminiz); break;
-            case 0x17: INSTR_VU(vminiw); break;
-            case 0x18: INSTR_VU(vmulx); break;
-            case 0x19: INSTR_VU(vmuly); break;
-            case 0x1A: INSTR_VU(vmulz); break;
-            case 0x1B: INSTR_VU(vmulw); break;
+            case 0x00:
+            case 0x01:
+            case 0x02:
+            case 0x03: INSTR_VU(vaddbc); break;
+            case 0x04:
+            case 0x05:
+            case 0x06:
+            case 0x07: INSTR_VU(vsubbc); break;
+            case 0x08:
+            case 0x09:
+            case 0x0A:
+            case 0x0B: INSTR_VU(vmaddbc); break;
+            case 0x0C:
+            case 0x0D:
+            case 0x0E:
+            case 0x0F: INSTR_VU(vmsubbc); break;
+            case 0x10:
+            case 0x11:
+            case 0x12:
+            case 0x13: INSTR_VU(vmaxbc); break;
+            case 0x14:
+            case 0x15:
+            case 0x16:
+            case 0x17: INSTR_VU(vminibc); break;
+            case 0x18:
+            case 0x19:
+            case 0x1A:
+            case 0x1B: INSTR_VU(vmulbc); break;
             case 0x1C: INSTR_VU(vmulq); break;
             case 0x1D: INSTR_VU(vmaxi); break;
             case 0x1E: INSTR_VU(vmuli); break;
@@ -230,22 +230,22 @@ template<Cpu cpu, CpuImpl cpu_impl, bool make_string> void cop2(u32 instr)
             case 0x3F: { // Special2
                 if ((instr & 0x3C) == 0x3C) {
                     switch (instr & 3 | (instr & 0xEC0) >> 4) {
-                    case 0x00: INSTR_VU(vaddax); break;
-                    case 0x01: INSTR_VU(vadday); break;
-                    case 0x02: INSTR_VU(vaddaz); break;
-                    case 0x03: INSTR_VU(vaddaw); break;
-                    case 0x04: INSTR_VU(vsubax); break;
-                    case 0x05: INSTR_VU(vsubay); break;
-                    case 0x06: INSTR_VU(vsubaz); break;
-                    case 0x07: INSTR_VU(vsubaw); break;
-                    case 0x08: INSTR_VU(vmaddax); break;
-                    case 0x09: INSTR_VU(vmadday); break;
-                    case 0x0A: INSTR_VU(vmaddaz); break;
-                    case 0x0B: INSTR_VU(vmaddaw); break;
-                    case 0x0C: INSTR_VU(vmsubax); break;
-                    case 0x0D: INSTR_VU(vmsubay); break;
-                    case 0x0E: INSTR_VU(vmsubaz); break;
-                    case 0x0F: INSTR_VU(vmsubaw); break;
+                    case 0x00:
+                    case 0x01:
+                    case 0x02:
+                    case 0x03: INSTR_VU(vaddabc); break;
+                    case 0x04:
+                    case 0x05:
+                    case 0x06:
+                    case 0x07: INSTR_VU(vsubabc); break;
+                    case 0x08:
+                    case 0x09:
+                    case 0x0A:
+                    case 0x0B: INSTR_VU(vmaddabc); break;
+                    case 0x0C:
+                    case 0x0D:
+                    case 0x0E:
+                    case 0x0F: INSTR_VU(vmsubabc); break;
                     case 0x10: INSTR_VU(vitof0); break;
                     case 0x11: INSTR_VU(vitof4); break;
                     case 0x12: INSTR_VU(vitof12); break;
@@ -254,10 +254,10 @@ template<Cpu cpu, CpuImpl cpu_impl, bool make_string> void cop2(u32 instr)
                     case 0x15: INSTR_VU(vftoi4); break;
                     case 0x16: INSTR_VU(vftoi12); break;
                     case 0x17: INSTR_VU(vftoi15); break;
-                    case 0x18: INSTR_VU(vmulax); break;
-                    case 0x19: INSTR_VU(vmulay); break;
-                    case 0x1A: INSTR_VU(vmulaz); break;
-                    case 0x1B: INSTR_VU(vmulaw); break;
+                    case 0x18:
+                    case 0x19:
+                    case 0x1A:
+                    case 0x1B: INSTR_VU(vmulabc); break;
                     case 0x1C: INSTR_VU(vmulaq); break;
                     case 0x1D: INSTR_VU(vabs); break;
                     case 0x1E: INSTR_VU(vmulai); break;

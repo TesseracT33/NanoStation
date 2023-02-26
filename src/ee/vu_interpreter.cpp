@@ -6,15 +6,11 @@ namespace ee::vu {
 
 using enum mips::CpuImpl;
 
-#define BC    (instr & 3)
-#define FD    (instr >> 11 & 31)
-#define FS    (instr >> 11 & 31)
-#define FT    (instr >> 16 & 31)
-#define DST   (instr >> 21 & 15)
-#define DST_W (instr & 1 << 21)
-#define DST_Z (instr & 1 << 22)
-#define DST_Y (instr & 1 << 23)
-#define DST_X (instr & 1 << 24)
+#define BC     (instr & 3)
+#define FD     (instr >> 11 & 31)
+#define FS     (instr >> 11 & 31)
+#define FT     (instr >> 16 & 31)
+#define DST(i) (instr & 1 << (21 + i))
 
 template<> void vabs<Interpreter>(u32 instr)
 {
@@ -36,19 +32,7 @@ template<> void vaddaq<Interpreter>(u32 instr)
 {
 }
 
-template<> void vaddaw<Interpreter>(u32 instr)
-{
-}
-
-template<> void vaddax<Interpreter>(u32 instr)
-{
-}
-
-template<> void vadday<Interpreter>(u32 instr)
-{
-}
-
-template<> void vaddaz<Interpreter>(u32 instr)
+template<> void vaddabc<Interpreter>(u32 instr)
 {
 }
 
@@ -60,19 +44,7 @@ template<> void vaddq<Interpreter>(u32 instr)
 {
 }
 
-template<> void vaddw<Interpreter>(u32 instr)
-{
-}
-
-template<> void vaddx<Interpreter>(u32 instr)
-{
-}
-
-template<> void vaddy<Interpreter>(u32 instr)
-{
-}
-
-template<> void vaddz<Interpreter>(u32 instr)
+template<> void vaddbc<Interpreter>(u32 instr)
 {
 }
 
@@ -176,19 +148,7 @@ template<> void vmaddaq<Interpreter>(u32 instr)
 {
 }
 
-template<> void vmaddaw<Interpreter>(u32 instr)
-{
-}
-
-template<> void vmaddax<Interpreter>(u32 instr)
-{
-}
-
-template<> void vmadday<Interpreter>(u32 instr)
-{
-}
-
-template<> void vmaddaz<Interpreter>(u32 instr)
+template<> void vmaddabc<Interpreter>(u32 instr)
 {
 }
 
@@ -200,19 +160,7 @@ template<> void vmaddq<Interpreter>(u32 instr)
 {
 }
 
-template<> void vmaddw<Interpreter>(u32 instr)
-{
-}
-
-template<> void vmaddx<Interpreter>(u32 instr)
-{
-}
-
-template<> void vmaddy<Interpreter>(u32 instr)
-{
-}
-
-template<> void vmaddz<Interpreter>(u32 instr)
+template<> void vmaddbc<Interpreter>(u32 instr)
 {
 }
 
@@ -224,19 +172,7 @@ template<> void vmaxi<Interpreter>(u32 instr)
 {
 }
 
-template<> void vmaxw<Interpreter>(u32 instr)
-{
-}
-
-template<> void vmaxx<Interpreter>(u32 instr)
-{
-}
-
-template<> void vmaxy<Interpreter>(u32 instr)
-{
-}
-
-template<> void vmaxz<Interpreter>(u32 instr)
+template<> void vmaxbc<Interpreter>(u32 instr)
 {
 }
 
@@ -252,19 +188,7 @@ template<> void vminii<Interpreter>(u32 instr)
 {
 }
 
-template<> void vminiw<Interpreter>(u32 instr)
-{
-}
-
-template<> void vminix<Interpreter>(u32 instr)
-{
-}
-
-template<> void vminiy<Interpreter>(u32 instr)
-{
-}
-
-template<> void vminiz<Interpreter>(u32 instr)
+template<> void vminibc<Interpreter>(u32 instr)
 {
 }
 
@@ -288,19 +212,7 @@ template<> void vmsubaq<Interpreter>(u32 instr)
 {
 }
 
-template<> void vmsubaw<Interpreter>(u32 instr)
-{
-}
-
-template<> void vmsubax<Interpreter>(u32 instr)
-{
-}
-
-template<> void vmsubay<Interpreter>(u32 instr)
-{
-}
-
-template<> void vmsubaz<Interpreter>(u32 instr)
+template<> void vmsubabc<Interpreter>(u32 instr)
 {
 }
 
@@ -316,19 +228,7 @@ template<> void vmsubq<Interpreter>(u32 instr)
 {
 }
 
-template<> void vmsubw<Interpreter>(u32 instr)
-{
-}
-
-template<> void vmsubx<Interpreter>(u32 instr)
-{
-}
-
-template<> void vmsuby<Interpreter>(u32 instr)
-{
-}
-
-template<> void vmsubz<Interpreter>(u32 instr)
+template<> void vmsubbc<Interpreter>(u32 instr)
 {
 }
 
@@ -352,19 +252,7 @@ template<> void vmulaq<Interpreter>(u32 instr)
 {
 }
 
-template<> void vmulaw<Interpreter>(u32 instr)
-{
-}
-
-template<> void vmulax<Interpreter>(u32 instr)
-{
-}
-
-template<> void vmulay<Interpreter>(u32 instr)
-{
-}
-
-template<> void vmulaz<Interpreter>(u32 instr)
+template<> void vmulabc<Interpreter>(u32 instr)
 {
 }
 
@@ -376,19 +264,7 @@ template<> void vmulq<Interpreter>(u32 instr)
 {
 }
 
-template<> void vmulw<Interpreter>(u32 instr)
-{
-}
-
-template<> void vmulx<Interpreter>(u32 instr)
-{
-}
-
-template<> void vmuly<Interpreter>(u32 instr)
-{
-}
-
-template<> void vmulz<Interpreter>(u32 instr)
+template<> void vmulbc<Interpreter>(u32 instr)
 {
 }
 
@@ -452,19 +328,7 @@ template<> void vsubaq<Interpreter>(u32 instr)
 {
 }
 
-template<> void vsubaw<Interpreter>(u32 instr)
-{
-}
-
-template<> void vsubax<Interpreter>(u32 instr)
-{
-}
-
-template<> void vsubay<Interpreter>(u32 instr)
-{
-}
-
-template<> void vsubaz<Interpreter>(u32 instr)
+template<> void vsubabc<Interpreter>(u32 instr)
 {
 }
 
@@ -476,19 +340,7 @@ template<> void vsubq<Interpreter>(u32 instr)
 {
 }
 
-template<> void vsubw<Interpreter>(u32 instr)
-{
-}
-
-template<> void vsubx<Interpreter>(u32 instr)
-{
-}
-
-template<> void vsuby<Interpreter>(u32 instr)
-{
-}
-
-template<> void vsubz<Interpreter>(u32 instr)
+template<> void vsubbc<Interpreter>(u32 instr)
 {
 }
 
