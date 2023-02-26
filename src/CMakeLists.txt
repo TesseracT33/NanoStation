@@ -16,6 +16,7 @@ target_sources(NanoStation PRIVATE
 	ee/mmi.cpp
 	ee/mmu.cpp
 	ee/timers.cpp
+	ee/vu_interpreter.cpp
 
 	frontend/message.cpp
 
@@ -27,7 +28,7 @@ target_sources(NanoStation PRIVATE
 	iop/memory.cpp
 
 	mips/disassembler.cpp
- )
+)
 
 target_include_directories(NanoStation PRIVATE
 	.

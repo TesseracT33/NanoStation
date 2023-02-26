@@ -5,6 +5,7 @@
 #include "ee/cpu.hpp"
 #include "ee/exceptions.hpp"
 #include "ee/mmi.hpp"
+#include "ee/vu.hpp"
 #include "iop/cop0.hpp"
 #include "iop/cop2.hpp"
 #include "iop/cpu.hpp"
@@ -57,6 +58,12 @@ static std::string disassemble_result;
     {                                                                                          \
         if constexpr (cpu == Cpu::EE) reserved_instruction<Cpu::EE, make_string>(#instr_name); \
         else iop::instr_name<cpu_impl>(__VA_ARGS__);                                           \
+    } // namespace mips
+
+#define INSTR_VU(instr_name)                                               \
+    {                                                                      \
+        if constexpr (cpu == Cpu::EE) ee::vu::instr_name<cpu_impl>(instr); \
+        else reserved_instruction<Cpu::IOP, make_string>(#instr_name);     \
     } // namespace mips
 
 template<Cpu cpu, CpuImpl cpu_impl, bool make_string> void cop0(u32 instr)
@@ -162,132 +169,132 @@ template<Cpu cpu, CpuImpl cpu_impl, bool make_string> void cop2(u32 instr)
         u32 fmt = instr >> 21 & 31;
         if (fmt >= 16) { // Special1
             switch (instr & 63) {
-            case 0x00: INSTR_EE(vaddx); break;
-            case 0x01: INSTR_EE(vaddy); break;
-            case 0x02: INSTR_EE(vaddz); break;
-            case 0x03: INSTR_EE(vaddw); break;
-            case 0x04: INSTR_EE(vsubx); break;
-            case 0x05: INSTR_EE(vsuby); break;
-            case 0x06: INSTR_EE(vsubz); break;
-            case 0x07: INSTR_EE(vsubw); break;
-            case 0x08: INSTR_EE(vmaddx); break;
-            case 0x09: INSTR_EE(vmaddy); break;
-            case 0x0A: INSTR_EE(vmaddz); break;
-            case 0x0B: INSTR_EE(vmaddw); break;
-            case 0x0C: INSTR_EE(vmsubx); break;
-            case 0x0D: INSTR_EE(vmsuby); break;
-            case 0x0E: INSTR_EE(vmsubz); break;
-            case 0x0F: INSTR_EE(vmsubw); break;
-            case 0x10: INSTR_EE(vmaxx); break;
-            case 0x11: INSTR_EE(vmaxy); break;
-            case 0x12: INSTR_EE(vmaxz); break;
-            case 0x13: INSTR_EE(vmaxw); break;
-            case 0x14: INSTR_EE(vminix); break;
-            case 0x15: INSTR_EE(vminiy); break;
-            case 0x16: INSTR_EE(vminiz); break;
-            case 0x17: INSTR_EE(vminiw); break;
-            case 0x18: INSTR_EE(vmulx); break;
-            case 0x19: INSTR_EE(vmuly); break;
-            case 0x1A: INSTR_EE(vmulz); break;
-            case 0x1B: INSTR_EE(vmulw); break;
-            case 0x1C: INSTR_EE(vmulq); break;
-            case 0x1D: INSTR_EE(vmaxi); break;
-            case 0x1E: INSTR_EE(vmuli); break;
-            case 0x1F: INSTR_EE(vminii); break;
-            case 0x20: INSTR_EE(vaddq); break;
-            case 0x21: INSTR_EE(vmaddq); break;
-            case 0x22: INSTR_EE(vaddi); break;
-            case 0x23: INSTR_EE(vmaddi); break;
-            case 0x24: INSTR_EE(vsubq); break;
-            case 0x25: INSTR_EE(vmsubq); break;
-            case 0x26: INSTR_EE(vsubi); break;
-            case 0x27: INSTR_EE(vmsubi); break;
-            case 0x28: INSTR_EE(vadd); break;
-            case 0x29: INSTR_EE(vmadd); break;
-            case 0x2A: INSTR_EE(vmul); break;
-            case 0x2B: INSTR_EE(vmax); break;
-            case 0x2C: INSTR_EE(vsub); break;
-            case 0x2D: INSTR_EE(vmsub); break;
-            case 0x2E: INSTR_EE(vopmsub); break;
-            case 0x2F: INSTR_EE(vmini); break;
-            case 0x30: INSTR_EE(viadd); break;
-            case 0x31: INSTR_EE(visub); break;
-            case 0x32: INSTR_EE(viaddi); break;
-            case 0x34: INSTR_EE(viand); break;
-            case 0x35: INSTR_EE(vior); break;
-            case 0x38: INSTR_EE(vcallms); break;
-            case 0x39: INSTR_EE(vcallmsr); break;
+            case 0x00: INSTR_VU(vaddx); break;
+            case 0x01: INSTR_VU(vaddy); break;
+            case 0x02: INSTR_VU(vaddz); break;
+            case 0x03: INSTR_VU(vaddw); break;
+            case 0x04: INSTR_VU(vsubx); break;
+            case 0x05: INSTR_VU(vsuby); break;
+            case 0x06: INSTR_VU(vsubz); break;
+            case 0x07: INSTR_VU(vsubw); break;
+            case 0x08: INSTR_VU(vmaddx); break;
+            case 0x09: INSTR_VU(vmaddy); break;
+            case 0x0A: INSTR_VU(vmaddz); break;
+            case 0x0B: INSTR_VU(vmaddw); break;
+            case 0x0C: INSTR_VU(vmsubx); break;
+            case 0x0D: INSTR_VU(vmsuby); break;
+            case 0x0E: INSTR_VU(vmsubz); break;
+            case 0x0F: INSTR_VU(vmsubw); break;
+            case 0x10: INSTR_VU(vmaxx); break;
+            case 0x11: INSTR_VU(vmaxy); break;
+            case 0x12: INSTR_VU(vmaxz); break;
+            case 0x13: INSTR_VU(vmaxw); break;
+            case 0x14: INSTR_VU(vminix); break;
+            case 0x15: INSTR_VU(vminiy); break;
+            case 0x16: INSTR_VU(vminiz); break;
+            case 0x17: INSTR_VU(vminiw); break;
+            case 0x18: INSTR_VU(vmulx); break;
+            case 0x19: INSTR_VU(vmuly); break;
+            case 0x1A: INSTR_VU(vmulz); break;
+            case 0x1B: INSTR_VU(vmulw); break;
+            case 0x1C: INSTR_VU(vmulq); break;
+            case 0x1D: INSTR_VU(vmaxi); break;
+            case 0x1E: INSTR_VU(vmuli); break;
+            case 0x1F: INSTR_VU(vminii); break;
+            case 0x20: INSTR_VU(vaddq); break;
+            case 0x21: INSTR_VU(vmaddq); break;
+            case 0x22: INSTR_VU(vaddi); break;
+            case 0x23: INSTR_VU(vmaddi); break;
+            case 0x24: INSTR_VU(vsubq); break;
+            case 0x25: INSTR_VU(vmsubq); break;
+            case 0x26: INSTR_VU(vsubi); break;
+            case 0x27: INSTR_VU(vmsubi); break;
+            case 0x28: INSTR_VU(vadd); break;
+            case 0x29: INSTR_VU(vmadd); break;
+            case 0x2A: INSTR_VU(vmul); break;
+            case 0x2B: INSTR_VU(vmax); break;
+            case 0x2C: INSTR_VU(vsub); break;
+            case 0x2D: INSTR_VU(vmsub); break;
+            case 0x2E: INSTR_VU(vopmsub); break;
+            case 0x2F: INSTR_VU(vmini); break;
+            case 0x30: INSTR_VU(viadd); break;
+            case 0x31: INSTR_VU(visub); break;
+            case 0x32: INSTR_VU(viaddi); break;
+            case 0x34: INSTR_VU(viand); break;
+            case 0x35: INSTR_VU(vior); break;
+            case 0x38: INSTR_VU(vcallms); break;
+            case 0x39: INSTR_VU(vcallmsr); break;
             case 0x3C:
             case 0x3D:
             case 0x3E:
             case 0x3F: { // Special2
                 if ((instr & 0x3C) == 0x3C) {
                     switch (instr & 3 | (instr & 0xEC0) >> 4) {
-                    case 0x00: INSTR_EE(vaddax); break;
-                    case 0x01: INSTR_EE(vadday); break;
-                    case 0x02: INSTR_EE(vaddaz); break;
-                    case 0x03: INSTR_EE(vaddaw); break;
-                    case 0x04: INSTR_EE(vsubax); break;
-                    case 0x05: INSTR_EE(vsubay); break;
-                    case 0x06: INSTR_EE(vsubaz); break;
-                    case 0x07: INSTR_EE(vsubaw); break;
-                    case 0x08: INSTR_EE(vmaddax); break;
-                    case 0x09: INSTR_EE(vmadday); break;
-                    case 0x0A: INSTR_EE(vmaddaz); break;
-                    case 0x0B: INSTR_EE(vmaddaw); break;
-                    case 0x0C: INSTR_EE(vmsubax); break;
-                    case 0x0D: INSTR_EE(vmsubay); break;
-                    case 0x0E: INSTR_EE(vmsubaz); break;
-                    case 0x0F: INSTR_EE(vmsubaw); break;
-                    case 0x10: INSTR_EE(vitof0); break;
-                    case 0x11: INSTR_EE(vitof4); break;
-                    case 0x12: INSTR_EE(vitof12); break;
-                    case 0x13: INSTR_EE(vitof15); break;
-                    case 0x14: INSTR_EE(vftoi0); break;
-                    case 0x15: INSTR_EE(vftoi4); break;
-                    case 0x16: INSTR_EE(vftoi12); break;
-                    case 0x17: INSTR_EE(vftoi15); break;
-                    case 0x18: INSTR_EE(vmulax); break;
-                    case 0x19: INSTR_EE(vmulay); break;
-                    case 0x1A: INSTR_EE(vmulaz); break;
-                    case 0x1B: INSTR_EE(vmulaw); break;
-                    case 0x1C: INSTR_EE(vmulaq); break;
-                    case 0x1D: INSTR_EE(vabs); break;
-                    case 0x1E: INSTR_EE(vmulai); break;
-                    case 0x1F: INSTR_EE(vclipw); break;
-                    case 0x20: INSTR_EE(vaddaq); break;
-                    case 0x21: INSTR_EE(vmaddaq); break;
-                    case 0x22: INSTR_EE(vaddai); break;
-                    case 0x23: INSTR_EE(vmaddai); break;
-                    case 0x24: INSTR_EE(vsubaq); break;
-                    case 0x25: INSTR_EE(vmsubaq); break;
-                    case 0x26: INSTR_EE(vsubai); break;
-                    case 0x27: INSTR_EE(vmsubai); break;
-                    case 0x28: INSTR_EE(vadda); break;
-                    case 0x29: INSTR_EE(vmadda); break;
-                    case 0x2A: INSTR_EE(vmula); break;
-                    case 0x2C: INSTR_EE(vsuba); break;
-                    case 0x2D: INSTR_EE(vmsuba); break;
-                    case 0x2E: INSTR_EE(vopmula); break;
-                    case 0x2F: INSTR_EE(vnop); break;
-                    case 0x30: INSTR_EE(vmove); break;
-                    case 0x31: INSTR_EE(vmr32); break;
-                    case 0x34: INSTR_EE(vlqi); break;
-                    case 0x35: INSTR_EE(vsqi); break;
-                    case 0x36: INSTR_EE(vlqd); break;
-                    case 0x37: INSTR_EE(vsqd); break;
-                    case 0x38: INSTR_EE(vdiv); break;
-                    case 0x39: INSTR_EE(vsqrt); break;
-                    case 0x3A: INSTR_EE(vrsqrt); break;
-                    case 0x3B: INSTR_EE(vwaitq); break;
-                    case 0x3C: INSTR_EE(vmtir); break;
-                    case 0x3D: INSTR_EE(vmfir); break;
-                    case 0x3E: INSTR_EE(vilwr); break;
-                    case 0x3F: INSTR_EE(viswr); break;
-                    case 0x40: INSTR_EE(vrnext); break;
-                    case 0x41: INSTR_EE(vrget); break;
-                    case 0x42: INSTR_EE(vrinit); break;
-                    case 0x43: INSTR_EE(vrxor); break;
+                    case 0x00: INSTR_VU(vaddax); break;
+                    case 0x01: INSTR_VU(vadday); break;
+                    case 0x02: INSTR_VU(vaddaz); break;
+                    case 0x03: INSTR_VU(vaddaw); break;
+                    case 0x04: INSTR_VU(vsubax); break;
+                    case 0x05: INSTR_VU(vsubay); break;
+                    case 0x06: INSTR_VU(vsubaz); break;
+                    case 0x07: INSTR_VU(vsubaw); break;
+                    case 0x08: INSTR_VU(vmaddax); break;
+                    case 0x09: INSTR_VU(vmadday); break;
+                    case 0x0A: INSTR_VU(vmaddaz); break;
+                    case 0x0B: INSTR_VU(vmaddaw); break;
+                    case 0x0C: INSTR_VU(vmsubax); break;
+                    case 0x0D: INSTR_VU(vmsubay); break;
+                    case 0x0E: INSTR_VU(vmsubaz); break;
+                    case 0x0F: INSTR_VU(vmsubaw); break;
+                    case 0x10: INSTR_VU(vitof0); break;
+                    case 0x11: INSTR_VU(vitof4); break;
+                    case 0x12: INSTR_VU(vitof12); break;
+                    case 0x13: INSTR_VU(vitof15); break;
+                    case 0x14: INSTR_VU(vftoi0); break;
+                    case 0x15: INSTR_VU(vftoi4); break;
+                    case 0x16: INSTR_VU(vftoi12); break;
+                    case 0x17: INSTR_VU(vftoi15); break;
+                    case 0x18: INSTR_VU(vmulax); break;
+                    case 0x19: INSTR_VU(vmulay); break;
+                    case 0x1A: INSTR_VU(vmulaz); break;
+                    case 0x1B: INSTR_VU(vmulaw); break;
+                    case 0x1C: INSTR_VU(vmulaq); break;
+                    case 0x1D: INSTR_VU(vabs); break;
+                    case 0x1E: INSTR_VU(vmulai); break;
+                    case 0x1F: INSTR_VU(vclipw); break;
+                    case 0x20: INSTR_VU(vaddaq); break;
+                    case 0x21: INSTR_VU(vmaddaq); break;
+                    case 0x22: INSTR_VU(vaddai); break;
+                    case 0x23: INSTR_VU(vmaddai); break;
+                    case 0x24: INSTR_VU(vsubaq); break;
+                    case 0x25: INSTR_VU(vmsubaq); break;
+                    case 0x26: INSTR_VU(vsubai); break;
+                    case 0x27: INSTR_VU(vmsubai); break;
+                    case 0x28: INSTR_VU(vadda); break;
+                    case 0x29: INSTR_VU(vmadda); break;
+                    case 0x2A: INSTR_VU(vmula); break;
+                    case 0x2C: INSTR_VU(vsuba); break;
+                    case 0x2D: INSTR_VU(vmsuba); break;
+                    case 0x2E: INSTR_VU(vopmula); break;
+                    case 0x2F: INSTR_VU(vnop); break;
+                    case 0x30: INSTR_VU(vmove); break;
+                    case 0x31: INSTR_VU(vmr32); break;
+                    case 0x34: INSTR_VU(vlqi); break;
+                    case 0x35: INSTR_VU(vsqi); break;
+                    case 0x36: INSTR_VU(vlqd); break;
+                    case 0x37: INSTR_VU(vsqd); break;
+                    case 0x38: INSTR_VU(vdiv); break;
+                    case 0x39: INSTR_VU(vsqrt); break;
+                    case 0x3A: INSTR_VU(vrsqrt); break;
+                    case 0x3B: INSTR_VU(vwaitq); break;
+                    case 0x3C: INSTR_VU(vmtir); break;
+                    case 0x3D: INSTR_VU(vmfir); break;
+                    case 0x3E: INSTR_VU(vilwr); break;
+                    case 0x3F: INSTR_VU(viswr); break;
+                    case 0x40: INSTR_VU(vrnext); break;
+                    case 0x41: INSTR_VU(vrget); break;
+                    case 0x42: INSTR_VU(vrinit); break;
+                    case 0x43: INSTR_VU(vrxor); break;
 
                     default: reserved_instruction<cpu, make_string>(instr);
                     }

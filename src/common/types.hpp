@@ -27,4 +27,7 @@ using s128 = struct {
 
 using uint = unsigned;
 
+using f32 = float;
+using f64 = double;
+
 using std::size_t;
