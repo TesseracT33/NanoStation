@@ -1,5 +1,6 @@
 #pragma once
 
+#include "eef32.hpp"
 #include "mips/mips.hpp"
 #include "types.hpp"
 
@@ -9,44 +10,7 @@
 
 namespace ee::vu {
 
-struct EeF32 {
-    constexpr EeF32() = default;
-    constexpr EeF32(f32 f) { value = ieee754_to_ee(f); }
-    constexpr EeF32& operator=(f32 f)
-    {
-        value = ieee754_to_ee(f);
-        return *this;
-    }
-    constexpr operator f32() const { return value; }
-
-private:
-    static constexpr f32 ieee754_to_ee(f32 f)
-    {
-        // There are major differences between the PS2 floating-point format and standard IEEE 754, used in most modern
-        // computers.
-        // * NaNs and Infinities do not exist on the PS2. In IEEE 754, any number with the exponent field set to 255 is
-        // a NaN/Infinity. On the PS2, it is treated as a normal value. This means the upper range of PS2 floats is
-        // greater than on IEEE 754.
-        // * Denormals, numbers with the exponent field set to 0, do not exist on the PS2. For every
-        // arithmetic operation, a denormal is automatically truncated to zero. On the PS2, the rounding mode is always
-        // forced to round-towards-zero.
-        // * The PS2 uses a quirky version where the least-significant-bit may vary after a
-        // round, and the details on this are not well understood.
-        u32 result = std::bit_cast<u32>(f);
-        u32 exp = result & 0x7F80'0000;
-        if (exp == 0) {
-            result &= 0x8000'0000; // return zero, preserve sign
-        }
-        if (exp == 0x7F80'0000) {
-            result = (result & 0x8000'0000) | 0x7F7F'FFFF; // return IEEE-754 F32_MIN/F32_MAX, preserve sign
-        }
-        return std::bit_cast<f32>(result);
-    }
-
-    f32 value{};
-};
-
-using Vf = std::array<EeF32, 4>;
+using Vf = std::array<EeF32, 4>; // x, y, z, w
 
 struct Gpr {
     Vf get(u32 idx) const { return gpr[idx]; }
@@ -55,9 +19,10 @@ struct Gpr {
         gpr[idx] = data;
         std::memcpy(&gpr[0], &zero, 16); // don't assign directly from 'zero' to avoid ieee754 conversion from happening
     }
-    void set(u32 idx, u32 lane, f32 data)
+    void set(u32 idx, u32 lane, auto data)
+        requires(sizeof(data) == 4)
     {
-        gpr[idx][lane] = data;
+        gpr[idx][lane] = std::bit_cast<f32>(data);
         std::memcpy(&gpr[0], &zero, 16);
     }
 
@@ -68,12 +33,12 @@ private:
     static constexpr Vf zero{ 0.f, 0.f, 0.f, 1.f };
 } inline vf;
 
-inline std::array<u16, 16> vi;
+inline std::array<u32, 16> vi;
 inline EeF32 I, P, Q, R;
 alignas(16) inline Vf acc;
 
 struct {
-    bool zero[4]; // w, z, y, x
+    bool zero[4]; // x, y, z, w
     bool sign[4];
     bool underflow[4];
     bool overflow[4];
@@ -81,18 +46,32 @@ struct {
     {
         u16 ret{};
         for (int i = 0; i < 4; ++i) {
-            ret |= zero[i] << i;
-            ret |= sign[i] << (i + 4);
-            ret |= underflow[i] << (i + 8);
-            ret |= overflow[i] << (i + 12);
+            ret |= zero[3 - i] << i;
+            ret |= sign[3 - i] << (i + 4);
+            ret |= underflow[3 - i] << (i + 8);
+            ret |= overflow[3 - i] << (i + 12);
         }
         return ret;
+    }
+    void update(int dst, EeF32 result)
+    {
+        s32 result_s32 = std::bit_cast<s32>(result);
+        s32 exponent = result_s32 & 0x7F80'0000;
+        zero[dst] = result == 0.f;
+        sign[dst] = result_s32 < 0;
+        underflow[dst] = exponent == 0;
+        overflow[dst] = exponent == 0x7F80'0000;
     }
 } inline mac;
 
 struct {
     bool zero, sign, underflow, overflow, invalid, div_zero, sticky_zero, sticky_sign, sticky_underflow,
       sticky_overflow, sticky_invalid, sticky_div_zero;
+    void signal_invalid()
+    {
+        invalid = 1;
+        sticky_invalid |= 1;
+    }
     u16 to_u16() const
     {
         return zero | sign << 1 | underflow << 2 | overflow << 3 | invalid << 4 | div_zero << 5 | sticky_zero << 6

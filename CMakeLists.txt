@@ -9,9 +9,7 @@ add_executable(NanoStation)
 add_subdirectory(ext)
 add_subdirectory(src)
 
-if (CMAKE_VERSION VERSION_GREATER 3.12)
-	set_property(TARGET NanoStation PROPERTY CXX_STANDARD 23 CXX_STANDARD_REQUIRED ON)
-endif()
+set_property(TARGET NanoStation PROPERTY CXX_STANDARD 23 CXX_STANDARD_REQUIRED ON)
 
 if (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "AMD64" OR ${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86-64")
 	set(X64 1)
