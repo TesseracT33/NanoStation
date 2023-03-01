@@ -38,11 +38,10 @@ struct Timer {
         reset();
     }
 
-    static constexpr u32 counter_max = 0x10000;
-
     u64 time_last_counter_refresh;
     Interrupt const intc_interrupt;
     scheduler::EventType const interrupt_event;
+    u32 counter_max;
     u16 compare;
     u16 counter;
     u16 counter_rem;
@@ -74,6 +73,7 @@ struct Timer {
     void set_compare(u32 value);
     void set_counter(u32 value);
     void set_sbus_counter(u32 value);
+    void update_gating(GateType gate_type, bool active);
     void write_to_mode(u32 data);
 };
 
@@ -82,8 +82,6 @@ static std::array<Timer, 4> timers{ Timer{ 0, Interrupt::Timer0, scheduler::Even
     Timer{ 2, Interrupt::Timer2, scheduler::EventType::EETimer2Interrupt },
     Timer{ 3, Interrupt::Timer3, scheduler::EventType::EETimer3Interrupt } };
 
-static void update_gating(GateType gate_type, bool active);
-
 bool Timer::is_counting() const
 {
     return enabled && !gated;
@@ -91,12 +89,13 @@ bool Timer::is_counting() const
 
 void Timer::on_compare_match()
 {
+    if (clear_counter_on_compare_match) {
+        counter = counter_rem = 0;
+        time_last_counter_refresh = get_time();
+    }
     if (compare_int_enable) {
-        if (clear_counter_on_compare_match) {
-            counter = counter_rem = 0;
-            time_last_counter_refresh = get_time();
-        }
         if (!std::exchange(compare_int_flag, 1)) {
+            mode_raw |= 0x400;
             raise_intc(intc_interrupt);
         }
         handle_events_no_compare();
@@ -112,6 +111,7 @@ void Timer::on_hold_match()
 void Timer::on_overflow()
 {
     if (overflow_int_enable && !std::exchange(overflow_int_flag, 1)) {
+        mode_raw |= 0x800;
         raise_intc(intc_interrupt);
         handle_events_no_overflow();
     }
@@ -139,6 +139,7 @@ void Timer::refresh_counter()
 void Timer::reset()
 {
     time_last_counter_refresh = {};
+    counter_max = 0x10000;
     compare = {};
     counter = {};
     counter_rem = {};
@@ -160,14 +161,16 @@ void Timer::reset()
 
 template<bool check_overflow, bool check_compare> void Timer::handle_events()
 {
+    // TODO: possibly have multiple timer events per timer
     if (is_counting()) {
         refresh_counter();
         u32 fewest_ticks = std::numeric_limits<u32>::max();
         scheduler::EventCallback handler{};
         if constexpr (check_overflow) {
-            if (overflow_int_enable && !overflow_int_flag) {
+            if (overflow_int_enable && !overflow_int_flag && (!clear_counter_on_compare_match)) {
                 u32 time_until_overflow = counter_max - counter;
                 if (time_until_overflow < fewest_ticks) {
+                    fewest_ticks = time_until_overflow;
                     handler = {}; // TODO
                 }
             }
@@ -179,6 +182,7 @@ template<bool check_overflow, bool check_compare> void Timer::handle_events()
                     time_until_match += counter_max;
                 }
                 if (time_until_match < fewest_ticks) {
+                    fewest_ticks = time_until_match;
                     handler = {};
                 }
             }
@@ -189,6 +193,7 @@ template<bool check_overflow, bool check_compare> void Timer::handle_events()
                 time_until_sbus += counter_max;
             }
             if (time_until_sbus < fewest_ticks) {
+                fewest_ticks = time_until_sbus;
                 handler = {};
             }
         }
@@ -244,6 +249,31 @@ void Timer::set_sbus_counter(u32 value)
     }
 }
 
+void Timer::update_gating(GateType gate_type, bool active)
+{
+    if (gate_enable && this->gate_type == gate_type) {
+        using enum GateMode;
+        switch (gate_mode) {
+        case CountWhileNotGated:
+            gated = active;
+            handle_events();
+            break;
+        case ResetCountOnGateHi:
+            gated = false;
+            active ? set_counter(0) : handle_events();
+            break;
+        case ResetCountOnGateLo:
+            gated = false;
+            !active ? set_counter(0) : handle_events();
+            break;
+        case ResetCountOnGateTrans:
+            gated = false;
+            set_counter(0);
+            break;
+        }
+    }
+}
+
 void Timer::write_to_mode(u32 data)
 {
     u32 clock_mode = data & 3;
@@ -264,7 +294,7 @@ void Timer::write_to_mode(u32 data)
     compare_int_flag &= !(data & 0x400);
     overflow_int_flag &= !(data & 0x800);
     counter_rem = 0;
-    mode_raw = data & 0xFFFF;
+    mode_raw = data & 0xF3FF | compare_int_flag << 10 | overflow_int_flag << 11;
     handle_events();
 }
 
@@ -277,12 +307,16 @@ void init()
 
 void on_hblank(bool active)
 {
-    update_gating(GateType::HBlank, active);
+    for (Timer& t : timers) {
+        t.update_gating(GateType::HBlank, active);
+    }
 }
 
 void on_vblank(bool active)
 {
-    update_gating(GateType::VBlank, active);
+    for (Timer& t : timers) {
+        t.update_gating(GateType::VBlank, active);
+    }
 }
 
 u32 read(u32 addr)
@@ -294,34 +328,6 @@ u32 read(u32 addr)
     case Addr::TN_COMP: return timer().compare; // 10000020h + N*800h
     case Addr::TN_HOLD: return timer().sbus_int_counter; // 10000030h + N*800h
     default: message::fatal(std::format("EE: Tried to read from unknown IO address {:X}", addr)); return {};
-    }
-}
-
-void update_gating(GateType gate_type, bool active)
-{
-    for (Timer& t : timers) {
-        if (t.gate_enable && t.gate_type == gate_type) {
-            using enum GateMode;
-            switch (t.gate_mode) {
-            case CountWhileNotGated:
-                t.gated = active;
-                t.handle_events();
-                break;
-            case ResetCountOnGateHi:
-                t.gated = false;
-                active ? t.set_counter(0) : t.handle_events();
-                break;
-            case ResetCountOnGateLo:
-                t.gated = false;
-                !active ? t.set_counter(0) : t.handle_events();
-                break;
-            case ResetCountOnGateTrans:
-                t.gated = false;
-                t.set_counter(0);
-                break;
-            }
-            // TODO: update events
-        }
     }
 }
 
