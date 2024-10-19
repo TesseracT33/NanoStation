@@ -11,8 +11,9 @@
 #include "iop/cpu.hpp"
 #include "iop/exceptions.hpp"
 #include "mips.hpp"
+#include "platform.hpp"
 
-#define IMM16 (instr & 0xFFFF)
+#define IMM16 (s16(instr))
 #define IMM26 (instr & 0x3FF'FFFF)
 #define FMT   (instr & 63)
 #define SA    (instr >> 6 & 31)
@@ -28,7 +29,7 @@ namespace mips {
 
 enum class Cpu {
     EE,
-    IOP
+    IOP,
 };
 
 template<Cpu cpu, CpuImpl cpu_impl, bool make_string> static void cop0(u32 instr);
@@ -42,35 +43,35 @@ template<Cpu cpu, CpuImpl cpu_impl, bool make_string> static void special(u32 in
 
 static std::string disassemble_result;
 
-#define INSTR_COMMON(instr_name, ...)                                        \
-    {                                                                        \
-        if constexpr (cpu == Cpu::EE) ee::instr_name<cpu_impl>(__VA_ARGS__); \
-        else iop::instr_name<cpu_impl>(__VA_ARGS__);                         \
+#define INSTR(instr_name, ...)                                     \
+    {                                                              \
+        if constexpr (cpu == Cpu::EE) ee::instr_name(__VA_ARGS__); \
+        else iop::instr_name(__VA_ARGS__);                         \
     } // namespace mips
 
-#define INSTR_EE(instr_name, ...)                                            \
-    {                                                                        \
-        if constexpr (cpu == Cpu::EE) ee::instr_name<cpu_impl>(__VA_ARGS__); \
-        else reserved_instruction<Cpu::IOP, make_string>(#instr_name);       \
+#define INSTR_EE(instr_name, ...)                                      \
+    {                                                                  \
+        if constexpr (cpu == Cpu::EE) ee::instr_name(__VA_ARGS__);     \
+        else reserved_instruction<Cpu::IOP, make_string>(#instr_name); \
     } // namespace mips
 
 #define INSTR_IOP(instr_name, ...)                                                             \
     {                                                                                          \
         if constexpr (cpu == Cpu::EE) reserved_instruction<Cpu::EE, make_string>(#instr_name); \
-        else iop::instr_name<cpu_impl>(__VA_ARGS__);                                           \
+        else iop::instr_name(__VA_ARGS__);                                                     \
     } // namespace mips
 
-#define INSTR_VU(instr_name)                                               \
-    {                                                                      \
-        if constexpr (cpu == Cpu::EE) ee::vu::instr_name<cpu_impl>(instr); \
-        else reserved_instruction<Cpu::IOP, make_string>(#instr_name);     \
+#define INSTR_VU(instr_name)                                           \
+    {                                                                  \
+        if constexpr (cpu == Cpu::EE) ee::vu::instr_name(instr);       \
+        else reserved_instruction<Cpu::IOP, make_string>(#instr_name); \
     } // namespace mips
 
 template<Cpu cpu, CpuImpl cpu_impl, bool make_string> void cop0(u32 instr)
 {
     switch (instr >> 21 & 31) {
-    case 0: INSTR_COMMON(mfc0, RD, RT); break;
-    case 4: INSTR_COMMON(mtc0, RD, RT); break;
+    case 0: INSTR(mfc0, RD, RT); break;
+    case 4: INSTR(mtc0, RD, RT); break;
 
     case 8: { // BC0
         switch (instr >> 16 & 31) {
@@ -229,7 +230,7 @@ template<Cpu cpu, CpuImpl cpu_impl, bool make_string> void cop2(u32 instr)
             case 0x3E:
             case 0x3F: { // Special2
                 if ((instr & 0x3C) == 0x3C) {
-                    switch (instr & 3 | (instr & 0xEC0) >> 4) {
+                    switch ((instr & 3) | ((instr & 0xEC0) >> 4)) {
                     case 0x00:
                     case 0x01:
                     case 0x02:
@@ -362,20 +363,20 @@ template<Cpu cpu, CpuImpl cpu_impl, bool make_string> void disassemble(u32 instr
     switch (instr >> 26 & 63) {
     case 0x00: special<cpu, cpu_impl, make_string>(instr); break;
     case 0x01: regimm<cpu, cpu_impl, make_string>(instr); break;
-    case 0x02: INSTR_COMMON(j, IMM26); break;
-    case 0x03: INSTR_COMMON(jal, IMM26); break;
-    case 0x04: INSTR_COMMON(beq, RS, RT, IMM16); break;
-    case 0x05: INSTR_COMMON(bne, RS, RT, IMM16); break;
-    case 0x06: INSTR_COMMON(blez, RS, IMM16); break;
-    case 0x07: INSTR_COMMON(bgtz, RS, IMM16); break;
-    case 0x08: INSTR_COMMON(addi, RS, RT, IMM16); break;
-    case 0x09: INSTR_COMMON(addiu, RS, RT, IMM16); break;
-    case 0x0A: INSTR_COMMON(slti, RS, RT, IMM16); break;
-    case 0x0B: INSTR_COMMON(sltiu, RS, RT, IMM16); break;
-    case 0x0C: INSTR_COMMON(andi, RS, RT, IMM16); break;
-    case 0x0D: INSTR_COMMON(ori, RS, RT, IMM16); break;
-    case 0x0E: INSTR_COMMON(xori, RS, RT, IMM16); break;
-    case 0x0F: INSTR_COMMON(lui, RT, IMM16); break;
+    case 0x02: INSTR(j, IMM26); break;
+    case 0x03: INSTR(jal, IMM26); break;
+    case 0x04: INSTR(beq, RS, RT, IMM16); break;
+    case 0x05: INSTR(bne, RS, RT, IMM16); break;
+    case 0x06: INSTR(blez, RS, IMM16); break;
+    case 0x07: INSTR(bgtz, RS, IMM16); break;
+    case 0x08: INSTR(addi, RS, RT, IMM16); break;
+    case 0x09: INSTR(addiu, RS, RT, IMM16); break;
+    case 0x0A: INSTR(slti, RS, RT, IMM16); break;
+    case 0x0B: INSTR(sltiu, RS, RT, IMM16); break;
+    case 0x0C: INSTR(andi, RS, RT, IMM16); break;
+    case 0x0D: INSTR(ori, RS, RT, IMM16); break;
+    case 0x0E: INSTR(xori, RS, RT, IMM16); break;
+    case 0x0F: INSTR(lui, RT, IMM16); break;
     case 0x10: cop0<cpu, cpu_impl, make_string>(instr); break;
     case 0x11: cop1<cpu, cpu_impl, make_string>(instr); break;
     case 0x12: cop2<cpu, cpu_impl, make_string>(instr); break;
@@ -391,21 +392,21 @@ template<Cpu cpu, CpuImpl cpu_impl, bool make_string> void disassemble(u32 instr
     case 0x1C: mmi<cpu, cpu_impl, make_string>(instr); break;
     case 0x1E: INSTR_EE(lq, RS, RT, IMM16); break;
     case 0x1F: INSTR_EE(sq, RS, RT, IMM16); break;
-    case 0x20: INSTR_COMMON(lb, RS, RT, IMM16); break;
-    case 0x21: INSTR_COMMON(lh, RS, RT, IMM16); break;
-    case 0x22: INSTR_COMMON(lwl, RS, RT, IMM16); break;
-    case 0x23: INSTR_COMMON(lw, RS, RT, IMM16); break;
-    case 0x24: INSTR_COMMON(lbu, RS, RT, IMM16); break;
-    case 0x25: INSTR_COMMON(lhu, RS, RT, IMM16); break;
-    case 0x26: INSTR_COMMON(lwr, RS, RT, IMM16); break;
-    case 0x27: INSTR_COMMON(lwu, RS, RT, IMM16); break;
-    case 0x28: INSTR_COMMON(sb, RS, RT, IMM16); break;
-    case 0x29: INSTR_COMMON(sh, RS, RT, IMM16); break;
-    case 0x2A: INSTR_COMMON(swl, RS, RT, IMM16); break;
-    case 0x2B: INSTR_COMMON(sw, RS, RT, IMM16); break;
+    case 0x20: INSTR(lb, RS, RT, IMM16); break;
+    case 0x21: INSTR(lh, RS, RT, IMM16); break;
+    case 0x22: INSTR(lwl, RS, RT, IMM16); break;
+    case 0x23: INSTR(lw, RS, RT, IMM16); break;
+    case 0x24: INSTR(lbu, RS, RT, IMM16); break;
+    case 0x25: INSTR(lhu, RS, RT, IMM16); break;
+    case 0x26: INSTR(lwr, RS, RT, IMM16); break;
+    case 0x27: INSTR(lwu, RS, RT, IMM16); break;
+    case 0x28: INSTR(sb, RS, RT, IMM16); break;
+    case 0x29: INSTR(sh, RS, RT, IMM16); break;
+    case 0x2A: INSTR(swl, RS, RT, IMM16); break;
+    case 0x2B: INSTR(sw, RS, RT, IMM16); break;
     case 0x2C: INSTR_EE(sdl, RS, RT, IMM16); break;
     case 0x2D: INSTR_EE(sdr, RS, RT, IMM16); break;
-    case 0x2E: INSTR_COMMON(swr, RS, RT, IMM16); break;
+    case 0x2E: INSTR(swr, RS, RT, IMM16); break;
     case 0x2F: INSTR_EE(cache); break;
     case 0x31: INSTR_EE(lwc1, FT, BASE, IMM16); break;
     case 0x33: INSTR_EE(pref); break;
@@ -430,6 +431,7 @@ template<CpuImpl cpu_impl> void disassemble_iop(u32 instr)
 
 std::string disassemble_str(u32 instr)
 {
+    (void)instr;
     // disassemble<Cpu::EE, cpu_impl, true>(instr);
     return disassemble_result;
 }
@@ -575,8 +577,8 @@ template<Cpu cpu, CpuImpl cpu_impl, bool make_string> void mmi(u32 instr)
 template<Cpu cpu, CpuImpl cpu_impl, bool make_string> void regimm(u32 instr)
 {
     switch (instr >> 16 & 31) {
-    case 0x00: INSTR_COMMON(bltz, RS, IMM16); break;
-    case 0x01: INSTR_COMMON(bgez, RS, IMM16); break;
+    case 0x00: INSTR(bltz, RS, IMM16); break;
+    case 0x01: INSTR(bgez, RS, IMM16); break;
     case 0x02: INSTR_EE(bltzl, RS, IMM16); break;
     case 0x03: INSTR_EE(bgezl, RS, IMM16); break;
     case 0x08: INSTR_EE(tgei, RS, IMM16); break;
@@ -585,8 +587,8 @@ template<Cpu cpu, CpuImpl cpu_impl, bool make_string> void regimm(u32 instr)
     case 0x0B: INSTR_EE(tltiu, RS, IMM16); break;
     case 0x0C: INSTR_EE(teqi, RS, IMM16); break;
     case 0x0E: INSTR_EE(tnei, RS, IMM16); break;
-    case 0x10: INSTR_COMMON(bltzal, RS, IMM16); break;
-    case 0x11: INSTR_COMMON(bgezal, RS, IMM16); break;
+    case 0x10: INSTR(bltzal, RS, IMM16); break;
+    case 0x11: INSTR(bgezal, RS, IMM16); break;
     case 0x12: INSTR_EE(bltzall, RS, IMM16); break;
     case 0x13: INSTR_EE(bgezall, RS, IMM16); break;
     case 0x18: INSTR_EE(mtsab, RS, IMM16); break;
@@ -598,7 +600,7 @@ template<Cpu cpu, CpuImpl cpu_impl, bool make_string> void regimm(u32 instr)
 template<Cpu cpu, bool make_string> void reserved_instruction(auto instr)
 {
     if constexpr (make_string) {
-
+        (void)instr;
     } else if constexpr (cpu == Cpu::EE) {
         ee::reserved_instruction_exception();
     } else {
@@ -610,42 +612,42 @@ template<Cpu cpu, bool make_string> void reserved_instruction(auto instr)
 template<Cpu cpu, CpuImpl cpu_impl, bool make_string> void special(u32 instr)
 {
     switch (instr & 63) {
-    case 0x00: INSTR_COMMON(sll, RT, RD, SA); break;
-    case 0x02: INSTR_COMMON(srl, RT, RD, SA); break;
-    case 0x03: INSTR_COMMON(sra, RT, RD, SA); break;
-    case 0x04: INSTR_COMMON(sllv, RS, RT, RD); break;
-    case 0x06: INSTR_COMMON(srlv, RS, RT, RD); break;
-    case 0x07: INSTR_COMMON(srav, RS, RT, RD); break;
-    case 0x08: INSTR_COMMON(jr, RS); break;
-    case 0x09: INSTR_COMMON(jalr, RS, RD); break;
+    case 0x00: INSTR(sll, RT, RD, SA); break;
+    case 0x02: INSTR(srl, RT, RD, SA); break;
+    case 0x03: INSTR(sra, RT, RD, SA); break;
+    case 0x04: INSTR(sllv, RS, RT, RD); break;
+    case 0x06: INSTR(srlv, RS, RT, RD); break;
+    case 0x07: INSTR(srav, RS, RT, RD); break;
+    case 0x08: INSTR(jr, RS); break;
+    case 0x09: INSTR(jalr, RS, RD); break;
     case 0x0A: INSTR_EE(movz, RS, RT, RD); break;
     case 0x0B: INSTR_EE(movn, RS, RT, RD); break;
-    case 0x0C: INSTR_COMMON(syscall); break;
-    case 0x0D: INSTR_COMMON(break_); break;
+    case 0x0C: INSTR(syscall); break;
+    case 0x0D: INSTR(break_); break;
     case 0x0F: INSTR_EE(sync); break;
-    case 0x10: INSTR_COMMON(mfhi, RD); break;
-    case 0x11: INSTR_COMMON(mthi, RS); break;
-    case 0x12: INSTR_COMMON(mflo, RD); break;
-    case 0x13: INSTR_COMMON(mtlo, RS); break;
+    case 0x10: INSTR(mfhi, RD); break;
+    case 0x11: INSTR(mthi, RS); break;
+    case 0x12: INSTR(mflo, RD); break;
+    case 0x13: INSTR(mtlo, RS); break;
     case 0x14: INSTR_EE(dsllv, RS, RT, RD); break;
     case 0x16: INSTR_EE(dsrlv, RS, RT, RD); break;
     case 0x17: INSTR_EE(dsrav, RS, RT, RD); break;
-    case 0x18: INSTR_COMMON(mult, RS, RT); break;
-    case 0x19: INSTR_COMMON(multu, RS, RT); break;
-    case 0x1A: INSTR_COMMON(div, RS, RT); break;
-    case 0x1B: INSTR_COMMON(divu, RS, RT); break;
-    case 0x20: INSTR_COMMON(add, RS, RT, RD); break;
-    case 0x21: INSTR_COMMON(addu, RS, RT, RD); break;
-    case 0x22: INSTR_COMMON(sub, RS, RT, RD); break;
-    case 0x23: INSTR_COMMON(subu, RS, RT, RD); break;
-    case 0x24: INSTR_COMMON(and_, RS, RT, RD); break;
-    case 0x25: INSTR_COMMON(or_, RS, RT, RD); break;
-    case 0x26: INSTR_COMMON(xor_, RS, RT, RD); break;
-    case 0x27: INSTR_COMMON(nor, RS, RT, RD); break;
+    case 0x18: INSTR(mult, RS, RT); break;
+    case 0x19: INSTR(multu, RS, RT); break;
+    case 0x1A: INSTR(div, RS, RT); break;
+    case 0x1B: INSTR(divu, RS, RT); break;
+    case 0x20: INSTR(add, RS, RT, RD); break;
+    case 0x21: INSTR(addu, RS, RT, RD); break;
+    case 0x22: INSTR(sub, RS, RT, RD); break;
+    case 0x23: INSTR(subu, RS, RT, RD); break;
+    case 0x24: INSTR(and_, RS, RT, RD); break;
+    case 0x25: INSTR(or_, RS, RT, RD); break;
+    case 0x26: INSTR(xor_, RS, RT, RD); break;
+    case 0x27: INSTR(nor, RS, RT, RD); break;
     case 0x28: INSTR_EE(mfsa, RD); break;
     case 0x29: INSTR_EE(mtsa, RS); break;
-    case 0x2A: INSTR_COMMON(slt, RS, RT, RD); break;
-    case 0x2B: INSTR_COMMON(sltu, RS, RT, RD); break;
+    case 0x2A: INSTR(slt, RS, RT, RD); break;
+    case 0x2B: INSTR(sltu, RS, RT, RD); break;
     case 0x2C: INSTR_EE(dadd, RS, RT, RD); break;
     case 0x2D: INSTR_EE(daddu, RS, RT, RD); break;
     case 0x2E: INSTR_EE(dsub, RS, RT, RD); break;

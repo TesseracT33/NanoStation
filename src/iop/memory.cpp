@@ -18,6 +18,8 @@ template<IopUInt Int, Alignment alignment, MemOp mem_op> Int read(u32 addr)
 
 template<size_t size, Alignment alignment> void write(u32 addr, auto data)
 {
+    (void)addr;
+    (void)data;
 }
 
 template u8 read<u8, Alignment::Aligned, MemOp::DataRead>(u32);

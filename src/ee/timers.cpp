@@ -39,15 +39,16 @@ struct Timer {
     }
 
     u64 time_last_counter_refresh;
-    Interrupt const intc_interrupt;
-    scheduler::EventType const interrupt_event;
     u32 counter_max;
+    Interrupt const intc_interrupt;
+
     u16 compare;
     u16 counter;
     u16 counter_rem;
     u16 ee_clock_scale;
     u16 mode_raw;
     u16 sbus_int_counter;
+    scheduler::EventType const interrupt_event;
     GateMode gate_mode;
     GateType gate_type;
     u8 const index;
@@ -319,26 +320,26 @@ void on_vblank(bool active)
     }
 }
 
-u32 read(u32 addr)
+u32 read_io(u32 addr)
 {
-    auto timer = [addr]() -> Timer& { return timers[addr >> 11]; };
+    Timer& timer = timers[addr >> 11 & 3];
     switch (addr & ~0x1800) {
-    case Addr::TN_COUNT: return timer().read_counter(); // 10000000h + N*800h
-    case Addr::TN_MODE: return timer().mode_raw; // 10000010h + N*800h
-    case Addr::TN_COMP: return timer().compare; // 10000020h + N*800h
-    case Addr::TN_HOLD: return timer().sbus_int_counter; // 10000030h + N*800h
+    case Addr::TN_COUNT: return timer.read_counter(); // 10000000h + N*800h
+    case Addr::TN_MODE: return timer.mode_raw; // 10000010h + N*800h
+    case Addr::TN_COMP: return timer.compare; // 10000020h + N*800h
+    case Addr::TN_HOLD: return timer.sbus_int_counter; // 10000030h + N*800h
     default: message::fatal(std::format("EE: Tried to read from unknown IO address {:X}", addr)); return {};
     }
 }
 
-void write(u32 addr, u32 data)
+void write_io(u32 addr, u32 data)
 {
-    auto timer = [addr]() -> Timer& { return timers[addr >> 11]; };
+    Timer& timer = timers[addr >> 11 & 3];
     switch (addr & ~0x1800) {
-    case Addr::TN_COUNT: timer().set_counter(data); break; // 10000000h + N*800h
-    case Addr::TN_MODE: timer().write_to_mode(data); break; // 10000010h + N*800h
-    case Addr::TN_COMP: timer().set_compare(data); break; // 10000020h + N*800h
-    case Addr::TN_HOLD: timer().set_sbus_counter(data); break; // 10000030h + N*800h
+    case Addr::TN_COUNT: timer.set_counter(data); break; // 10000000h + N*800h
+    case Addr::TN_MODE: timer.write_to_mode(data); break; // 10000010h + N*800h
+    case Addr::TN_COMP: timer.set_compare(data); break; // 10000020h + N*800h
+    case Addr::TN_HOLD: timer.set_sbus_counter(data); break; // 10000030h + N*800h
     default: message::fatal(std::format("EE: Tried to write to unknown IO address {:X}", addr));
     }
 }

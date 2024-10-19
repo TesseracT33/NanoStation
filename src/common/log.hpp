@@ -1,7 +1,7 @@
 #pragma once
 
 #include "build_options.hpp"
-#include "types.hpp"
+#include "numtypes.hpp"
 
 #include <source_location>
 #include <string_view>

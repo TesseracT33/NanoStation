@@ -1,6 +1,6 @@
 #pragma once
 
-#include "types.hpp"
+#include "numtypes.hpp"
 
 namespace ee {
 enum class MemOp;

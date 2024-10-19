@@ -1,31 +1,31 @@
 #pragma once
 
 #include "mips/mips.hpp"
-#include "types.hpp"
+#include "numtypes.hpp"
 
 namespace iop {
 
-template<mips::CpuImpl> void avsz3(){}
-template<mips::CpuImpl> void avsz4(){}
-template<mips::CpuImpl> void cc(){}
-template<mips::CpuImpl> void cdp(){}
-template<mips::CpuImpl> void dcpl(){}
-template<mips::CpuImpl> void dpcs(){}
-template<mips::CpuImpl> void dpct(){}
-template<mips::CpuImpl> void gpf(){}
-template<mips::CpuImpl> void gpl(){}
-template<mips::CpuImpl> void intpl(){}
-template<mips::CpuImpl> void op(){}
-template<mips::CpuImpl> void mvmva(){}
-template<mips::CpuImpl> void nccs(){}
-template<mips::CpuImpl> void ncct(){}
-template<mips::CpuImpl> void ncds(){}
-template<mips::CpuImpl> void ncdt(){}
-template<mips::CpuImpl> void nclip(){}
-template<mips::CpuImpl> void ncs(){}
-template<mips::CpuImpl> void nct(){}
-template<mips::CpuImpl> void rtps(){}
-template<mips::CpuImpl> void rtpt(){}
-template<mips::CpuImpl> void sqr(){}
+void avsz3();
+void avsz4();
+void cc();
+void cdp();
+void dcpl();
+void dpcs();
+void dpct();
+void gpf();
+void gpl();
+void intpl();
+void op();
+void mvmva();
+void nccs();
+void ncct();
+void ncds();
+void ncdt();
+void nclip();
+void ncs();
+void nct();
+void rtps();
+void rtpt();
+void sqr();
 
-}
+} // namespace iop

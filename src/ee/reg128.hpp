@@ -1,13 +1,13 @@
 #pragma once
 
-#include "host.hpp"
-#include "types.hpp"
+#include "numtypes.hpp"
+#include "platform.hpp"
 
 #include <bit>
 #include <concepts>
 #include <cstring>
 
-#if X64
+#if PLATFORM_X64
 #include <immintrin.h>
 using m128i = __m128i;
 #endif

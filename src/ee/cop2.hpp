@@ -4,15 +4,15 @@
 
 namespace ee {
 
-template<mips::CpuImpl> void bc2f();
-template<mips::CpuImpl> void bc2fl();
-template<mips::CpuImpl> void bc2t();
-template<mips::CpuImpl> void bc2tl();
-template<mips::CpuImpl> void cfc2();
-template<mips::CpuImpl> void ctc2();
-template<mips::CpuImpl> void lqc2();
-template<mips::CpuImpl> void qmfc2();
-template<mips::CpuImpl> void qmtc2();
-template<mips::CpuImpl> void sqc2();
+void bc2f();
+void bc2fl();
+void bc2t();
+void bc2tl();
+void cfc2();
+void ctc2();
+void lqc2();
+void qmfc2();
+void qmtc2();
+void sqc2();
 
 } // namespace ee

@@ -12,10 +12,10 @@
 
 namespace ee {
 
-template<EeUInt Int> static Int read_bios(u32 addr);
-template<EeUInt Int> static Int read_io(u32 addr);
-template<EeUInt Int> static Int read_rdram(u32 addr);
-template<EeUInt Int> static void write_io(u32 addr, Int data);
+template<ee_uint Int> static Int read_bios(u32 addr);
+template<ee_uint Int> static Int read_io(u32 addr);
+template<ee_uint Int> static Int read_rdram(u32 addr);
+template<ee_uint Int> static void write_io(u32 addr, Int data);
 template<MemOp> static u32 tlb_addr_translation(u32 vaddr);
 template<MemOp> static u32 virt_to_phys_addr(u32 vaddr);
 
@@ -41,19 +41,20 @@ void TlbEntry::write()
     offset_addr_mask = page_mask >> 1 | 0xFFF;
 }
 
-template<EeUInt Int> Int read_bios(u32 addr)
+template<ee_uint Int> Int read_bios(u32 addr)
 {
     static_assert(std::has_single_bit(bios.size()));
+    static constexpr u32 mask = u32(bios.size() - 1);
     Int ret;
-    std::memcpy(&ret, &bios[addr & (bios.size() - 1)], sizeof(Int));
+    std::memcpy(&ret, &bios[addr & mask], sizeof(Int));
     return ret;
 }
 
-template<EeUInt Int> Int read_io(u32 addr)
+template<ee_uint Int> Int read_io(u32 addr)
 {
     if constexpr (sizeof(Int) == 4) {
         if (addr < 0x1000'2000) {
-            return timers::read(addr);
+            return timers::read_io(addr);
         }
         if (addr == 0x1000'F000) {
             return read_intc_stat();
@@ -63,11 +64,11 @@ template<EeUInt Int> Int read_io(u32 addr)
         }
     } else {
         message::fatal(std::format("Tried to read {} bytes from IO, when only word reads are supported.", sizeof(Int)));
-        return {};
     }
+    return {};
 }
 
-template<EeUInt Int> Int read_rdram(u32 addr)
+template<ee_uint Int> Int read_rdram(u32 addr)
 {
     static_assert(std::has_single_bit(rdram.size()));
     Int ret;
@@ -116,7 +117,7 @@ template<MemOp mem_op> u32 virt_to_phys_addr(u32 vaddr)
     return tlb_addr_translation<mem_op>(vaddr);
 }
 
-template<EeUInt Int, Alignment alignment, MemOp mem_op> Int virtual_read(u32 addr)
+template<ee_uint Int, Alignment alignment, MemOp mem_op> Int virtual_read(u32 addr)
 {
     static constexpr size_t size = sizeof(Int);
     if constexpr (alignment == Alignment::Aligned && size > 1 && size < 16 && mem_op == MemOp::DataRead) {
@@ -141,11 +142,11 @@ template<EeUInt Int, Alignment alignment, MemOp mem_op> Int virtual_read(u32 add
     return {};
 }
 
-template<EeUInt Int> static void write_io(u32 addr, Int data)
+template<ee_uint Int> static void write_io(u32 addr, Int data)
 {
     if constexpr (sizeof(Int) == 4) {
         if (addr < 0x1000'2000) {
-            timers::write(addr, data);
+            timers::write_io(addr, data);
         }
         if (addr == 0x1000'F000) {
             write_intc_stat(u16(data));

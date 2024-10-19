@@ -1,12 +1,12 @@
 #pragma once
 
 #include "mips/mips.hpp"
-#include "types.hpp"
+#include "numtypes.hpp"
 
 namespace iop {
-template<mips::CpuImpl> void mfc0(u32 rd, u32 rt);
-template<mips::CpuImpl> void mtc0(u32 rd, u32 rt);
-template<mips::CpuImpl> void rfe();
+void mfc0(u32 rd, u32 rt);
+void mtc0(u32 rd, u32 rt);
+void rfe();
 
 struct Cop0Registers {
     u32 unused_0, unused_1, unused_2;

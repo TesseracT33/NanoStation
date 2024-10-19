@@ -4,43 +4,43 @@ namespace ee {
 
 using enum mips::CpuImpl;
 
-template<> void bc2f<Interpreter>()
+void bc2f()
 {
 }
 
-template<> void bc2fl<Interpreter>()
+void bc2fl()
 {
 }
 
-template<> void bc2t<Interpreter>()
+void bc2t()
 {
 }
 
-template<> void bc2tl<Interpreter>()
+void bc2tl()
 {
 }
 
-template<> void cfc2<Interpreter>()
+void cfc2()
 {
 }
 
-template<> void ctc2<Interpreter>()
+void ctc2()
 {
 }
 
-template<> void lqc2<Interpreter>()
+void lqc2()
 {
 }
 
-template<> void qmfc2<Interpreter>()
+void qmfc2()
 {
 }
 
-template<> void qmtc2<Interpreter>()
+void qmtc2()
 {
 }
 
-template<> void sqc2<Interpreter>()
+void sqc2()
 {
 }
 

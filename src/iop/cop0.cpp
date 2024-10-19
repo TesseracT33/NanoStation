@@ -9,7 +9,7 @@ namespace iop {
 
 using enum mips::CpuImpl;
 
-template<> void mfc0<Interpreter>(u32 rd, u32 rt)
+void mfc0(u32 rd, u32 rt)
 {
     if (rd < 16 || rd > 31) [[likely]] { // TODO: can we really read above 31? if so, adjust function argument RD
         static constexpr u64 reserved = 0xFFFF'FFFF'0000'0417; // 0-2, 4, 10, 32-63
@@ -26,7 +26,7 @@ template<> void mfc0<Interpreter>(u32 rd, u32 rt)
     }
 }
 
-template<> void mtc0<Interpreter>(u32 rd, u32 rt)
+void mtc0(u32 rd, u32 rt)
 {
     if (rd > 15) return;
 
@@ -52,7 +52,7 @@ template<> void mtc0<Interpreter>(u32 rd, u32 rt)
     }
 }
 
-template<> void rfe<Interpreter>()
+void rfe()
 {
     cop0.status.raw = cop0.status.raw >> 2 & 15 | cop0.status.raw & ~15;
 }

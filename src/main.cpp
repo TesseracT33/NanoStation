@@ -14,7 +14,9 @@ int main(int argc, char* argv[])
         std::cerr << "[warning] Failed to create file log\n";
     }
 
-    if (!emulator::init()) return EXIT_FAILURE;
+    if (!emulator::init()) {
+        return EXIT_FAILURE;
+    }
 
     if (argc > 1) {
         char const* game_path = argv[1];

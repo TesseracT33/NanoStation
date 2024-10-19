@@ -1,19 +1,21 @@
 cmake_minimum_required(VERSION 3.13)
 
-target_include_directories(NanoStation PRIVATE .)
+target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE .)
 
 ##### SDL #########################
-set(SDL2_DISABLE_SDL2MAIN ON)
-set(SDL2_DISABLE_INSTALL ON)
-set(SDL2_DISABLE_UNINSTALL ON)
 set(SDL_SHARED OFF)
 set(SDL_STATIC ON)
-set(SDL_TEST OFF)
+set(SDL_TEST_LIBRARY OFF)
+set(SDL_TESTS OFF)
 set(SDL_SHARED_ENABLED_BY_DEFAULT OFF)
 set(SDL_STATIC_ENABLED_BY_DEFAULT ON)
 set(SDL_TEST_ENABLED_BY_DEFAULT OFF)
+set(SDL2_DISABLE_SDL2MAIN ON)
+set(SDL2_DISABLE_INSTALL ON)
+set(SDL2_DISABLE_UNINSTALL ON)
 add_subdirectory(SDL)
-target_link_libraries(NanoStation SDL3-static)
+target_compile_options(SDL3-static PRIVATE -w) # disable warnings
+target_link_libraries(${CMAKE_PROJECT_NAME} SDL3-static)
 
 ##### imgui #########################
 add_library(imgui STATIC
@@ -25,4 +27,4 @@ add_library(imgui STATIC
 )
 target_include_directories(imgui PRIVATE imgui)
 target_link_libraries(imgui SDL3-static)
-target_link_libraries(NanoStation imgui)
+target_link_libraries(${CMAKE_PROJECT_NAME} imgui)

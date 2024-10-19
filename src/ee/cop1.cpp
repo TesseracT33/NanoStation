@@ -4,140 +4,214 @@ namespace ee {
 
 using enum mips::CpuImpl;
 
-template<> void abs_s<Interpreter>(u32 fd, u32 fs)
+void abs_s(u32 fd, u32 fs)
 {
+    (void)fd;
+    (void)fs;
 }
 
-template<> void add_s<Interpreter>(u32 fd, u32 fs, u32 ft)
+void add_s(u32 fd, u32 fs, u32 ft)
 {
+    (void)fd;
+    (void)fs;
+    (void)ft;
 }
 
-template<> void adda_s<Interpreter>(u32 fs, u32 ft)
+void adda_s(u32 fs, u32 ft)
 {
+    (void)fs;
+    (void)ft;
 }
 
-template<> void bc1f<Interpreter>(s16 imm)
+void bc1f(s16 imm)
 {
+    (void)imm;
 }
 
-template<> void bc1fl<Interpreter>(s16 imm)
+void bc1fl(s16 imm)
 {
+    (void)imm;
 }
 
-template<> void bc1t<Interpreter>(s16 imm)
+void bc1t(s16 imm)
 {
+    (void)imm;
 }
 
-template<> void bc1tl<Interpreter>(s16 imm)
+void bc1tl(s16 imm)
 {
+    (void)imm;
 }
 
-template<> void c_eq<Interpreter>(u32 fs, u32 ft)
+void c_eq(u32 fs, u32 ft)
 {
+    (void)fs;
+    (void)ft;
 }
 
-template<> void c_f<Interpreter>(u32 fs, u32 ft)
+void c_f(u32 fs, u32 ft)
 {
+    (void)fs;
+    (void)ft;
 }
 
-template<> void c_le<Interpreter>(u32 fs, u32 ft)
+void c_le(u32 fs, u32 ft)
 {
+    (void)fs;
+    (void)ft;
 }
 
-template<> void c_lt<Interpreter>(u32 fs, u32 ft)
+void c_lt(u32 fs, u32 ft)
 {
+    (void)fs;
+    (void)ft;
 }
 
-template<> void cfc1<Interpreter>(u32 fs, u32 rt)
+void cfc1(u32 fs, u32 rt)
 {
+    (void)fs;
+    (void)rt;
 }
 
-template<> void ctc1<Interpreter>(u32 fs, u32 rt)
+void ctc1(u32 fs, u32 rt)
 {
+    (void)fs;
+    (void)rt;
 }
 
-template<> void cvt_s<Interpreter>(u32 fd, u32 fs)
+void cvt_s(u32 fd, u32 fs)
 {
+    (void)fd;
+    (void)fs;
 }
 
-template<> void cvt_w<Interpreter>(u32 fd, u32 fs)
+void cvt_w(u32 fd, u32 fs)
 {
+    (void)fd;
+    (void)fs;
 }
 
-template<> void div_s<Interpreter>(u32 fd, u32 fs, u32 ft)
+void div_s(u32 fd, u32 fs, u32 ft)
 {
+    (void)fd;
+    (void)fs;
+    (void)ft;
 }
 
-template<> void lwc1<Interpreter>(u32 ft, u32 base, u32 imm)
+void lwc1(u32 ft, u32 base, u32 imm)
 {
+    (void)ft;
+    (void)base;
+    (void)imm;
 }
 
-template<> void madd_s<Interpreter>(u32 fd, u32 fs, u32 ft)
+void madd_s(u32 fd, u32 fs, u32 ft)
 {
+    (void)fd;
+    (void)fs;
+    (void)ft;
 }
 
-template<> void madda_s<Interpreter>(u32 fs, u32 ft)
+void madda_s(u32 fs, u32 ft)
 {
+    (void)fs;
+    (void)ft;
 }
 
-template<> void max_s<Interpreter>(u32 fd, u32 fs, u32 ft)
+void max_s(u32 fd, u32 fs, u32 ft)
 {
+    (void)fd;
+    (void)fs;
+    (void)ft;
 }
 
-template<> void mfc1<Interpreter>(u32 fs, u32 rt)
+void mfc1(u32 fs, u32 rt)
 {
+    (void)fs;
+    (void)rt;
 }
 
-template<> void min_s<Interpreter>(u32 fd, u32 fs, u32 ft)
+void min_s(u32 fd, u32 fs, u32 ft)
 {
+    (void)fd;
+    (void)fs;
+    (void)ft;
 }
 
-template<> void mov_s<Interpreter>(u32 fd, u32 fs)
+void mov_s(u32 fd, u32 fs)
 {
+    (void)fd;
+    (void)fs;
 }
 
-template<> void msub_s<Interpreter>(u32 fd, u32 fs, u32 ft)
+void msub_s(u32 fd, u32 fs, u32 ft)
 {
+    (void)fd;
+    (void)fs;
+    (void)ft;
 }
 
-template<> void msuba_s<Interpreter>(u32 fs, u32 ft)
+void msuba_s(u32 fs, u32 ft)
 {
+    (void)fs;
+    (void)ft;
 }
 
-template<> void mtc1<Interpreter>(u32 fs, u32 rt)
+void mtc1(u32 fs, u32 rt)
 {
+    (void)fs;
+    (void)rt;
 }
 
-template<> void mul_s<Interpreter>(u32 fd, u32 fs, u32 ft)
+void mul_s(u32 fd, u32 fs, u32 ft)
 {
+    (void)fd;
+    (void)fs;
+    (void)ft;
 }
 
-template<> void mula_s<Interpreter>(u32 fs, u32 ft)
+void mula_s(u32 fs, u32 ft)
 {
+    (void)fs;
+    (void)ft;
 }
 
-template<> void neg_s<Interpreter>(u32 fd, u32 fs)
+void neg_s(u32 fd, u32 fs)
 {
+    (void)fd;
+    (void)fs;
 }
 
-template<> void rsqrt_s<Interpreter>(u32 fd, u32 fs)
+void rsqrt_s(u32 fd, u32 fs)
 {
+    (void)fd;
+    (void)fs;
 }
 
-template<> void sqrt_s<Interpreter>(u32 fd, u32 fs)
+void sqrt_s(u32 fd, u32 fs)
 {
+    (void)fd;
+    (void)fs;
 }
 
-template<> void sub_s<Interpreter>(u32 fd, u32 fs, u32 ft)
+void sub_s(u32 fd, u32 fs, u32 ft)
 {
+    (void)fd;
+    (void)fs;
+    (void)ft;
 }
 
-template<> void suba_s<Interpreter>(u32 fs, u32 ft)
+void suba_s(u32 fs, u32 ft)
 {
+    (void)fs;
+    (void)ft;
 }
 
-template<> void swc1<Interpreter>(u32 ft, u32 base, u32 imm)
+void swc1(u32 ft, u32 base, u32 imm)
 {
+    (void)ft;
+    (void)base;
+    (void)imm;
 }
 
 } // namespace ee

@@ -173,7 +173,9 @@ void tlb_refill_exception(u32 vaddr, MemOp mem_op)
     u32 prev_exl = cop0.status.exl;
     handle_lvl1_exception();
     pc = cop0.status.bev ? 0xBFC0'0200 : 0x8000'0000;
-    if (prev_exl) pc |= 0x180;
+    if (prev_exl) {
+        pc |= 0x180;
+    }
     cop0.cause.exc_code = mem_op == MemOp::DataWrite ? 3 : 2;
     on_tlb_exception(vaddr);
 }

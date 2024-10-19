@@ -25,6 +25,49 @@ using add_t = std::plus<void>;
 using mul_t = std::multiplies<void>;
 using sub_t = std::minus<void>;
 
+struct {
+    bool zero[4]; // x, y, z, w
+    bool sign[4];
+    bool underflow[4];
+    bool overflow[4];
+    u16 to_u16() const
+    {
+        u16 ret{};
+        for (int i = 0; i < 4; ++i) {
+            ret |= zero[3 - i] << i;
+            ret |= sign[3 - i] << (i + 4);
+            ret |= underflow[3 - i] << (i + 8);
+            ret |= overflow[3 - i] << (i + 12);
+        }
+        return ret;
+    }
+    void update(int dst, EeF32 result)
+    {
+        s32 result_s32 = std::bit_cast<s32>(result);
+        s32 exponent = result_s32 & 0x7F80'0000;
+        zero[dst] = result == 0.f;
+        sign[dst] = result_s32 < 0;
+        underflow[dst] = exponent == 0;
+        overflow[dst] = exponent == 0x7F80'0000;
+    }
+} static mac;
+
+struct {
+    bool zero, sign, underflow, overflow, invalid, div_zero, sticky_zero, sticky_sign, sticky_underflow,
+      sticky_overflow, sticky_invalid, sticky_div_zero;
+    void signal_invalid()
+    {
+        invalid = 1;
+        sticky_invalid |= 1;
+    }
+    u16 to_u16() const
+    {
+        return zero | sign << 1 | underflow << 2 | overflow << 3 | invalid << 4 | div_zero << 5 | sticky_zero << 6
+             | sticky_sign << 7 | sticky_underflow << 8 | sticky_overflow << 9 | sticky_invalid << 10
+             | sticky_div_zero << 11;
+    }
+} static status;
+
 template<typename Fun> static void arith(u32 instr, auto op2);
 template<typename Fun> static void arith_acc(u32 instr, auto op2);
 static EeF32 get_lane(auto val, int idx);
@@ -39,7 +82,7 @@ template<typename Fun> static void outer_prod_and_arith(u32 instr);
 // SUB, SUBI, SUBQ, SUBx, SUBy, SUBz, SUBw
 template<typename Fun> void arith(u32 instr, auto op2)
 {
-    static const Fun fun{};
+    static Fun const fun{};
     for (int i = 0; i < 4; ++i) {
         if (DST(i)) {
             EeF32 result = fun(vf[FS][i], get_lane(op2, i));
@@ -54,7 +97,7 @@ template<typename Fun> void arith(u32 instr, auto op2)
 // SUBA, SUBAI, SUBAQ, SUBAx, SUBAy, SUBAz, SUBAw
 template<typename Fun> void arith_acc(u32 instr, auto op2)
 {
-    static const Fun fun{};
+    static Fun const fun{};
     for (int i = 0; i < 4; ++i) {
         if (DST(i)) {
             EeF32 result = fun(vf[FS][i], get_lane(op2, i));
@@ -101,7 +144,7 @@ void min(u32 instr, auto op2)
 // MSUB, MSUBI, MSUBQ, MSUBx, MSUBy, MSUBz, MSUBw
 template<typename Fun> void mul_and_arith(u32 instr, auto op2)
 {
-    static const Fun fun{};
+    static Fun const fun{};
     for (int i = 0; i < 4; ++i) {
         if (DST(i)) {
             EeF32 result = vf[FS][i] * get_lane(op2, i);
@@ -116,7 +159,7 @@ template<typename Fun> void mul_and_arith(u32 instr, auto op2)
 // MSUBA, MSUBAI, MSUBAQ, MSUBAx, MSUBAy, MSUBAz, MSUBAw
 template<typename Fun> void mul_and_arith_acc(u32 instr, auto op2)
 {
-    static const Fun fun{};
+    static Fun const fun{};
     for (int i = 0; i < 4; ++i) {
         if (DST(i)) {
             EeF32 result = vf[FS][i] * get_lane(op2, i);
@@ -127,7 +170,7 @@ template<typename Fun> void mul_and_arith_acc(u32 instr, auto op2)
     }
 }
 
-template<> void vabs<Interpreter>(u32 instr)
+void vabs(u32 instr)
 {
     for (int i = 0; i < 4; ++i) {
         if (DST(i)) {
@@ -138,59 +181,62 @@ template<> void vabs<Interpreter>(u32 instr)
     }
 }
 
-template<> void vadd<Interpreter>(u32 instr)
+void vadd(u32 instr)
 {
     arith<add_t>(instr, vf[FS]);
 }
 
-template<> void vadda<Interpreter>(u32 instr)
+void vadda(u32 instr)
 {
     arith_acc<add_t>(instr, vf[FT]);
 }
 
-template<> void vaddai<Interpreter>(u32 instr)
+void vaddai(u32 instr)
 {
     arith_acc<add_t>(instr, I);
 }
 
-template<> void vaddaq<Interpreter>(u32 instr)
+void vaddaq(u32 instr)
 {
     arith_acc<add_t>(instr, Q);
 }
 
-template<> void vaddabc<Interpreter>(u32 instr)
+void vaddabc(u32 instr)
 {
     arith_acc<add_t>(instr, vf[FT][BC]);
 }
 
-template<> void vaddi<Interpreter>(u32 instr)
+void vaddi(u32 instr)
 {
     arith<add_t>(instr, I);
 }
 
-template<> void vaddq<Interpreter>(u32 instr)
+void vaddq(u32 instr)
 {
     arith<add_t>(instr, Q);
 }
 
-template<> void vaddbc<Interpreter>(u32 instr)
+void vaddbc(u32 instr)
 {
     arith<add_t>(instr, vf[FS][BC]);
 }
 
-template<> void vcallms<Interpreter>(u32 instr)
+void vcallms(u32 instr)
 {
+    (void)instr;
 }
 
-template<> void vcallmsr<Interpreter>(u32 instr)
+void vcallmsr(u32 instr)
 {
+    (void)instr;
 }
 
-template<> void vclipw<Interpreter>(u32 instr)
+void vclipw(u32 instr)
 {
+    (void)instr;
 }
 
-template<> void vdiv<Interpreter>(u32 instr)
+void vdiv(u32 instr)
 {
     EeF32 fs = vf[FS][instr >> 21 & 3];
     if (fs == 0.f) {
@@ -201,135 +247,147 @@ template<> void vdiv<Interpreter>(u32 instr)
     }
 }
 
-template<> void vftoi0<Interpreter>(u32 instr)
+void vftoi0(u32 instr)
 {
+    (void)instr;
 }
 
-template<> void vftoi4<Interpreter>(u32 instr)
+void vftoi4(u32 instr)
 {
+    (void)instr;
 }
 
-template<> void vftoi12<Interpreter>(u32 instr)
+void vftoi12(u32 instr)
 {
+    (void)instr;
 }
 
-template<> void vftoi15<Interpreter>(u32 instr)
+void vftoi15(u32 instr)
 {
+    (void)instr;
 }
 
-template<> void viadd<Interpreter>(u32 instr)
+void viadd(u32 instr)
 {
     vi[ID] = vi[IS] + vi[IT];
 }
 
-template<> void viaddi<Interpreter>(u32 instr)
+void viaddi(u32 instr)
 {
     vi[IT] = vi[IS] + (instr >> 6 & 31); // TODO: sign-extend imm?
 }
 
-template<> void viand<Interpreter>(u32 instr)
+void viand(u32 instr)
 {
     vi[ID] = vi[IS] & vi[IT];
 }
 
-template<> void vilwr<Interpreter>(u32 instr)
+void vilwr(u32 instr)
 {
+    (void)instr;
 }
 
-template<> void vior<Interpreter>(u32 instr)
+void vior(u32 instr)
 {
     vi[ID] = vi[IS] | vi[IT];
 }
 
-template<> void visub<Interpreter>(u32 instr)
+void visub(u32 instr)
 {
     vi[ID] = vi[IS] - vi[IT];
 }
 
-template<> void viswr<Interpreter>(u32 instr)
+void viswr(u32 instr)
 {
+    (void)instr;
 }
 
-template<> void vitof0<Interpreter>(u32 instr)
+void vitof0(u32 instr)
 {
+    (void)instr;
 }
 
-template<> void vitof4<Interpreter>(u32 instr)
+void vitof4(u32 instr)
 {
+    (void)instr;
 }
 
-template<> void vitof12<Interpreter>(u32 instr)
+void vitof12(u32 instr)
 {
+    (void)instr;
 }
 
-template<> void vitof15<Interpreter>(u32 instr)
+void vitof15(u32 instr)
 {
+    (void)instr;
 }
 
-template<> void vlqd<Interpreter>(u32 instr)
+void vlqd(u32 instr)
 {
+    (void)instr;
 }
 
-template<> void vlqi<Interpreter>(u32 instr)
+void vlqi(u32 instr)
 {
+    (void)instr;
 }
 
-template<> void vmadd<Interpreter>(u32 instr)
+void vmadd(u32 instr)
 {
     mul_and_arith<add_t>(instr, vf[FS]);
 }
 
-template<> void vmadda<Interpreter>(u32 instr)
+void vmadda(u32 instr)
 {
     mul_and_arith_acc<add_t>(instr, vf[FT]);
 }
 
-template<> void vmaddai<Interpreter>(u32 instr)
+void vmaddai(u32 instr)
 {
     mul_and_arith_acc<add_t>(instr, I);
 }
 
-template<> void vmaddaq<Interpreter>(u32 instr)
+void vmaddaq(u32 instr)
 {
     mul_and_arith_acc<add_t>(instr, Q);
 }
 
-template<> void vmaddabc<Interpreter>(u32 instr)
+void vmaddabc(u32 instr)
 {
     mul_and_arith_acc<add_t>(instr, vf[FT][BC]);
 }
 
-template<> void vmaddi<Interpreter>(u32 instr)
+void vmaddi(u32 instr)
 {
     mul_and_arith<add_t>(instr, I);
 }
 
-template<> void vmaddq<Interpreter>(u32 instr)
+void vmaddq(u32 instr)
 {
     mul_and_arith<add_t>(instr, Q);
 }
 
-template<> void vmaddbc<Interpreter>(u32 instr)
+void vmaddbc(u32 instr)
 {
     mul_and_arith<add_t>(instr, vf[FS][BC]);
 }
 
-template<> void vmax<Interpreter>(u32 instr)
+void vmax(u32 instr)
 {
     max(instr, vf[FT]);
 }
 
-template<> void vmaxi<Interpreter>(u32 instr)
+void vmaxi(u32 instr)
 {
     max(instr, I);
 }
 
-template<> void vmaxbc<Interpreter>(u32 instr)
+void vmaxbc(u32 instr)
 {
     max(instr, vf[FT][BC]);
 }
 
-template<> void vmfir<Interpreter>(u32 instr)
+void vmfir(u32 instr)
 {
     for (int i = 0; i < 4; ++i) {
         if (DST(i)) {
@@ -339,22 +397,22 @@ template<> void vmfir<Interpreter>(u32 instr)
     }
 }
 
-template<> void vmini<Interpreter>(u32 instr)
+void vmini(u32 instr)
 {
     min(instr, vf[FT]);
 }
 
-template<> void vminii<Interpreter>(u32 instr)
+void vminii(u32 instr)
 {
     min(instr, I);
 }
 
-template<> void vminibc<Interpreter>(u32 instr)
+void vminibc(u32 instr)
 {
     min(instr, vf[FT][BC]);
 }
 
-template<> void vmove<Interpreter>(u32 instr)
+void vmove(u32 instr)
 {
     for (int i = 0; i < 4; ++i) {
         if (DST(i)) {
@@ -364,100 +422,102 @@ template<> void vmove<Interpreter>(u32 instr)
     }
 }
 
-template<> void vmr32<Interpreter>(u32 instr)
+void vmr32(u32 instr)
 {
+    (void)instr;
 }
 
-template<> void vmsub<Interpreter>(u32 instr)
+void vmsub(u32 instr)
 {
     mul_and_arith<sub_t>(instr, vf[FS]);
 }
 
-template<> void vmsuba<Interpreter>(u32 instr)
+void vmsuba(u32 instr)
 {
     mul_and_arith_acc<sub_t>(instr, vf[FT]);
 }
 
-template<> void vmsubai<Interpreter>(u32 instr)
+void vmsubai(u32 instr)
 {
     mul_and_arith_acc<sub_t>(instr, I);
 }
 
-template<> void vmsubaq<Interpreter>(u32 instr)
+void vmsubaq(u32 instr)
 {
     mul_and_arith_acc<sub_t>(instr, Q);
 }
 
-template<> void vmsubabc<Interpreter>(u32 instr)
+void vmsubabc(u32 instr)
 {
     mul_and_arith_acc<sub_t>(instr, vf[FT][BC]);
 }
 
-template<> void vmsubi<Interpreter>(u32 instr)
+void vmsubi(u32 instr)
 {
     mul_and_arith<sub_t>(instr, I);
 }
 
-template<> void vmsubq<Interpreter>(u32 instr)
+void vmsubq(u32 instr)
 {
     mul_and_arith<sub_t>(instr, Q);
 }
 
-template<> void vmsubbc<Interpreter>(u32 instr)
+void vmsubbc(u32 instr)
 {
     mul_and_arith<sub_t>(instr, vf[FS][BC]);
 }
 
-template<> void vmtir<Interpreter>(u32 instr)
+void vmtir(u32 instr)
 {
     vi[IT] = std::bit_cast<u32>(vf[FS][instr >> 21 & 3]);
 }
 
-template<> void vmul<Interpreter>(u32 instr)
+void vmul(u32 instr)
 {
     arith<mul_t>(instr, vf[FS]);
 }
 
-template<> void vmula<Interpreter>(u32 instr)
+void vmula(u32 instr)
 {
     arith_acc<mul_t>(instr, vf[FT]);
 }
 
-template<> void vmulai<Interpreter>(u32 instr)
+void vmulai(u32 instr)
 {
     arith_acc<mul_t>(instr, I);
 }
 
-template<> void vmulaq<Interpreter>(u32 instr)
+void vmulaq(u32 instr)
 {
     arith_acc<mul_t>(instr, Q);
 }
 
-template<> void vmulabc<Interpreter>(u32 instr)
+void vmulabc(u32 instr)
 {
     arith_acc<mul_t>(instr, vf[FT][BC]);
 }
 
-template<> void vmuli<Interpreter>(u32 instr)
+void vmuli(u32 instr)
 {
     arith<mul_t>(instr, I);
 }
 
-template<> void vmulq<Interpreter>(u32 instr)
+void vmulq(u32 instr)
 {
     arith<mul_t>(instr, Q);
 }
 
-template<> void vmulbc<Interpreter>(u32 instr)
+void vmulbc(u32 instr)
 {
     arith<mul_t>(instr, vf[FS][BC]);
 }
 
-template<> void vnop<Interpreter>(u32 instr)
+void vnop(u32 instr)
 {
+    (void)instr;
 }
 
-template<> void vopmsub<Interpreter>(u32 instr)
+void vopmsub(u32 instr)
 {
     EeF32 a = vf[FS][INDEX_Y] * vf[FT][INDEX_Z];
     EeF32 b = vf[FS][INDEX_Z] * vf[FT][INDEX_Y];
@@ -473,7 +533,7 @@ template<> void vopmsub<Interpreter>(u32 instr)
     mac.update(INDEX_Z, e - f);
 }
 
-template<> void vopmula<Interpreter>(u32 instr)
+void vopmula(u32 instr)
 {
     EeF32 a = vf[FS][INDEX_Y] * vf[FT][INDEX_Z];
     EeF32 b = vf[FS][INDEX_Z] * vf[FT][INDEX_Y];
@@ -486,7 +546,7 @@ template<> void vopmula<Interpreter>(u32 instr)
     acc[INDEX_Z] = e + f;
 }
 
-template<> void vrget<Interpreter>(u32 instr)
+void vrget(u32 instr)
 {
     for (int i = 0; i < 4; ++i) {
         if (DST(i)) {
@@ -496,15 +556,17 @@ template<> void vrget<Interpreter>(u32 instr)
     }
 }
 
-template<> void vrinit<Interpreter>(u32 instr)
+void vrinit(u32 instr)
 {
+    (void)instr;
 }
 
-template<> void vrnext<Interpreter>(u32 instr)
+void vrnext(u32 instr)
 {
+    (void)instr;
 }
 
-template<> void vrsqrt<Interpreter>(u32 instr)
+void vrsqrt(u32 instr)
 {
     EeF32 op1 = vf[FS][instr >> 21 & 3];
     if (op1 > 0.f) {
@@ -516,20 +578,23 @@ template<> void vrsqrt<Interpreter>(u32 instr)
     }
 }
 
-template<> void vrxor<Interpreter>(u32 instr)
+void vrxor(u32 instr)
 {
-    R = R ^ vf[FS][instr >> 21 & 3];
+    (void)instr;
+    // R = R ^ vf[FS][instr >> 21 & 3];
 }
 
-template<> void vsqd<Interpreter>(u32 instr)
+void vsqd(u32 instr)
 {
+    (void)instr;
 }
 
-template<> void vsqi<Interpreter>(u32 instr)
+void vsqi(u32 instr)
 {
+    (void)instr;
 }
 
-template<> void vsqrt<Interpreter>(u32 instr)
+void vsqrt(u32 instr)
 {
     EeF32 op = vf[FT][instr >> 23 & 3];
     if (op >= 0.f) {
@@ -539,48 +604,49 @@ template<> void vsqrt<Interpreter>(u32 instr)
     }
 }
 
-template<> void vsub<Interpreter>(u32 instr)
+void vsub(u32 instr)
 {
     arith<sub_t>(instr, vf[FS]);
 }
 
-template<> void vsuba<Interpreter>(u32 instr)
+void vsuba(u32 instr)
 {
     arith_acc<sub_t>(instr, vf[FT]);
 }
 
-template<> void vsubai<Interpreter>(u32 instr)
+void vsubai(u32 instr)
 {
     arith_acc<sub_t>(instr, I);
 }
 
-template<> void vsubaq<Interpreter>(u32 instr)
+void vsubaq(u32 instr)
 {
     arith_acc<sub_t>(instr, Q);
 }
 
-template<> void vsubabc<Interpreter>(u32 instr)
+void vsubabc(u32 instr)
 {
     arith_acc<sub_t>(instr, vf[FT][BC]);
 }
 
-template<> void vsubi<Interpreter>(u32 instr)
+void vsubi(u32 instr)
 {
     arith<sub_t>(instr, I);
 }
 
-template<> void vsubq<Interpreter>(u32 instr)
+void vsubq(u32 instr)
 {
     arith<sub_t>(instr, Q);
 }
 
-template<> void vsubbc<Interpreter>(u32 instr)
+void vsubbc(u32 instr)
 {
     arith<sub_t>(instr, vf[FS][BC]);
 }
 
-template<> void vwaitq<Interpreter>(u32 instr)
+void vwaitq(u32 instr)
 {
+    (void)instr;
 }
 
 } // namespace ee::vu

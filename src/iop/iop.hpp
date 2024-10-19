@@ -1,7 +1,7 @@
 #pragma once
 
 #include "mips/gpr.hpp"
-#include "types.hpp"
+#include "numtypes.hpp"
 
 #include <array>
 #include <concepts>

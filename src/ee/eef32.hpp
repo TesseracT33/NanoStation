@@ -1,6 +1,6 @@
 #pragma once
 
-#include "types.hpp"
+#include "numtypes.hpp"
 
 #include <bit>
 
@@ -13,13 +13,6 @@ struct EeF32 {
         return *this;
     }
     constexpr operator f32() const { return value; }
-
-    constexpr friend EeF32 operator^(EeF32 a, EeF32 b)
-    {
-        u32 a_u32 = std::bit_cast<u32>(a.value);
-        u32 b_u32 = std::bit_cast<u32>(b.value);
-        return std::bit_cast<f32>(a ^ b);
-    }
 
 private:
     static constexpr f32 ieee754_to_ee(f32 f)

@@ -14,23 +14,27 @@ namespace ee {
 
 using enum mips::CpuImpl;
 
-template<> void bc0f<Interpreter>(s16 imm)
+void bc0f(s16 imm)
 {
+    (void)imm;
 }
 
-template<> void bc0fl<Interpreter>(s16 imm)
+void bc0fl(s16 imm)
 {
+    (void)imm;
 }
 
-template<> void bc0t<Interpreter>(s16 imm)
+void bc0t(s16 imm)
 {
+    (void)imm;
 }
 
-template<> void bc0tl<Interpreter>(s16 imm)
+void bc0tl(s16 imm)
 {
+    (void)imm;
 }
 
-template<> void di<Interpreter>()
+void di()
 {
     u32 edi_erl_exi = cop0.status.raw & 0x20006;
     if ((cop0.status.ksu == 0) | edi_erl_exi) {
@@ -38,7 +42,7 @@ template<> void di<Interpreter>()
     }
 }
 
-template<> void ei<Interpreter>()
+void ei()
 {
     u32 edi_erl_exi = cop0.status.raw & 0x20006;
     if ((cop0.status.ksu == 0) | edi_erl_exi) {
@@ -46,7 +50,7 @@ template<> void ei<Interpreter>()
     }
 }
 
-template<> void eret<Interpreter>()
+void eret()
 {
     if (cop0.status.erl) {
         pc = cop0.error_epc;
@@ -57,17 +61,17 @@ template<> void eret<Interpreter>()
     }
 }
 
-template<> void mfc0<Interpreter>(u32 rd, u32 rt)
+void mfc0(u32 rd, u32 rt)
 {
     gpr.set(rt, s32(cop0.get(rd)));
 }
 
-template<> void mtc0<Interpreter>(u32 rd, u32 rt)
+void mtc0(u32 rd, u32 rt)
 {
     cop0.set(rd, gpr[rt].u32());
 }
 
-template<> void tlbp<Interpreter>()
+void tlbp()
 {
     auto tlb_idx = std::ranges::find_if(tlb_entries, [](TlbEntry const& entry) {
         return (entry.hi.raw & entry.vpn2_addr_mask) == (cop0.entry_hi.raw & entry.vpn2_addr_mask)
@@ -78,22 +82,22 @@ template<> void tlbp<Interpreter>()
         cop0.index.value = 0;
     } else {
         cop0.index.p = 0;
-        cop0.index.value = u32(std::distance(tlb_entries.begin(), tlb_idx));
+        cop0.index.value = u8(std::distance(tlb_entries.begin(), tlb_idx));
     }
 }
 
-template<> void tlbr<Interpreter>()
+void tlbr()
 {
     // TODO: what should happen if index >= size?
     tlb_entries[cop0.index.value % tlb_entries.size()].read();
 }
 
-template<> void tlbwi<Interpreter>()
+void tlbwi()
 {
     tlb_entries[cop0.index.value % tlb_entries.size()].write();
 }
 
-template<> void tlbwr<Interpreter>()
+void tlbwr()
 {
     tlb_entries[cop0.random % tlb_entries.size()].write();
 }

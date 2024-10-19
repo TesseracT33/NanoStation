@@ -9,7 +9,7 @@ namespace ee {
 
 using enum mips::CpuImpl;
 
-template<> void add<Interpreter>(u32 rs, u32 rt, u32 rd)
+void add(u32 rs, u32 rt, u32 rd)
 {
     s32 sum;
     bool overflow;
@@ -26,7 +26,7 @@ template<> void add<Interpreter>(u32 rs, u32 rt, u32 rd)
     }
 }
 
-template<> void addi<Interpreter>(u32 rs, u32 rt, s16 imm)
+void addi(u32 rs, u32 rt, s16 imm)
 {
     s32 sum;
     bool overflow;
@@ -43,34 +43,34 @@ template<> void addi<Interpreter>(u32 rs, u32 rt, s16 imm)
     }
 }
 
-template<> void addiu<Interpreter>(u32 rs, u32 rt, s16 imm)
+void addiu(u32 rs, u32 rt, s16 imm)
 {
     gpr.set(rt, gpr[rs].s32() + imm);
 }
 
-template<> void addu<Interpreter>(u32 rs, u32 rt, u32 rd)
+void addu(u32 rs, u32 rt, u32 rd)
 {
     gpr.set(rd, gpr[rs].s32() + gpr[rt].s32());
 }
 
-template<> void and_<Interpreter>(u32 rs, u32 rt, u32 rd)
+void and_(u32 rs, u32 rt, u32 rd)
 {
     gpr.set(rd, gpr[rs].s64() & gpr[rt].s64());
 }
 
-template<> void andi<Interpreter>(u32 rs, u32 rt, u16 imm)
+void andi(u32 rs, u32 rt, u16 imm)
 {
     gpr.set(rt, gpr[rs].s64() & imm);
 }
 
-template<> void beq<Interpreter>(u32 rs, u32 rt, s16 imm)
+void beq(u32 rs, u32 rt, s16 imm)
 {
     if (gpr[rs].s64() == gpr[rt].s64()) {
         jump(pc + (imm << 2));
     }
 }
 
-template<> void beql<Interpreter>(u32 rs, u32 rt, s16 imm)
+void beql(u32 rs, u32 rt, s16 imm)
 {
     if (gpr[rs].s64() == gpr[rt].s64()) {
         jump(pc + (imm << 2));
@@ -79,14 +79,14 @@ template<> void beql<Interpreter>(u32 rs, u32 rt, s16 imm)
     }
 }
 
-template<> void bgez<Interpreter>(u32 rs, s16 imm)
+void bgez(u32 rs, s16 imm)
 {
     if (gpr[rs].s64() >= 0) {
         jump(pc + (imm << 2));
     }
 }
 
-template<> void bgezal<Interpreter>(u32 rs, s16 imm)
+void bgezal(u32 rs, s16 imm)
 {
     gpr.set(31, 4 + (in_branch_delay_slot ? jump_addr : pc));
     if (gpr[rs].s64() >= 0) {
@@ -94,7 +94,7 @@ template<> void bgezal<Interpreter>(u32 rs, s16 imm)
     }
 }
 
-template<> void bgezall<Interpreter>(u32 rs, s16 imm)
+void bgezall(u32 rs, s16 imm)
 {
     gpr.set(31, 4 + (in_branch_delay_slot ? jump_addr : pc));
     if (gpr[rs].s64() >= 0) {
@@ -104,7 +104,7 @@ template<> void bgezall<Interpreter>(u32 rs, s16 imm)
     }
 }
 
-template<> void bgezl<Interpreter>(u32 rs, s16 imm)
+void bgezl(u32 rs, s16 imm)
 {
     if (gpr[rs].s64() >= 0) {
         jump(pc + (imm << 2));
@@ -113,14 +113,14 @@ template<> void bgezl<Interpreter>(u32 rs, s16 imm)
     }
 }
 
-template<> void bgtz<Interpreter>(u32 rs, s16 imm)
+void bgtz(u32 rs, s16 imm)
 {
     if (gpr[rs].s64() > 0) {
         jump(pc + (imm << 2));
     }
 }
 
-template<> void bgtzl<Interpreter>(u32 rs, s16 imm)
+void bgtzl(u32 rs, s16 imm)
 {
     if (gpr[rs].s64() > 0) {
         jump(pc + (imm << 2));
@@ -129,14 +129,14 @@ template<> void bgtzl<Interpreter>(u32 rs, s16 imm)
     }
 }
 
-template<> void blez<Interpreter>(u32 rs, s16 imm)
+void blez(u32 rs, s16 imm)
 {
     if (gpr[rs].s64() <= 0) {
         jump(pc + (imm << 2));
     }
 }
 
-template<> void blezl<Interpreter>(u32 rs, s16 imm)
+void blezl(u32 rs, s16 imm)
 {
     if (gpr[rs].s64() <= 0) {
         jump(pc + (imm << 2));
@@ -145,14 +145,14 @@ template<> void blezl<Interpreter>(u32 rs, s16 imm)
     }
 }
 
-template<> void bltz<Interpreter>(u32 rs, s16 imm)
+void bltz(u32 rs, s16 imm)
 {
     if (gpr[rs].s64() < 0) {
         jump(pc + (imm << 2));
     }
 }
 
-template<> void bltzal<Interpreter>(u32 rs, s16 imm)
+void bltzal(u32 rs, s16 imm)
 {
     gpr.set(31, 4 + (in_branch_delay_slot ? jump_addr : pc));
     if (gpr[rs].s64() < 0) {
@@ -160,7 +160,7 @@ template<> void bltzal<Interpreter>(u32 rs, s16 imm)
     }
 }
 
-template<> void bltzall<Interpreter>(u32 rs, s16 imm)
+void bltzall(u32 rs, s16 imm)
 {
     gpr.set(31, 4 + (in_branch_delay_slot ? jump_addr : pc));
     if (gpr[rs].s64() < 0) {
@@ -170,7 +170,7 @@ template<> void bltzall<Interpreter>(u32 rs, s16 imm)
     }
 }
 
-template<> void bltzl<Interpreter>(u32 rs, s16 imm)
+void bltzl(u32 rs, s16 imm)
 {
     if (gpr[rs].s64() < 0) {
         jump(pc + (imm << 2));
@@ -179,14 +179,14 @@ template<> void bltzl<Interpreter>(u32 rs, s16 imm)
     }
 }
 
-template<> void bne<Interpreter>(u32 rs, u32 rt, s16 imm)
+void bne(u32 rs, u32 rt, s16 imm)
 {
     if (gpr[rs].s64() != gpr[rt].s64()) {
         jump(pc + (imm << 2));
     }
 }
 
-template<> void bnel<Interpreter>(u32 rs, u32 rt, s16 imm)
+void bnel(u32 rs, u32 rt, s16 imm)
 {
     if (gpr[rs].s64() != gpr[rt].s64()) {
         jump(pc + (imm << 2));
@@ -195,17 +195,17 @@ template<> void bnel<Interpreter>(u32 rs, u32 rt, s16 imm)
     }
 }
 
-template<> void break_<Interpreter>()
+void break_()
 {
     breakpoint_exception();
 }
 
-template<> void cache<Interpreter>()
+void cache()
 {
     // TODO
 }
 
-template<> void dadd<Interpreter>(u32 rs, u32 rt, u32 rd)
+void dadd(u32 rs, u32 rt, u32 rd)
 {
     s64 sum;
     bool overflow;
@@ -222,7 +222,7 @@ template<> void dadd<Interpreter>(u32 rs, u32 rt, u32 rd)
     }
 }
 
-template<> void daddi<Interpreter>(u32 rs, u32 rt, s16 imm)
+void daddi(u32 rs, u32 rt, s16 imm)
 {
     s64 sum;
     bool overflow;
@@ -239,17 +239,17 @@ template<> void daddi<Interpreter>(u32 rs, u32 rt, s16 imm)
     }
 }
 
-template<> void daddiu<Interpreter>(u32 rs, u32 rt, s16 imm)
+void daddiu(u32 rs, u32 rt, s16 imm)
 {
     gpr.set(rt, gpr[rs].s64() + imm);
 }
 
-template<> void daddu<Interpreter>(u32 rs, u32 rt, u32 rd)
+void daddu(u32 rs, u32 rt, u32 rd)
 {
     gpr.set(rd, gpr[rs].s64() + gpr[rt].s64());
 }
 
-template<> void div<Interpreter>(u32 rs, u32 rt)
+void div(u32 rs, u32 rt)
 {
     s32 op1 = gpr[rs].s32();
     s32 op2 = gpr[rt].s32();
@@ -265,7 +265,7 @@ template<> void div<Interpreter>(u32 rs, u32 rt)
     }
 }
 
-template<> void div1<Interpreter>(u32 rs, u32 rt)
+void div1(u32 rs, u32 rt)
 {
     s32 op1 = gpr[rs].s32();
     s32 op2 = gpr[rt].s32();
@@ -281,7 +281,7 @@ template<> void div1<Interpreter>(u32 rs, u32 rt)
     }
 }
 
-template<> void divu<Interpreter>(u32 rs, u32 rt)
+void divu(u32 rs, u32 rt)
 {
     u32 op1 = gpr[rs].u32();
     u32 op2 = gpr[rt].u32();
@@ -294,7 +294,7 @@ template<> void divu<Interpreter>(u32 rs, u32 rt)
     }
 }
 
-template<> void divu1<Interpreter>(u32 rs, u32 rt)
+void divu1(u32 rs, u32 rt)
 {
     u32 op1 = gpr[rs].u32();
     u32 op2 = gpr[rt].u32();
@@ -307,52 +307,52 @@ template<> void divu1<Interpreter>(u32 rs, u32 rt)
     }
 }
 
-template<> void dsll<Interpreter>(u32 rt, u32 rd, u32 sa)
+void dsll(u32 rt, u32 rd, u32 sa)
 {
     gpr.set(rd, gpr[rt].s64() << sa);
 }
 
-template<> void dsll32<Interpreter>(u32 rt, u32 rd, u32 sa)
+void dsll32(u32 rt, u32 rd, u32 sa)
 {
     gpr.set(rd, gpr[rt].s64() << (sa + 32));
 }
 
-template<> void dsllv<Interpreter>(u32 rs, u32 rt, u32 rd)
+void dsllv(u32 rs, u32 rt, u32 rd)
 {
     gpr.set(rd, gpr[rt].s64() << (gpr[rs].s32() & 63));
 }
 
-template<> void dsra<Interpreter>(u32 rt, u32 rd, u32 sa)
+void dsra(u32 rt, u32 rd, u32 sa)
 {
     gpr.set(rd, gpr[rt].s64() >> sa);
 }
 
-template<> void dsra32<Interpreter>(u32 rt, u32 rd, u32 sa)
+void dsra32(u32 rt, u32 rd, u32 sa)
 {
     gpr.set(rd, gpr[rt].s64() >> (sa + 32));
 }
 
-template<> void dsrav<Interpreter>(u32 rs, u32 rt, u32 rd)
+void dsrav(u32 rs, u32 rt, u32 rd)
 {
     gpr.set(rd, gpr[rt].s64() >> (gpr[rs].s32() & 63));
 }
 
-template<> void dsrl<Interpreter>(u32 rt, u32 rd, u32 sa)
+void dsrl(u32 rt, u32 rd, u32 sa)
 {
     gpr.set(rd, gpr[rt].u64() >> sa);
 }
 
-template<> void dsrl32<Interpreter>(u32 rt, u32 rd, u32 sa)
+void dsrl32(u32 rt, u32 rd, u32 sa)
 {
     gpr.set(rd, gpr[rt].u64() >> (sa + 32));
 }
 
-template<> void dsrlv<Interpreter>(u32 rs, u32 rt, u32 rd)
+void dsrlv(u32 rs, u32 rt, u32 rd)
 {
     gpr.set(rd, gpr[rt].u64() >> (gpr[rs].s32() & 63));
 }
 
-template<> void dsub<Interpreter>(u32 rs, u32 rt, u32 rd)
+void dsub(u32 rs, u32 rt, u32 rd)
 {
     s64 sum;
     bool overflow;
@@ -369,19 +369,19 @@ template<> void dsub<Interpreter>(u32 rs, u32 rt, u32 rd)
     }
 }
 
-template<> void dsubu<Interpreter>(u32 rs, u32 rt, u32 rd)
+void dsubu(u32 rs, u32 rt, u32 rd)
 {
     gpr.set(rd, gpr[rs].s64() - gpr[rt].s64());
 }
 
-template<> void j<Interpreter>(u32 imm26)
+void j(u32 imm26)
 {
     if (!in_branch_delay_slot) {
         jump(pc & 0xF000'0000 | imm26 << 2);
     }
 }
 
-template<> void jal<Interpreter>(u32 imm26)
+void jal(u32 imm26)
 {
     if (!in_branch_delay_slot) {
         jump(pc & 0xF000'0000 | imm26 << 2);
@@ -389,7 +389,7 @@ template<> void jal<Interpreter>(u32 imm26)
     gpr.set(31, 4 + (in_branch_delay_slot ? jump_addr : pc));
 }
 
-template<> void jalr<Interpreter>(u32 rs, u32 rd)
+void jalr(u32 rs, u32 rd)
 {
     if (!in_branch_delay_slot) {
         s32 target = gpr[rs].s32();
@@ -402,7 +402,7 @@ template<> void jalr<Interpreter>(u32 rs, u32 rd)
     gpr.set(rd, 4 + (in_branch_delay_slot ? jump_addr : pc));
 }
 
-template<> void jr<Interpreter>(u32 rs)
+void jr(u32 rs)
 {
     if (!in_branch_delay_slot) {
         s32 target = gpr[rs].s32();
@@ -414,7 +414,7 @@ template<> void jr<Interpreter>(u32 rs)
     }
 }
 
-template<> void lb<Interpreter>(u32 rs, u32 rt, s16 imm)
+void lb(u32 rs, u32 rt, s16 imm)
 {
     s8 val = virtual_read<u8>(gpr[rs].s32() + imm);
     if (!exception_occurred) {
@@ -422,7 +422,7 @@ template<> void lb<Interpreter>(u32 rs, u32 rt, s16 imm)
     }
 }
 
-template<> void lbu<Interpreter>(u32 rs, u32 rt, s16 imm)
+void lbu(u32 rs, u32 rt, s16 imm)
 {
     u8 val = virtual_read<u8>(gpr[rs].s32() + imm);
     if (!exception_occurred) {
@@ -430,7 +430,7 @@ template<> void lbu<Interpreter>(u32 rs, u32 rt, s16 imm)
     }
 }
 
-template<> void ld<Interpreter>(u32 rs, u32 rt, s16 imm)
+void ld(u32 rs, u32 rt, s16 imm)
 {
     s64 val = virtual_read<u64>(gpr[rs].s32() + imm);
     if (!exception_occurred) {
@@ -438,7 +438,7 @@ template<> void ld<Interpreter>(u32 rs, u32 rt, s16 imm)
     }
 }
 
-template<> void ldl<Interpreter>(u32 rs, u32 rt, s16 imm)
+void ldl(u32 rs, u32 rt, s16 imm)
 {
     s32 addr = gpr[rs].s32() + imm;
     s64 val = virtual_read<u64, Alignment::Unaligned>(addr);
@@ -448,7 +448,7 @@ template<> void ldl<Interpreter>(u32 rs, u32 rt, s16 imm)
     }
 }
 
-template<> void ldr<Interpreter>(u32 rs, u32 rt, s16 imm)
+void ldr(u32 rs, u32 rt, s16 imm)
 {
     s32 addr = gpr[rs].s32() + imm;
     s64 val = virtual_read<u64, Alignment::Unaligned>(addr);
@@ -460,7 +460,7 @@ template<> void ldr<Interpreter>(u32 rs, u32 rt, s16 imm)
     }
 }
 
-template<> void lh<Interpreter>(u32 rs, u32 rt, s16 imm)
+void lh(u32 rs, u32 rt, s16 imm)
 {
     s16 val = virtual_read<u16>(gpr[rs].s32() + imm);
     if (!exception_occurred) {
@@ -468,7 +468,7 @@ template<> void lh<Interpreter>(u32 rs, u32 rt, s16 imm)
     }
 }
 
-template<> void lhu<Interpreter>(u32 rs, u32 rt, s16 imm)
+void lhu(u32 rs, u32 rt, s16 imm)
 {
     u16 val = virtual_read<u16>(gpr[rs].s32() + imm);
     if (!exception_occurred) {
@@ -476,7 +476,7 @@ template<> void lhu<Interpreter>(u32 rs, u32 rt, s16 imm)
     }
 }
 
-template<> void lq<Interpreter>(u32 rs, u32 rt, s16 imm)
+void lq(u32 rs, u32 rt, s16 imm)
 {
     u128 val = virtual_read<u128>((gpr[rs].s32() + imm) & ~15);
     if (!exception_occurred) {
@@ -484,12 +484,12 @@ template<> void lq<Interpreter>(u32 rs, u32 rt, s16 imm)
     }
 }
 
-template<> void lui<Interpreter>(u32 rt, s16 imm)
+void lui(u32 rt, s16 imm)
 {
     gpr.set(rt, imm << 16);
 }
 
-template<> void lw<Interpreter>(u32 rs, u32 rt, s16 imm)
+void lw(u32 rs, u32 rt, s16 imm)
 {
     s32 val = virtual_read<u32>(gpr[rs].s32() + imm);
     if (!exception_occurred) {
@@ -497,7 +497,7 @@ template<> void lw<Interpreter>(u32 rs, u32 rt, s16 imm)
     }
 }
 
-template<> void lwl<Interpreter>(u32 rs, u32 rt, s16 imm)
+void lwl(u32 rs, u32 rt, s16 imm)
 {
     s32 addr = gpr[rs].s32() + imm;
     s32 val = virtual_read<u32, Alignment::Unaligned>(addr);
@@ -507,7 +507,7 @@ template<> void lwl<Interpreter>(u32 rs, u32 rt, s16 imm)
     }
 }
 
-template<> void lwr<Interpreter>(u32 rs, u32 rt, s16 imm)
+void lwr(u32 rs, u32 rt, s16 imm)
 {
     s32 addr = gpr[rs].s32() + imm;
     s32 val = virtual_read<u32, Alignment::Unaligned>(addr);
@@ -519,7 +519,7 @@ template<> void lwr<Interpreter>(u32 rs, u32 rt, s16 imm)
     }
 }
 
-template<> void lwu<Interpreter>(u32 rs, u32 rt, s16 imm)
+void lwu(u32 rs, u32 rt, s16 imm)
 {
     u32 val = virtual_read<u32>(gpr[rs].s32() + imm);
     if (!exception_occurred) {
@@ -527,228 +527,240 @@ template<> void lwu<Interpreter>(u32 rs, u32 rt, s16 imm)
     }
 }
 
-template<> void mfhi<Interpreter>(u32 rd)
+void mfhi(u32 rd)
 {
     gpr.set(rd, hi);
 }
 
-template<> void mfhi1<Interpreter>(u32 rd)
+void mfhi1(u32 rd)
 {
     gpr.set(rd, hi.get_upper_dword());
 }
 
-template<> void mflo<Interpreter>(u32 rd)
+void mflo(u32 rd)
 {
     gpr.set(rd, lo);
 }
 
-template<> void mflo1<Interpreter>(u32 rd)
+void mflo1(u32 rd)
 {
     gpr.set(rd, lo.get_upper_dword());
 }
 
-template<> void mfsa<Interpreter>(u32 rd)
+void mfsa(u32 rd)
 {
     gpr.set(rd, sa);
 }
 
-template<> void movn<Interpreter>(u32 rs, u32 rt, u32 rd)
+void movn(u32 rs, u32 rt, u32 rd)
 {
     if (gpr[rt].s64() != 0) {
         gpr.set(rd, gpr[rs].s64());
     }
 }
 
-template<> void movz<Interpreter>(u32 rs, u32 rt, u32 rd)
+void movz(u32 rs, u32 rt, u32 rd)
 {
     if (gpr[rt].s64() == 0) {
         gpr.set(rd, gpr[rs].s64());
     }
 }
 
-template<> void mthi<Interpreter>(u32 rs)
+void mthi(u32 rs)
 {
     hi = gpr[rs].s64();
 }
 
-template<> void mthi1<Interpreter>(u32 rs)
+void mthi1(u32 rs)
 {
     hi.set_upper_dword(gpr[rs].s64());
 }
 
-template<> void mtlo<Interpreter>(u32 rs)
+void mtlo(u32 rs)
 {
     lo = gpr[rs].s64();
 }
 
-template<> void mtlo1<Interpreter>(u32 rs)
+void mtlo1(u32 rs)
 {
     lo.set_upper_dword(gpr[rs].s64());
 }
 
-template<> void mtsa<Interpreter>(u32 rs)
+void mtsa(u32 rs)
 {
     sa = gpr[rs].u32();
 }
 
-template<> void mtsab<Interpreter>(u32 rs, s16 imm)
+void mtsab(u32 rs, s16 imm)
 {
     sa = 8 * (15 & (gpr[rs].s16() ^ imm));
 }
 
-template<> void mtsah<Interpreter>(u32 rs, s16 imm)
+void mtsah(u32 rs, s16 imm)
 {
     sa = 16 * (7 & (gpr[rs].s16() ^ imm));
 }
 
-template<> void mult<Interpreter>(u32 rs, u32 rt)
+void mult(u32 rs, u32 rt)
 {
     s64 prod = s64(gpr[rs].s32()) * s64(gpr[rt].s32());
     lo = s32(prod);
     hi = prod >> 32;
 }
 
-template<> void mult1<Interpreter>(u32 rs, u32 rt)
+void mult1(u32 rs, u32 rt)
 {
     s64 prod = s64(gpr[rs].s32()) * s64(gpr[rt].s32());
     lo.set_upper_dword(s32(prod));
     hi.set_upper_dword(prod >> 32);
 }
 
-template<> void multu<Interpreter>(u32 rs, u32 rt)
+void multu(u32 rs, u32 rt)
 {
     u64 prod = u64(gpr[rs].u32()) * u64(gpr[rt].u32());
     lo = s32(prod);
     hi = s32(prod >> 32);
 }
 
-template<> void multu1<Interpreter>(u32 rs, u32 rt)
+void multu1(u32 rs, u32 rt)
 {
     u64 prod = u64(gpr[rs].u32()) * u64(gpr[rt].u32());
     lo.set_upper_dword(s32(prod));
     hi.set_upper_dword(s32(prod >> 32));
 }
 
-template<> void nor<Interpreter>(u32 rs, u32 rt, u32 rd)
+void nor(u32 rs, u32 rt, u32 rd)
 {
     gpr.set(rd, ~(gpr[rs].s64() | gpr[rt].s64()));
 }
 
-template<> void or_<Interpreter>(u32 rs, u32 rt, u32 rd)
+void or_(u32 rs, u32 rt, u32 rd)
 {
     gpr.set(rd, gpr[rs].s64() | gpr[rt].s64());
 }
 
-template<> void ori<Interpreter>(u32 rs, u32 rt, u16 imm)
+void ori(u32 rs, u32 rt, u16 imm)
 {
     gpr.set(rt, gpr[rs].s64() | imm);
 }
 
-template<> void pref<Interpreter>()
+void pref()
 {
 }
 
-template<> void sb<Interpreter>(u32 rs, u32 rt, s16 imm)
+void sb(u32 rs, u32 rt, s16 imm)
 {
     virtual_write<1>(gpr[rs].s32() + imm, gpr[rt].s8());
 }
 
-template<> void sd<Interpreter>(u32 rs, u32 rt, s16 imm)
+void sd(u32 rs, u32 rt, s16 imm)
 {
     virtual_write<8>(gpr[rs].s32() + imm, gpr[rt].s64());
 }
 
-template<> void sdl<Interpreter>(u32 rs, u32 rt, s16 imm)
+void sdl(u32 rs, u32 rt, s16 imm)
 {
+    (void)rs;
+    (void)rt;
+    (void)imm;
 }
 
-template<> void sdr<Interpreter>(u32 rs, u32 rt, s16 imm)
+void sdr(u32 rs, u32 rt, s16 imm)
 {
+    (void)rs;
+    (void)rt;
+    (void)imm;
 }
 
-template<> void sh<Interpreter>(u32 rs, u32 rt, s16 imm)
+void sh(u32 rs, u32 rt, s16 imm)
 {
     virtual_write<2>(gpr[rs].s32() + imm, gpr[rt].s16());
 }
 
-template<> void sll<Interpreter>(u32 rt, u32 rd, u32 sa)
+void sll(u32 rt, u32 rd, u32 sa)
 {
     gpr.set(rd, gpr[rt].s32() << sa);
 }
 
-template<> void sllv<Interpreter>(u32 rs, u32 rt, u32 rd)
+void sllv(u32 rs, u32 rt, u32 rd)
 {
     gpr.set(rd, gpr[rt].s32() << (gpr[rs].s32() & 31));
 }
 
-template<> void slt<Interpreter>(u32 rs, u32 rt, u32 rd)
+void slt(u32 rs, u32 rt, u32 rd)
 {
     gpr.set(rd, gpr[rs].s64() < gpr[rt].s64());
 }
 
-template<> void slti<Interpreter>(u32 rs, u32 rt, s16 imm)
+void slti(u32 rs, u32 rt, s16 imm)
 {
     gpr.set(rt, gpr[rs].s64() < imm);
 }
 
-template<> void sltiu<Interpreter>(u32 rs, u32 rt, s16 imm)
+void sltiu(u32 rs, u32 rt, s16 imm)
 {
     gpr.set(rt, gpr[rs].u64() < u64(imm));
 }
 
-template<> void sltu<Interpreter>(u32 rs, u32 rt, u32 rd)
+void sltu(u32 rs, u32 rt, u32 rd)
 {
     gpr.set(rd, gpr[rs].u64() < gpr[rt].u64());
 }
 
-template<> void sq<Interpreter>(u32 rs, u32 rt, s16 imm)
+void sq(u32 rs, u32 rt, s16 imm)
 {
     virtual_write<16>((gpr[rs].s32() + imm) & ~15, gpr[rt].m128i());
 }
 
-template<> void sra<Interpreter>(u32 rt, u32 rd, u32 sa)
+void sra(u32 rt, u32 rd, u32 sa)
 {
     gpr.set(rd, gpr[rt].s32() >> sa);
 }
 
-template<> void srav<Interpreter>(u32 rs, u32 rt, u32 rd)
+void srav(u32 rs, u32 rt, u32 rd)
 {
     gpr.set(rd, gpr[rt].s32() >> (gpr[rs].s32() & 31));
 }
 
-template<> void srl<Interpreter>(u32 rt, u32 rd, u32 sa)
+void srl(u32 rt, u32 rd, u32 sa)
 {
     gpr.set(rd, gpr[rt].u32() >> sa);
 }
 
-template<> void srlv<Interpreter>(u32 rs, u32 rt, u32 rd)
+void srlv(u32 rs, u32 rt, u32 rd)
 {
     gpr.set(rd, gpr[rt].u32() >> (gpr[rs].s32() & 31));
 }
 
-template<> void sw<Interpreter>(u32 rs, u32 rt, s16 imm)
+void sw(u32 rs, u32 rt, s16 imm)
 {
     virtual_write<4>(gpr[rs].s32() + imm, gpr[rt].s32());
 }
 
-template<> void swl<Interpreter>(u32 rs, u32 rt, s16 imm)
+void swl(u32 rs, u32 rt, s16 imm)
+{
+    (void)rs;
+    (void)rt;
+    (void)imm;
+}
+
+void swr(u32 rs, u32 rt, s16 imm)
+{
+    (void)rs;
+    (void)rt;
+    (void)imm;
+}
+
+void sync()
 {
 }
 
-template<> void swr<Interpreter>(u32 rs, u32 rt, s16 imm)
-{
-}
-
-template<> void sync<Interpreter>()
-{
-}
-
-template<> void syscall<Interpreter>()
+void syscall()
 {
     syscall_exception();
 }
 
-template<> void sub<Interpreter>(u32 rs, u32 rt, u32 rd)
+void sub(u32 rs, u32 rt, u32 rd)
 {
     s32 sum;
     bool overflow;
@@ -765,101 +777,101 @@ template<> void sub<Interpreter>(u32 rs, u32 rt, u32 rd)
     }
 }
 
-template<> void subu<Interpreter>(u32 rs, u32 rt, u32 rd)
+void subu(u32 rs, u32 rt, u32 rd)
 {
     gpr.set(rd, gpr[rs].s32() - gpr[rt].s32());
 }
 
-template<> void teq<Interpreter>(u32 rs, u32 rt)
+void teq(u32 rs, u32 rt)
 {
     if (gpr[rs].s64() == gpr[rt].s64()) {
         trap_exception();
     }
 }
 
-template<> void teqi<Interpreter>(u32 rs, s16 imm)
+void teqi(u32 rs, s16 imm)
 {
     if (gpr[rs].s64() == imm) {
         trap_exception();
     }
 }
 
-template<> void tge<Interpreter>(u32 rs, u32 rt)
+void tge(u32 rs, u32 rt)
 {
     if (gpr[rs].s64() >= gpr[rt].s64()) {
         trap_exception();
     }
 }
 
-template<> void tgei<Interpreter>(u32 rs, s16 imm)
+void tgei(u32 rs, s16 imm)
 {
     if (gpr[rs].s64() >= imm) {
         trap_exception();
     }
 }
 
-template<> void tgeu<Interpreter>(u32 rs, u32 rt)
+void tgeu(u32 rs, u32 rt)
 {
     if (gpr[rs].u64() >= gpr[rt].u64()) {
         trap_exception();
     }
 }
 
-template<> void tgeiu<Interpreter>(u32 rs, s16 imm)
+void tgeiu(u32 rs, s16 imm)
 {
     if (gpr[rs].u64() >= u64(imm)) {
         trap_exception();
     }
 }
 
-template<> void tlt<Interpreter>(u32 rs, u32 rt)
+void tlt(u32 rs, u32 rt)
 {
     if (gpr[rs].s64() < gpr[rt].s64()) {
         trap_exception();
     }
 }
 
-template<> void tlti<Interpreter>(u32 rs, s16 imm)
+void tlti(u32 rs, s16 imm)
 {
     if (gpr[rs].s64() < imm) {
         trap_exception();
     }
 }
 
-template<> void tltu<Interpreter>(u32 rs, u32 rt)
+void tltu(u32 rs, u32 rt)
 {
     if (gpr[rs].u64() < gpr[rt].u64()) {
         trap_exception();
     }
 }
 
-template<> void tltiu<Interpreter>(u32 rs, s16 imm)
+void tltiu(u32 rs, s16 imm)
 {
     if (gpr[rs].u64() < u64(imm)) {
         trap_exception();
     }
 }
 
-template<> void tne<Interpreter>(u32 rs, u32 rt)
+void tne(u32 rs, u32 rt)
 {
     if (gpr[rs].s64() != gpr[rt].s64()) {
         trap_exception();
     }
 }
 
-template<> void tnei<Interpreter>(u32 rs, s16 imm)
+void tnei(u32 rs, s16 imm)
 {
     if (gpr[rs].s64() != imm) {
         trap_exception();
     }
 }
 
-template<> void xor_<Interpreter>(u32 rs, u32 rt, u32 rd)
+void xor_(u32 rs, u32 rt, u32 rd)
 {
     gpr.set(rd, gpr[rs].s64() ^ gpr[rt].s64());
 }
 
-template<> void xori<Interpreter>(u32 rs, u32 rt, u16 imm)
+void xori(u32 rs, u32 rt, u16 imm)
 {
     gpr.set(rt, gpr[rs].s64() ^ imm);
 }

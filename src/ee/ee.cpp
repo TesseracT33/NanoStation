@@ -59,7 +59,7 @@ u64 get_time()
 
 bool init()
 {
-    std::memset(&gpr, 0, sizeof(gpr));
+    gpr = {};
     std::memset(&lo, 0, sizeof(lo));
     std::memset(&hi, 0, sizeof(hi));
     jump_addr = pc = 0;
@@ -101,7 +101,7 @@ bool load_bios(std::filesystem::path const& path)
 
 void lower_intc(Interrupt interrupt)
 {
-    intc_stat &= ~std::to_underlying(interrupt);
+    intc_stat &= u16(~std::to_underlying(interrupt));
     cop0.cause.ip_intc = bool(intc_stat & intc_mask);
 }
 
@@ -128,7 +128,7 @@ u32 run(u32 cycles)
         fetch_decode_exec();
     }
     time_last_step_begin += cycle_counter;
-    return cycle_counter - cycles;
+    return cycle_counter;
 }
 
 void write_intc_mask(u16 data)

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "types.hpp"
+#include "numtypes.hpp"
 
 #include <array>
 #include <concepts>
@@ -8,7 +8,7 @@
 namespace ee {
 
 template<typename T>
-concept EeUInt = std::unsigned_integral<T> || std::same_as<T, u128>;
+concept ee_uint = std::unsigned_integral<T> || std::same_as<T, u128>;
 
 enum class Alignment {
     Aligned,
@@ -62,7 +62,7 @@ inline std::array<TlbEntry, 48> tlb_entries;
 inline std::array<u8, bios_size> bios;
 inline std::array<u8, 32 * 1024 * 1024> rdram;
 
-template<EeUInt Int, Alignment alignment = Alignment::Aligned, MemOp mem_op = MemOp::DataRead>
+template<ee_uint Int, Alignment alignment = Alignment::Aligned, MemOp mem_op = MemOp::DataRead>
 Int virtual_read(u32 addr);
 
 template<size_t size, Alignment alignment = Alignment::Aligned> void virtual_write(u32 addr, auto data);

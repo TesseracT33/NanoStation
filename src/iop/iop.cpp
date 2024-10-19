@@ -119,7 +119,7 @@ u32 run(u32 cycles)
         fetch_decode_exec();
     }
     time_last_step_begin += cycle_counter;
-    return cycle_counter - cycles;
+    return cycle_counter;
 }
 
 void write_i_ctrl(u32 value)
