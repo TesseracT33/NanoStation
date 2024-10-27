@@ -52,7 +52,7 @@ void fetch_decode_exec()
     advance_pipeline(1);
 }
 
-u64 get_time()
+u64 get_ee_time()
 {
     return time_last_step_begin + cycle_counter;
 }

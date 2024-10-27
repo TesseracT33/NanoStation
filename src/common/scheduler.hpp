@@ -2,18 +2,25 @@
 
 #include <thread>
 
+#include "inplace_function.hpp"
 #include "numtypes.hpp"
 
 namespace scheduler {
 
-using EventCallback = void (*)();
+using EventCallback = InplaceFunction<void()>;
 
 enum class EventType : u8 {
     EECopCountCompareMatch,
-    EETimer0Interrupt,
-    EETimer1Interrupt,
-    EETimer2Interrupt,
-    EETimer3Interrupt,
+    EETimer0Match,
+    EETimer0Overflow,
+    EETimer0Sbus,
+    EETimer1Match,
+    EETimer1Overflow,
+    EETimer1Sbus,
+    EETimer2Match,
+    EETimer2Overflow,
+    EETimer3Match,
+    EETimer3Overflow,
 };
 
 void add_event(EventType event, s64 ee_cycles_until_fire, EventCallback callback);

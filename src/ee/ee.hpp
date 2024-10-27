@@ -37,7 +37,7 @@ inline u32 sa;
 
 void add_initial_events();
 void advance_pipeline(u32 cycles);
-u64 get_time();
+u64 get_ee_time();
 bool init();
 bool interrupts_are_enabled();
 void jump(u32 target);
