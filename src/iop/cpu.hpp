@@ -1,9 +1,9 @@
 #pragma once
 
-#include "mips/mips.hpp"
 #include "numtypes.hpp"
 
 namespace iop {
+
 void add(u32 rs, u32 rt, u32 rd);
 void addi(u32 rs, u32 rt, s16 imm);
 void addiu(u32 rs, u32 rt, s16 imm);
@@ -63,4 +63,5 @@ void swr(u32 rs, u32 rt, s16 imm);
 void syscall();
 void xor_(u32 rs, u32 rt, u32 rd);
 void xori(u32 rs, u32 rt, u16 imm);
+
 } // namespace iop

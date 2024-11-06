@@ -33,7 +33,7 @@ void TlbEntry::write()
     lo[0].raw = cop0.entry_lo[0].raw & ~1;
     lo[1].raw = cop0.entry_lo[1].raw & ~1;
     hi.raw = cop0.entry_hi.raw & ~cop0.page_mask;
-    hi.g = cop0.entry_lo[0].g & cop0.entry_lo[1].g;
+    hi.g = bool(cop0.entry_lo[0].g & cop0.entry_lo[1].g);
     page_mask = cop0.page_mask;
     // Things that speed up virtual-to-physical-address translation
     vpn2_addr_mask = ~page_mask & ~0x1FFF;

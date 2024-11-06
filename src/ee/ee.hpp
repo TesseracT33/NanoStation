@@ -1,8 +1,6 @@
 #pragma once
 
-#include "mips/gpr.hpp"
 #include "numtypes.hpp"
-#include "reg128.hpp"
 
 #include <filesystem>
 
@@ -29,10 +27,10 @@ enum class Interrupt : u16 {
 inline constexpr u32 ee_clock = 294'912'000;
 inline constexpr u32 bus_clock = ee_clock / 2;
 
-inline mips::Gpr<Reg128> gpr;
+inline std::array<u128, 32> gpr;
 inline bool in_branch_delay_slot;
 inline u32 jump_addr, pc;
-inline Reg128 lo, hi;
+inline u128 lo, hi;
 inline u32 sa;
 
 void add_initial_events();

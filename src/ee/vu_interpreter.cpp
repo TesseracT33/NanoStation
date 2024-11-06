@@ -6,8 +6,6 @@
 
 namespace ee::vu {
 
-using enum mips::CpuImpl;
-
 #define BC      (instr & 3)
 #define FD      (instr >> 6 & 31)
 #define ID      (instr >> 6 & 31)

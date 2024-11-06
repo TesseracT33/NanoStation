@@ -2,6 +2,14 @@ cmake_minimum_required(VERSION 3.13)
 
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE .)
 
+##### asmjit ####################
+set(ASMJIT_BUILD_TEST OFF)
+set(ASMJIT_STATIC ON)
+set(ASMJIT_BUILD_X86 X64)
+set(ASMJIT_BUILD_ARM ARM64)
+add_subdirectory(asmjit)
+target_link_libraries(${CMAKE_PROJECT_NAME} asmjit)
+
 ##### SDL #########################
 set(SDL_SHARED OFF)
 set(SDL_STATIC ON)

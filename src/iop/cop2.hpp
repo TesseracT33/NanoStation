@@ -1,8 +1,5 @@
 #pragma once
 
-#include "mips/mips.hpp"
-#include "numtypes.hpp"
-
 namespace iop {
 
 void avsz3();

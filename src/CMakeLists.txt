@@ -3,6 +3,7 @@ cmake_minimum_required (VERSION 3.13)
 target_sources(NanoStation PRIVATE
 	main.cpp
 
+	common/bump_allocator.cpp
 	common/emulator.cpp
 	common/log.cpp
 	common/scheduler.cpp
@@ -15,6 +16,7 @@ target_sources(NanoStation PRIVATE
 	ee/exceptions.cpp
 	ee/mmi.cpp
 	ee/mmu.cpp
+	ee/register_allocator.cpp
 	ee/timers.cpp
 	ee/vu_interpreter.cpp
 

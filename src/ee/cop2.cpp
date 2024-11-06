@@ -2,8 +2,6 @@
 
 namespace ee {
 
-using enum mips::CpuImpl;
-
 void bc2f()
 {
 }

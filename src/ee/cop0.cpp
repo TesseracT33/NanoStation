@@ -12,8 +12,6 @@
 
 namespace ee {
 
-using enum mips::CpuImpl;
-
 void bc0f(s16 imm)
 {
     (void)imm;
@@ -63,12 +61,14 @@ void eret()
 
 void mfc0(u32 rd, u32 rt)
 {
-    gpr.set(rt, s32(cop0.get(rd)));
+    (void)rd;
+    (void)rt;
 }
 
 void mtc0(u32 rd, u32 rt)
 {
-    cop0.set(rd, gpr[rt].u32());
+    (void)rd;
+    (void)rt;
 }
 
 void tlbp()

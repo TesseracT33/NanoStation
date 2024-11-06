@@ -1,6 +1,5 @@
 #pragma once
 
-#include "mips/gpr.hpp"
 #include "numtypes.hpp"
 
 #include <array>
@@ -38,7 +37,7 @@ enum class Interrupt : u32 {
     FDMA = 1 << 25
 };
 
-inline mips::Gpr<u32> gpr;
+inline std::array<u32, 32> gpr;
 inline bool in_branch_delay_slot;
 inline u32 lo, hi, jump_addr, pc;
 

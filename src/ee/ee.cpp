@@ -3,7 +3,7 @@
 #include "exceptions.hpp"
 #include "frontend/message.hpp"
 #include "mips/disassembler.hpp"
-#include "mips/mips.hpp"
+#include "mips/types.hpp"
 #include "mmu.hpp"
 #include "scheduler.hpp"
 #include "util.hpp"
@@ -48,7 +48,7 @@ void fetch_decode_exec()
 {
     u32 instr = virtual_read<u32, Alignment::Aligned, MemOp::InstrFetch>(pc);
     pc += 4;
-    mips::disassemble_ee<mips::CpuImpl::Interpreter>(instr);
+    mips::disassemble_ee(instr);
     advance_pipeline(1);
 }
 
@@ -60,8 +60,8 @@ u64 get_ee_time()
 bool init()
 {
     gpr = {};
-    std::memset(&lo, 0, sizeof(lo));
-    std::memset(&hi, 0, sizeof(hi));
+    lo = {};
+    hi = {};
     jump_addr = pc = 0;
     in_branch_delay_slot = false;
     intc_mask = intc_stat = 0;

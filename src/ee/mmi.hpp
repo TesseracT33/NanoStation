@@ -1,9 +1,9 @@
 #pragma once
 
-#include "mips/mips.hpp"
 #include "numtypes.hpp"
 
 namespace ee {
+
 void madd(u32 rs, u32 rt, u32 rd);
 void madd1(u32 rs, u32 rt, u32 rd);
 void maddu(u32 rs, u32 rt, u32 rd);
@@ -95,4 +95,5 @@ void psubuw(u32 rs, u32 rt, u32 rd);
 void psubw(u32 rs, u32 rt, u32 rd);
 void pxor(u32 rs, u32 rt, u32 rd);
 void qfsrv(u32 rs, u32 rt, u32 rd);
+
 } // namespace ee

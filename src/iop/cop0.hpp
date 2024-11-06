@@ -1,9 +1,9 @@
 #pragma once
 
-#include "mips/mips.hpp"
 #include "numtypes.hpp"
 
 namespace iop {
+
 void mfc0(u32 rd, u32 rt);
 void mtc0(u32 rd, u32 rt);
 void rfe();

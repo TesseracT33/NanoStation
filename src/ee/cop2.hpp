@@ -1,7 +1,5 @@
 #pragma once
 
-#include "mips/mips.hpp"
-
 namespace ee {
 
 void bc2f();

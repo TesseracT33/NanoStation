@@ -2,8 +2,6 @@
 
 namespace ee {
 
-using enum mips::CpuImpl;
-
 void abs_s(u32 fd, u32 fs)
 {
     (void)fd;

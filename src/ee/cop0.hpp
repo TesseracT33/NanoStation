@@ -1,6 +1,5 @@
 #pragma once
 
-#include "mips/mips.hpp"
 #include "numtypes.hpp"
 
 namespace ee {

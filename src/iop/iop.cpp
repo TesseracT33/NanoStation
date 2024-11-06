@@ -47,13 +47,13 @@ void fetch_decode_exec()
 {
     u32 instr = read<u32, Alignment::Aligned, MemOp::InstrFetch>(pc);
     pc += 4;
-    mips::disassemble_iop<mips::CpuImpl::Interpreter>(instr);
+    mips::disassemble_iop(instr);
     advance_pipeline(1);
 }
 
 bool init()
 {
-    std::memset(&gpr, 0, sizeof(gpr));
+    gpr = {};
     lo = hi = jump_addr = pc = 0;
     in_branch_delay_slot = false;
     i_ctrl = i_mask = i_stat = 0;
