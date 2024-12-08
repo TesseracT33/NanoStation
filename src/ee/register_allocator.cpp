@@ -1,4 +1,5 @@
 #include "register_allocator.hpp"
+#include "asmjit/x86/x86operand.h"
 #include "ee/ee.hpp"
 #include "jit.hpp"
 #include "jit_utils.hpp"
@@ -15,7 +16,19 @@ using namespace asmjit;
 
 namespace ee {
 
-constexpr int register_stack_space = 8 * 16 + 8; // +8 to offset stack for faster CALLs
+constexpr int register_stack_space = 8 * reg_alloc_nonvolatile_gprs.size();
+
+static s32 get_nonvolatile_host_gpr_stack_offset(HostGpr64 const& gpr)
+{
+    auto it = std::find(reg_alloc_nonvolatile_gprs.begin(), reg_alloc_nonvolatile_gprs.end(), gpr);
+    assert(it != reg_alloc_nonvolatile_gprs.end());
+    return 8 * (s32)std::distance(reg_alloc_nonvolatile_gprs.begin(), it);
+}
+
+enum : u32 {
+    lo_index = 32,
+    hi_index,
+};
 
 RegisterAllocator::RegisterAllocator()
 {
@@ -66,13 +79,14 @@ void RegisterAllocator::BlockEpilogWithJmp(void* func)
 void RegisterAllocator::BlockProlog()
 {
     Reset();
+    auto gpr_mid_ptr = gpr.data() + gpr.size() / 2;
     if constexpr (platform.a64) {}
     if constexpr (platform.x64) {
         if constexpr (!IsVolatile(guest_gpr_base_ptr_reg)) {
             c.push(guest_gpr_base_ptr_reg);
             stack_is_aligned_for_call = !stack_is_aligned_for_call;
         }
-        c.mov(guest_gpr_base_ptr_reg, gpr.data() + 16 * sizeof(u128));
+        c.mov(guest_gpr_base_ptr_reg, gpr_mid_ptr);
     }
 }
 
@@ -80,9 +94,10 @@ void RegisterAllocator::Flush(Binding const& b, bool restore) const
 {
     if (!b.Occupied()) return;
     if (b.dirty) {
+        s32 offset = GetGprMidPtrOffset(b.guest.value());
         if constexpr (platform.a64) {}
         if constexpr (platform.x64) {
-            c.mov(qword_ptr(guest_gpr_base_ptr_reg, sizeof(u128) * b.guest.value()), b.host);
+            c.mov(qword_ptr(guest_gpr_base_ptr_reg, offset), b.host);
         }
     }
     if (!b.is_volatile && restore) {
@@ -101,15 +116,15 @@ void RegisterAllocator::FlushAndDestroyAllVolatile()
 {
     for (Binding& binding : gpr_bindings) {
         if (binding.is_volatile) {
-            FlushAndDestroyBinding(binding, false, true);
+            FlushAndDestroyBinding(binding, false);
         }
     }
 }
 
-void RegisterAllocator::FlushAndDestroyBinding(Binding& b, bool restore, bool keep_reserved)
+void RegisterAllocator::FlushAndDestroyBinding(Binding& b, bool restore)
 {
     Flush(b, restore);
-    ResetBinding(b, keep_reserved);
+    ResetBinding(b);
 }
 
 // This should only be used as part of an instruction epilogue. Thus, there is no need
@@ -122,17 +137,17 @@ void RegisterAllocator::FlushAndRestoreAll() const
     }
 }
 
-HostGpr64 RegisterAllocator::GetDirtyHostGpr(u32 guest)
+HostGpr64 RegisterAllocator::GetDirtyGpr(u32 guest)
 {
-    return GetHostGpr(guest, guest != 0);
+    return GetGpr(guest, guest != 0);
 }
 
-HostGpr64 RegisterAllocator::GetHostGpr(u32 guest)
+HostGpr64 RegisterAllocator::GetGpr(u32 guest)
 {
-    return GetHostGpr(guest, false);
+    return GetGpr(guest, false);
 }
 
-HostGpr64 RegisterAllocator::GetHostGpr(u32 guest, bool make_dirty)
+HostGpr64 RegisterAllocator::GetGpr(u32 guest, bool make_dirty)
 {
     Binding* binding = guest_to_host[guest];
     if (binding) {
@@ -147,7 +162,7 @@ HostGpr64 RegisterAllocator::GetHostGpr(u32 guest, bool make_dirty)
         binding = next_free_binding_it++;
         found_free = true;
     } else {
-        u64 min_access_index = std::numeric_limits<u64>::max();
+        auto min_access_index = std::numeric_limits<decltype(host_access_index)>::max();
         for (Binding& b : gpr_bindings) {
             if (!b.Occupied()) {
                 found_free = true;
@@ -160,30 +175,62 @@ HostGpr64 RegisterAllocator::GetHostGpr(u32 guest, bool make_dirty)
         }
         assert(binding);
         if (!found_free) {
-            FlushAndDestroyBinding(*binding, false, true);
+            FlushAndDestroyBinding(*binding, false);
         }
     }
 
-    binding->guest = guest;
+    binding->guest = u8(guest);
     binding->access_index = host_access_index++;
     binding->dirty = make_dirty;
     guest_to_host[guest] = binding;
 
-    if (!binding->is_volatile && !std::exchange(nonvolatile_gprs_used, true)) {
-        if constexpr (platform.a64) {
-            // TODO
+    HostGpr64 const& host = binding->host;
+
+    if (!binding->is_volatile) {
+        if (!std::exchange(nonvolatile_gprs_used, true)) {
+            if constexpr (platform.a64) {
+                // TODO
+            }
+            if constexpr (platform.x64) {
+                c.sub(x86::rsp, register_stack_space);
+            }
         }
-        if constexpr (platform.x64) {
-            c.sub(x86::rsp, register_stack_space);
+        if (found_free) {
+            s32 stack_offset = get_nonvolatile_host_gpr_stack_offset(host);
+            if constexpr (platform.a64) {
+                // TODO
+            }
+            if constexpr (platform.x64) {
+                c.mov(qword_ptr(x86::rsp, stack_offset), host);
+            }
         }
     }
 
-    Load(*binding, found_free);
+    if constexpr (platform.a64) {
+        if (guest == 0) {
+            c.mov(host, 0);
+        } else {
+            // TODO
+        }
+    }
+    if constexpr (platform.x64) {
+        if (guest == 0) {
+            c.xor_(host.r32(), host.r32());
+        } else {
+            c.mov(host, qword_ptr(guest_gpr_base_ptr_reg, GetGprMidPtrOffset(guest)));
+        }
+    }
 
-    return binding->host;
+    return host;
 }
 
-std::string RegisterAllocator::GetStatusString() const
+s32 RegisterAllocator::GetGprMidPtrOffset(u32 guest) const
+{
+    static constexpr u32 kNumRegs = 32;
+    return s32(sizeof(u128)) * (guest - kNumRegs / 2);
+}
+
+std::string RegisterAllocator::GetStatus() const
 {
     std::string used_str, free_str;
     for (Binding const& b : gpr_bindings) {
@@ -201,28 +248,6 @@ std::string RegisterAllocator::GetStatusString() const
     return std::format("Used: {}; Free: {}\n", used_str, free_str);
 }
 
-void RegisterAllocator::Load(Binding& binding, bool save)
-{
-    if (!binding.is_volatile && save) {
-        SaveHost(binding.host);
-    }
-    u32 guest = binding.guest.value();
-    if constexpr (platform.a64) {
-        if (guest == 0) {
-            c.mov(binding.host, 0);
-        } else {
-            // TODO
-        }
-    }
-    if constexpr (platform.x64) {
-        if (guest == 0) {
-            c.xor_(binding.host.r32(), binding.host.r32());
-        } else {
-            c.mov(binding.host.r64(), qword_ptr(guest_gpr_base_ptr_reg, sizeof(u128) * guest));
-        }
-    }
-}
-
 void RegisterAllocator::Reset()
 {
     for (Binding& b : gpr_bindings) {
@@ -237,15 +262,12 @@ void RegisterAllocator::Reset()
     stack_is_aligned_for_call = false;
 }
 
-void RegisterAllocator::ResetBinding(Binding& b, bool keep_reserved)
+void RegisterAllocator::ResetBinding(Binding& b)
 {
     if (b.Occupied()) {
         guest_to_host[b.guest.value()] = {};
         b.guest = {};
         b.dirty = false;
-    }
-    if (!keep_reserved) {
-        // b.reserved = false;
     }
     b.access_index = host_access_index;
 }

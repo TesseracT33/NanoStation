@@ -552,8 +552,8 @@ template<Cpu cpu, bool make_string> void mmi(u32 instr)
         case 0x11: INSTR_EE(mthi1, RS); break;
         case 0x12: INSTR_EE(mflo1, RD); break;
         case 0x13: INSTR_EE(mtlo1, RS); break;
-        case 0x18: INSTR_EE(mult1, RS, RT); break;
-        case 0x19: INSTR_EE(multu1, RS, RT); break;
+        case 0x18: INSTR_EE(mult1, RS, RT, RD); break;
+        case 0x19: INSTR_EE(multu1, RS, RT, RD); break;
         case 0x1A: INSTR_EE(div1, RS, RT); break;
         case 0x1B: INSTR_EE(divu1, RS, RT); break;
         case 0x20: INSTR_EE(madd1, RS, RT, RD); break;
@@ -631,8 +631,8 @@ template<Cpu cpu, bool make_string> void special(u32 instr)
     case 0x14: INSTR_EE(dsllv, RS, RT, RD); break;
     case 0x16: INSTR_EE(dsrlv, RS, RT, RD); break;
     case 0x17: INSTR_EE(dsrav, RS, RT, RD); break;
-    case 0x18: INSTR(mult, RS, RT); break;
-    case 0x19: INSTR(multu, RS, RT); break;
+    case 0x18: INSTR(mult, RS, RT, RD); break;
+    case 0x19: INSTR(multu, RS, RT, RD); break;
     case 0x1A: INSTR(div, RS, RT); break;
     case 0x1B: INSTR(divu, RS, RT); break;
     case 0x20: INSTR(add, RS, RT, RD); break;

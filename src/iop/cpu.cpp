@@ -168,11 +168,11 @@ void mtlo(u32)
 {
 }
 
-void mult(u32, u32)
+void mult(u32, u32, u32)
 {
 }
 
-void multu(u32, u32)
+void multu(u32, u32, u32)
 {
 }
 

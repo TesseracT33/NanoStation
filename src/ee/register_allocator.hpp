@@ -131,7 +131,7 @@ class RegisterAllocator {
 
     struct Binding {
         HostGpr64 host;
-        std::optional<u32> guest;
+        std::optional<u8> guest;
         u16 access_index;
         bool dirty;
         bool is_volatile;
@@ -145,9 +145,15 @@ public:
     void BlockEpilogWithJmp(void* func);
     void BlockProlog();
     void FlushAll();
-    HostGpr64 GetDirtyHostGpr(u32 guest);
-    HostGpr64 GetHostGpr(u32 guest);
-    std::string GetStatusString() const;
+    HostGpr64 GetDirtyGpr(u32 guest);
+    HostGpr128 GetDirtyHi() { return {}; };
+    HostGpr128 GetDirtyLo() { return {}; };
+    HostGpr128 GetDirtyVpr(u32) { return {}; };
+    HostGpr64 GetGpr(u32 guest);
+    HostGpr128 GetHi() { return {}; };
+    HostGpr128 GetLo() { return {}; };
+    HostGpr128 GetVpr(u32) { return {}; };
+    std::string GetStatus() const;
     bool StackIsAlignedForCall() const;
 
 protected:
@@ -162,16 +168,16 @@ protected:
 
     void Flush(Binding const& b, bool restore) const;
     void FlushAndDestroyAllVolatile();
-    void FlushAndDestroyBinding(Binding& b, bool restore, bool keep_reserved);
+    void FlushAndDestroyBinding(Binding& b, bool restore);
     // This should only be used as part of an instruction epilogue. Thus, there is no need
     // to destroy bindings. In fact, this would be undesirable, since this function could not
     // be called in an epilog emitted mid-block, as part of a code path dependent on a run-time branch.
     void FlushAndRestoreAll() const;
-    HostGpr64 GetHostGpr(u32 guest, bool make_dirty);
-    HostGpr128 GetHostVpr(u32 guest, bool make_dirty);
-    void Load(Binding& binding, bool save);
+    s32 GetGprMidPtrOffset(u32 guest) const;
+    HostGpr64 GetGpr(u32 guest, bool make_dirty);
+    HostGpr128 GetVpr(u32, bool) { return {}; };
     void Reset();
-    void ResetBinding(Binding& b, bool keep_reserved);
+    void ResetBinding(Binding& b);
     void RestoreHost(HostGpr64 gpr) const;
     void SaveHost(HostGpr64 gpr) const;
 };

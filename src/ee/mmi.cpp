@@ -5,66 +5,72 @@
 #include "asmjit/x86.h"
 #include "jit.hpp"
 #include "jit_utils.hpp"
+#include "platform.hpp"
 #include <algorithm>
 #include <bit>
 #include <cstring>
 
 #include <immintrin.h>
 #include <limits>
+#include <tuple>
 
 // reference: https://wiki.qemu.org/File:C790.pdf
-
-// TODO: make sure get_dirty_lo is used instead of get_lo, where needed.
+// optimizations: https://godbolt.org/z/KEz81v9zz
 
 using namespace asmjit::x86;
 
 namespace ee {
 
-asmjit::x86::Xmm get_vpr(u32 index)
+static std::tuple<Xmm, Xmm, Xmm> get_vpr_rd_rs_rt(u32 rd, u32 rs, u32 rt)
+{
+    return { reg_alloc.GetDirtyVpr(rd), reg_alloc.GetVpr(rs), reg_alloc.GetVpr(rt) };
+}
+
+static asmjit::x86::Xmm get_vpr(u32 index)
 {
     (void)index;
     return xmm0;
 }
 
-asmjit::x86::Xmm get_dirty_vpr(u32 index)
+static asmjit::x86::Xmm get_dirty_vpr(u32 index)
 {
     (void)index;
     return xmm0;
 }
 
-asmjit::x86::Gpq get_gpr(u32 index)
+static asmjit::x86::Gpq get_gpr(u32 index)
 {
     (void)index;
     return rax;
 }
 
-asmjit::x86::Gpq get_dirty_gpr(u32 index)
+static asmjit::x86::Gpq get_dirty_gpr(u32 index)
 {
     (void)index;
     return rax;
 }
 
-Xmm get_lo()
+static Xmm get_lo()
 {
     return xmm0;
 }
 
-Xmm get_hi()
+static Xmm get_hi()
 {
     return xmm0;
 }
 
-Xmm get_dirty_lo()
+static Xmm get_dirty_lo()
 {
     return xmm0;
 }
 
-Xmm get_dirty_hi()
+static Xmm get_dirty_hi()
 {
     return xmm0;
 }
 
-Mem jit_ptr(auto)
+static Mem jit_ptr(auto)
 {
     return {};
 }
@@ -83,32 +89,32 @@ void pabsw(u32 rt, u32 rd) // Parallel Absolute Word
 
 void paddb(u32 rs, u32 rt, u32 rd) // Parallel Add Byte
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt);
+    auto [hd, hs, ht] = get_vpr_rd_rs_rt(rd, rs, rt);
     c.vpaddb(hd, hs, ht);
 }
 
 void paddh(u32 rs, u32 rt, u32 rd) // Parallel Add Halfword
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt);
+    auto [hd, hs, ht] = get_vpr_rd_rs_rt(rd, rs, rt);
     c.vpaddw(hd, hs, ht);
 }
 
 void paddsb(u32 rs, u32 rt, u32 rd) // Parallel Add with Signed Saturation Byte
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt);
+    auto [hd, hs, ht] = get_vpr_rd_rs_rt(rd, rs, rt);
     c.vpaddsb(hd, hs, ht);
 }
 
 void paddsh(u32 rs, u32 rt, u32 rd) // Parallel Add with Signed Saturation Halfword
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt);
+    auto [hd, hs, ht] = get_vpr_rd_rs_rt(rd, rs, rt);
     c.vpaddsw(hd, hs, ht);
 }
 
 void paddsw(u32 rs, u32 rt, u32 rd) // Parallel Add with Signed Saturation Word
 {
     static constexpr u32 mask = 0x8000'0000;
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt);
+    auto [hd, hs, ht] = get_vpr_rd_rs_rt(rd, rs, rt);
     c.vpbroadcastd(xmm0, jit_ptr(mask));
     c.vpaddd(xmm1, hs, ht);
     c.vpcmpgtd(xmm2, hs, xmm1);
@@ -120,19 +126,19 @@ void paddsw(u32 rs, u32 rt, u32 rd) // Parallel Add with Signed Saturation Word
 
 void paddub(u32 rs, u32 rt, u32 rd) // Parallel Add with Unsigned saturation Byte
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt);
+    auto [hd, hs, ht] = get_vpr_rd_rs_rt(rd, rs, rt);
     c.vpaddusb(hd, hs, ht);
 }
 
 void padduh(u32 rs, u32 rt, u32 rd) // Parallel Add with Unsigned saturation Halfword
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt);
+    auto [hd, hs, ht] = get_vpr_rd_rs_rt(rd, rs, rt);
     c.vpaddusw(hd, hs, ht);
 }
 
 void padduw(u32 rs, u32 rt, u32 rd) // Parallel Add with Unsigned saturation Word
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt);
+    auto [hd, hs, ht] = get_vpr_rd_rs_rt(rd, rs, rt);
     c.vpcmpeqd(xmm0, xmm0, xmm0);
     c.vpxor(xmm0, xmm0, ht);
     c.vpminud(xmm0, xmm0, hs);
@@ -141,13 +147,13 @@ void padduw(u32 rs, u32 rt, u32 rd) // Parallel Add with Unsigned saturation Wor
 
 void paddw(u32 rs, u32 rt, u32 rd) // Parallel Add Word
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt);
+    auto [hd, hs, ht] = get_vpr_rd_rs_rt(rd, rs, rt);
     c.vpaddd(hd, hs, ht);
 }
 
 void padsbh(u32 rs, u32 rt, u32 rd) // Parallel Add/Subtract Halfword
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt);
+    auto [hd, hs, ht] = get_vpr_rd_rs_rt(rd, rs, rt);
     c.vpaddw(xmm0, hs, ht);
     c.vpsubw(xmm1, hs, ht);
     c.vpblendw(hd, xmm1, xmm0, 15);
@@ -155,43 +161,43 @@ void padsbh(u32 rs, u32 rt, u32 rd) // Parallel Add/Subtract Halfword
 
 void pand(u32 rs, u32 rt, u32 rd) // Parallel AND
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt);
+    auto [hd, hs, ht] = get_vpr_rd_rs_rt(rd, rs, rt);
     c.vpand(hd, hs, ht);
 }
 
 void pceqb(u32 rs, u32 rt, u32 rd) // Parallel Compare for Equal Byte
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt);
+    auto [hd, hs, ht] = get_vpr_rd_rs_rt(rd, rs, rt);
     c.vpcmpeqb(hd, hs, ht);
 }
 
 void pceqh(u32 rs, u32 rt, u32 rd) // Parallel Compare for Equal Halfword
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt);
+    auto [hd, hs, ht] = get_vpr_rd_rs_rt(rd, rs, rt);
     c.vpcmpeqw(hd, hs, ht);
 }
 
 void pceqw(u32 rs, u32 rt, u32 rd) // Parallel Compare for Equal Word
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt);
+    auto [hd, hs, ht] = get_vpr_rd_rs_rt(rd, rs, rt);
     c.vpcmpeqd(hd, hs, ht);
 }
 
 void pcgtb(u32 rs, u32 rt, u32 rd) // Parallel Compare for Greater Than Byte
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt);
+    auto [hd, hs, ht] = get_vpr_rd_rs_rt(rd, rs, rt);
     c.vpcmpgtb(hd, hs, ht);
 }
 
 void pcgth(u32 rs, u32 rt, u32 rd) // Parallel Compare for Greater Than Halfword
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt);
+    auto [hd, hs, ht] = get_vpr_rd_rs_rt(rd, rs, rt);
     c.vpcmpgtw(hd, hs, ht);
 }
 
 void pcgtw(u32 rs, u32 rt, u32 rd) // Parallel Compare for Greater Than Word
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt);
+    auto [hd, hs, ht] = get_vpr_rd_rs_rt(rd, rs, rt);
     c.vpcmpgtd(hd, hs, ht);
 }
 
@@ -204,19 +210,19 @@ void pcpyh(u32 rt, u32 rd) // Parallel Copy Halfword
 
 void pcpyld(u32 rs, u32 rt, u32 rd) // Parallel Copy Lower Doubleword
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt);
+    auto [hd, hs, ht] = get_vpr_rd_rs_rt(rd, rs, rt);
     c.vpunpcklqdq(hd, ht, hs);
 }
 
 void pcpyud(u32 rs, u32 rt, u32 rd) // Parallel Copy Upper Doubleword
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt);
+    auto [hd, hs, ht] = get_vpr_rd_rs_rt(rd, rs, rt);
     c.vpunpckhqdq(hd, hs, ht);
 }
 
 void pdivbw(u32 rs, u32 rt) // Parallel Divide Broadcast Word
 {
-    auto div = [](u32 rs, u32 rt) {
+    auto do_div = [](u32 rs, u32 rt) {
         s32 quot[4];
         s32 rem[4];
         s32 op1;
@@ -237,15 +243,26 @@ void pdivbw(u32 rs, u32 rt) // Parallel Divide Broadcast Word
         lo = std::bit_cast<u128>(_mm_set_epi32(quot[3], quot[2], quot[1], quot[0]));
         hi = std::bit_cast<u128>(_mm_set_epi32(rem[3], rem[2], rem[1], rem[0]));
     };
-    // TODO: reg alloc free
-    c.mov(host_gpr_arg[0].r32(), rs);
-    c.mov(host_gpr_arg[1].r32(), rt);
-    jit_x64_call_with_stack_alignment(c, div);
+    reg_alloc.FlushAll();
+    if constexpr (platform.abi.systemv) {
+        c.push(rax);
+        c.mov(edi, rs);
+        c.mov(esi, rt);
+        c.call(+do_div);
+        c.pop(rcx);
+    }
+    if constexpr (platform.abi.win64) {
+        c.sub(rsp, 40);
+        c.mov(cl, rs);
+        c.mov(dl, rt);
+        c.call(+do_div);
+        c.add(rsp, 40);
+    }
 }
 
 void pdivuw(u32 rs, u32 rt) // Parallel Divide Unsigned Word
 {
-    auto div = [](u32 rs, u32 rt) {
+    auto do_div = [](u32 rs, u32 rt) {
         s32 quot[2];
         s32 rem[2];
         for (int i = 0; i < 2; ++i) {
@@ -263,15 +280,26 @@ void pdivuw(u32 rs, u32 rt) // Parallel Divide Unsigned Word
         lo = std::bit_cast<u128>(_mm_set_epi64x(quot[1], quot[0]));
         hi = std::bit_cast<u128>(_mm_set_epi64x(rem[1], rem[0]));
     };
-    // TODO: reg alloc free
-    c.mov(host_gpr_arg[0].r32(), rs);
-    c.mov(host_gpr_arg[1].r32(), rt);
-    jit_x64_call_with_stack_alignment(c, div);
+    reg_alloc.FlushAll();
+    if constexpr (platform.abi.systemv) {
+        c.push(rax);
+        c.mov(edi, rs);
+        c.mov(esi, rt);
+        c.call(+do_div);
+        c.pop(rcx);
+    }
+    if constexpr (platform.abi.win64) {
+        c.sub(rsp, 40);
+        c.mov(cl, rs);
+        c.mov(dl, rt);
+        c.call(+do_div);
+        c.add(rsp, 40);
+    }
 }
 
 void pdivw(u32 rs, u32 rt) // Parallel Divide Word
 {
-    auto div = [](u32 rs, u32 rt) {
+    auto do_div = [](u32 rs, u32 rt) {
         s32 quot[2];
         s32 rem[2];
         for (int i = 0; i < 2; ++i) {
@@ -292,10 +320,21 @@ void pdivw(u32 rs, u32 rt) // Parallel Divide Word
         lo = std::bit_cast<u128>(_mm_set_epi64x(quot[1], quot[0]));
         hi = std::bit_cast<u128>(_mm_set_epi64x(rem[1], rem[0]));
     };
-    // TODO: reg alloc free
-    c.mov(host_gpr_arg[0].r32(), rs);
-    c.mov(host_gpr_arg[1].r32(), rt);
-    jit_x64_call_with_stack_alignment(c, div);
+    reg_alloc.FlushAll();
+    if constexpr (platform.abi.systemv) {
+        c.push(rax);
+        c.mov(edi, rs);
+        c.mov(esi, rt);
+        c.call(+do_div);
+        c.pop(rcx);
+    }
+    if constexpr (platform.abi.win64) {
+        c.sub(rsp, 40);
+        c.mov(cl, rs);
+        c.mov(dl, rt);
+        c.call(+do_div);
+        c.add(rsp, 40);
+    }
 }
 
 void pexch(u32 rt, u32 rd) // Parallel Exchange Center Halfword
@@ -340,44 +379,44 @@ void pext5(u32 rt, u32 rd) // Parallel Extend Upper from 5 bits
 
 void pextlb(u32 rs, u32 rt, u32 rd) // Parallel Extend Lower from Byte
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt);
+    auto [hd, hs, ht] = get_vpr_rd_rs_rt(rd, rs, rt);
     c.vpunpcklbw(hd, ht, hs);
 }
 
 void pextlh(u32 rs, u32 rt, u32 rd) // Parallel Extend Lower from Halfword
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt);
+    auto [hd, hs, ht] = get_vpr_rd_rs_rt(rd, rs, rt);
     c.vpunpcklwd(hd, ht, hs);
 }
 
 void pextlw(u32 rs, u32 rt, u32 rd) // Parallel Extend Lower from Word
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt);
+    auto [hd, hs, ht] = get_vpr_rd_rs_rt(rd, rs, rt);
     c.vpunpckldq(hd, ht, hs);
 }
 
 void pextub(u32 rs, u32 rt, u32 rd) // Parallel Extend Upper from Byte
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt);
+    auto [hd, hs, ht] = get_vpr_rd_rs_rt(rd, rs, rt);
     c.vpunpckhbw(hd, ht, hs);
 }
 
 void pextuh(u32 rs, u32 rt, u32 rd) // Parallel Extend Upper from Halfword
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt);
+    auto [hd, hs, ht] = get_vpr_rd_rs_rt(rd, rs, rt);
     c.vpunpckhwd(hd, ht, hs);
 }
 
 void pextuw(u32 rs, u32 rt, u32 rd) // Parallel Extend Upper from Word
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt);
+    auto [hd, hs, ht] = get_vpr_rd_rs_rt(rd, rs, rt);
     c.vpunpckhdq(hd, ht, hs);
 }
 
 void phmadh(u32 rs, u32 rt, u32 rd) // Parallel Horizontal Multiply-Add Halfword
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt);
-    Xmm lo = get_lo(), hi = get_hi();
+    auto [hd, hs, ht] = get_vpr_rd_rs_rt(rd, rs, rt);
+    Xmm lo = get_dirty_lo(), hi = get_dirty_hi();
     c.vpmaddwd(hd, hs, ht);
     c.vmovaps(lo, hd);
     c.vpsrlq(hi, hd, 4);
@@ -385,8 +424,8 @@ void phmadh(u32 rs, u32 rt, u32 rd) // Parallel Horizontal Multiply-Add Halfword
 
 void phmsbh(u32 rs, u32 rt, u32 rd) // Parallel Horizontal Multiply-Subtract Halfword
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt);
-    Xmm lo = get_lo(), hi = get_hi();
+    auto [hd, hs, ht] = get_vpr_rd_rs_rt(rd, rs, rt);
+    Xmm lo = get_dirty_lo(), hi = get_dirty_hi();
     c.vpxor(xmm0, xmm0, xmm0);
     c.vpblendw(xmm0, hs, xmm0, 0xaa);
     c.vpsrld(xmm1, hs, 16);
@@ -400,14 +439,14 @@ void phmsbh(u32 rs, u32 rt, u32 rd) // Parallel Horizontal Multiply-Subtract Hal
 
 void pinteh(u32 rs, u32 rt, u32 rd) // Parallel Interleave Even Halfword
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt);
+    auto [hd, hs, ht] = get_vpr_rd_rs_rt(rd, rs, rt);
     c.vpslldq(xmm0, hs, 2);
     c.vpblendw(hd, xmm0, ht, 0x55);
 }
 
 void pinth(u32 rs, u32 rt, u32 rd) // Parallel Interleave Halfword
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt);
+    auto [hd, hs, ht] = get_vpr_rd_rs_rt(rd, rs, rt);
     c.vpsrldq(xmm0, hs, 8);
     c.vpunpcklwd(hd, ht, xmm0);
 }
@@ -436,7 +475,7 @@ void plzcw(u32 rs, u32 rd) // Parallel Leading Zero or One Count Word
 
 void pmaddh(u32 rs, u32 rt, u32 rd) // Parallel Multiply-Add Halfword
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt), lo = get_lo(), hi = get_hi();
+    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt), lo = get_dirty_lo(), hi = get_dirty_hi();
     c.vpmullw(xmm0, hs, ht);
     c.vpmulhw(xmm1, hs, ht);
     c.vpunpcklwd(xmm2, xmm0, xmm1);
@@ -452,7 +491,7 @@ void pmaddh(u32 rs, u32 rt, u32 rd) // Parallel Multiply-Add Halfword
 
 void pmadduw(u32 rs, u32 rt, u32 rd) // Parallel Multiply-Add Unsigned Word
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt), lo = get_lo(), hi = get_hi();
+    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt), lo = get_dirty_lo(), hi = get_dirty_hi();
     c.vpmuludq(xmm0, hs, ht);
     c.vpslldq(xmm1, hi, 4);
     c.vpblendd(xmm1, xmm1, lo, 5);
@@ -465,7 +504,7 @@ void pmadduw(u32 rs, u32 rt, u32 rd) // Parallel Multiply-Add Unsigned Word
 
 void pmaddw(u32 rs, u32 rt, u32 rd) // Parallel Multiply-Add Word
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt), lo = get_lo(), hi = get_hi();
+    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt), lo = get_dirty_lo(), hi = get_dirty_hi();
     c.vpmuldq(xmm0, hs, ht);
     c.vpslldq(xmm1, hi, 4);
     c.vpblendd(xmm1, xmm1, lo, 5);
@@ -478,13 +517,13 @@ void pmaddw(u32 rs, u32 rt, u32 rd) // Parallel Multiply-Add Word
 
 void pmaxh(u32 rs, u32 rt, u32 rd) // Parallel Maximum Halfword
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt);
+    auto [hd, hs, ht] = get_vpr_rd_rs_rt(rd, rs, rt);
     c.vpmaxsw(hd, hs, ht);
 }
 
 void pmaxw(u32 rs, u32 rt, u32 rd) //  Parallel Maximum Word
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt);
+    auto [hd, hs, ht] = get_vpr_rd_rs_rt(rd, rs, rt);
     c.vpmaxsd(hd, hs, ht);
 }
 
@@ -538,19 +577,19 @@ void pmflo(u32 rd) // Parallel Move From LO Register
 
 void pminh(u32 rs, u32 rt, u32 rd) // Parallel Minimum Halfword
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt);
+    auto [hd, hs, ht] = get_vpr_rd_rs_rt(rd, rs, rt);
     c.vpminsw(hd, hs, ht);
 }
 
 void pminw(u32 rs, u32 rt, u32 rd) // Parallel Minimum Word
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt);
+    auto [hd, hs, ht] = get_vpr_rd_rs_rt(rd, rs, rt);
     c.vpminsd(hd, hs, ht);
 }
 
 void pmsubh(u32 rs, u32 rt, u32 rd) // Parallel Multiply-Subtract Halfword
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt), lo = get_lo(), hi = get_hi();
+    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt), lo = get_dirty_lo(), hi = get_dirty_hi();
     c.vpmullw(xmm0, hs, ht);
     c.vpmulhw(xmm1, hs, ht);
     c.vpunpcklwd(xmm2, xmm0, xmm1);
@@ -566,7 +605,7 @@ void pmsubh(u32 rs, u32 rt, u32 rd) // Parallel Multiply-Subtract Halfword
 
 void pmsubw(u32 rs, u32 rt, u32 rd) // Parallel Multiply-Subtract Word
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt), lo = get_lo(), hi = get_hi();
+    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt), lo = get_dirty_lo(), hi = get_dirty_hi();
     c.vpmuldq(xmm0, hs, ht);
     c.vpslldq(xmm1, hi, 4);
     c.vpblendd(xmm1, xmm1, lo, 5);
@@ -600,7 +639,7 @@ void pmtlo(u32 rs) // Parallel Move To LO Register
 
 void pmulth(u32 rs, u32 rt, u32 rd) // Parallel Multiply Halfword
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt), lo = get_lo(), hi = get_hi();
+    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt), lo = get_dirty_lo(), hi = get_dirty_hi();
     c.vpmullw(xmm0, hs, ht);
     c.vpmulhw(xmm1, hs, ht);
     c.vpunpcklwd(xmm2, xmm0, xmm1);
@@ -612,7 +651,7 @@ void pmulth(u32 rs, u32 rt, u32 rd) // Parallel Multiply Halfword
 
 void pmultuw(u32 rs, u32 rt, u32 rd) // Parallel Multiply Unsigned Word
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt), lo = get_lo(), hi = get_hi();
+    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt), lo = get_dirty_lo(), hi = get_dirty_hi();
     c.vpmuludq(hd, hs, ht);
     c.vpshufd(xmm0, hd, 2 << 2);
     c.vpshufd(xmm1, hd, 1 | 3 << 2);
@@ -622,7 +661,7 @@ void pmultuw(u32 rs, u32 rt, u32 rd) // Parallel Multiply Unsigned Word
 
 void pmultw(u32 rs, u32 rt, u32 rd) // Parallel Multiply Word
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt), lo = get_lo(), hi = get_hi();
+    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt), lo = get_dirty_lo(), hi = get_dirty_hi();
     c.vpmuldq(hd, hs, ht);
     c.vpshufd(xmm0, hd, 2 << 2);
     c.vpshufd(xmm1, hd, 1 | 3 << 2);
@@ -632,7 +671,7 @@ void pmultw(u32 rs, u32 rt, u32 rd) // Parallel Multiply Word
 
 void pnor(u32 rs, u32 rt, u32 rd) // Parallel NOR
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt);
+    auto [hd, hs, ht] = get_vpr_rd_rs_rt(rd, rs, rt);
     c.vpor(hd, hs, ht);
     c.vpcmpeqd(xmm0, xmm0, xmm0);
     c.vpxor(hd, hd, xmm0);
@@ -640,7 +679,7 @@ void pnor(u32 rs, u32 rt, u32 rd) // Parallel NOR
 
 void por(u32 rs, u32 rt, u32 rd) // Parallel OR
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt);
+    auto [hd, hs, ht] = get_vpr_rd_rs_rt(rd, rs, rt);
     c.vpor(hd, hs, ht);
 }
 
@@ -660,7 +699,7 @@ void ppac5(u32 rt, u32 rd) // Parallel Pack to 5 bits
 
 void ppacb(u32 rs, u32 rt, u32 rd) // Parallel Pack to Byte
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt);
+    auto [hd, hs, ht] = get_vpr_rd_rs_rt(rd, rs, rt);
     static constexpr u8 mask1[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 4, 6, 8, 10, 12, 14 };
     static constexpr u8 mask2[16] = { 0, 2, 4, 6, 8, 10, 12, 14, 0, 0, 0, 0, 0, 0, 0, 0 };
     c.vpshufb(xmm0, hs, jit_ptr(mask1));
@@ -670,7 +709,7 @@ void ppacb(u32 rs, u32 rt, u32 rd) // Parallel Pack to Byte
 
 void ppach(u32 rs, u32 rt, u32 rd) // Parallel Pack to Halfword
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt);
+    auto [hd, hs, ht] = get_vpr_rd_rs_rt(rd, rs, rt);
     c.vpxor(xmm0, xmm0, xmm0);
     c.vpblendw(xmm1, xmm0, hs, 0x55);
     c.vpblendw(xmm2, xmm0, ht, 0x55);
@@ -679,7 +718,7 @@ void ppach(u32 rs, u32 rt, u32 rd) // Parallel Pack to Halfword
 
 void ppacw(u32 rs, u32 rt, u32 rd) // Parallel Pack to Word
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt);
+    auto [hd, hs, ht] = get_vpr_rd_rs_rt(rd, rs, rt);
     c.vshufps(hd, ht, hs, 2 << 2 | 2 << 6);
 }
 
@@ -704,7 +743,7 @@ void psllh(u32 rt, u32 rd, u32 sa) // Parallel Shift Left Logical Halfword
 
 void psllvw(u32 rs, u32 rt, u32 rd) // Parallel Shift Left Logical Variable Word
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt);
+    auto [hd, hs, ht] = get_vpr_rd_rs_rt(rd, rs, rt);
     c.vpslld(xmm0, hs, 27);
     c.vpsrld(xmm0, xmm0, 27);
     c.vpsllvd(xmm0, ht, xmm0);
@@ -726,7 +765,7 @@ void psrah(u32 rt, u32 rd, u32 sa) // Parallel Shift Right Arithmetic Halfword
 
 void psravw(u32 rs, u32 rt, u32 rd) // Parallel Shift Right Arithmetic Variable Word
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt);
+    auto [hd, hs, ht] = get_vpr_rd_rs_rt(rd, rs, rt);
     c.vpslld(xmm0, hs, 27);
     c.vpsrld(xmm0, xmm0, 27);
     c.vpsravd(xmm0, ht, xmm0);
@@ -748,7 +787,7 @@ void psrlh(u32 rt, u32 rd, u32 sa) // Parallel Shift Right Logical Halfword
 
 void psrlvw(u32 rs, u32 rt, u32 rd) // Parallel Shift Right Logical Variable Word
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt);
+    auto [hd, hs, ht] = get_vpr_rd_rs_rt(rd, rs, rt);
     c.vpslld(xmm0, hs, 27);
     c.vpsrld(xmm0, xmm0, 27);
     c.vpsrlvd(xmm0, ht, xmm0);
@@ -764,32 +803,32 @@ void psrlw(u32 rt, u32 rd, u32 sa) // Parallel Shift Right Logical Word
 
 void psubb(u32 rs, u32 rt, u32 rd) // Parallel Subtract Byte
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt);
+    auto [hd, hs, ht] = get_vpr_rd_rs_rt(rd, rs, rt);
     c.vpsubb(hd, hs, ht);
 }
 
 void psubh(u32 rs, u32 rt, u32 rd) // Parallel Subtract Halfword
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt);
+    auto [hd, hs, ht] = get_vpr_rd_rs_rt(rd, rs, rt);
     c.vpsubw(hd, hs, ht);
 }
 
 void psubsb(u32 rs, u32 rt, u32 rd) // Parallel Subtract with Signed Saturation Byte
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt);
+    auto [hd, hs, ht] = get_vpr_rd_rs_rt(rd, rs, rt);
     c.vpsubsb(hd, hs, ht);
 }
 
 void psubsh(u32 rs, u32 rt, u32 rd) // Parallel Subtract with Signed Saturation Halfword
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt);
+    auto [hd, hs, ht] = get_vpr_rd_rs_rt(rd, rs, rt);
     c.vpsubsw(hd, hs, ht);
 }
 
 void psubsw(u32 rs, u32 rt, u32 rd) // Parallel Subtract with Signed Saturation Word
 {
     static constexpr u32 mask = 0x8000'0000;
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt);
+    auto [hd, hs, ht] = get_vpr_rd_rs_rt(rd, rs, rt);
     c.vpbroadcastd(xmm0, jit_ptr(mask));
     c.vpxor(xmm1, xmm1, xmm1);
     c.vpcmpgtd(xmm1, ht, xmm1);
@@ -803,37 +842,38 @@ void psubsw(u32 rs, u32 rt, u32 rd) // Parallel Subtract with Signed Saturation 
 
 void psubub(u32 rs, u32 rt, u32 rd) // Parallel Subtract with Unsigned saturation Byte
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt);
+    auto [hd, hs, ht] = get_vpr_rd_rs_rt(rd, rs, rt);
     c.vpsubusb(hd, hs, ht);
 }
 
 void psubuh(u32 rs, u32 rt, u32 rd) // Parallel Subtract with Unsigned saturation Halfword
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt);
+    auto [hd, hs, ht] = get_vpr_rd_rs_rt(rd, rs, rt);
     c.vpsubusw(hd, hs, ht);
 }
 
 void psubuw(u32 rs, u32 rt, u32 rd) // Parallel Subtract with Unsigned saturation Word
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt);
+    auto [hd, hs, ht] = get_vpr_rd_rs_rt(rd, rs, rt);
     c.vpmaxud(xmm0, hs, ht);
     c.vpsubd(hd, xmm0, ht);
 }
 
 void psubw(u32 rs, u32 rt, u32 rd) // Parallel Subtract Word
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt);
+    auto [hd, hs, ht] = get_vpr_rd_rs_rt(rd, rs, rt);
     c.vpsubd(hd, hs, ht);
 }
 
 void pxor(u32 rs, u32 rt, u32 rd) // Parallel XOR
 {
-    Xmm hd = get_dirty_vpr(rd), hs = get_vpr(rs), ht = get_vpr(rt);
+    auto [hd, hs, ht] = get_vpr_rd_rs_rt(rd, rs, rt);
     c.vpxor(hd, hs, ht);
 }
 
 void qfsrv(u32 rs, u32 rt, u32 rd) // Quadword Funnel Shift Right Variable
 {
+    if (!rd) return;
     auto do_qfsrv = [](u32 rs, u32 rt, u32 rd) {
         if (sa > 255) {
             gpr[rd] = 0;
@@ -851,11 +891,23 @@ void qfsrv(u32 rs, u32 rt, u32 rd) // Quadword Funnel Shift Right Variable
             gpr[rd] = gpr[rt];
         }
     };
-    // TODO: reg alloc free
-    c.mov(host_gpr_arg[0].r32(), rs);
-    c.mov(host_gpr_arg[1].r32(), rt);
-    c.mov(host_gpr_arg[2].r32(), rd);
-    jit_x64_call_with_stack_alignment(c, do_qfsrv);
+    reg_alloc.FlushAll();
+    if constexpr (platform.abi.systemv) {
+        c.push(rax);
+        c.mov(edi, rs);
+        c.mov(esi, rt);
+        c.mov(edx, rd);
+        c.call(+do_qfsrv);
+        c.pop(rcx);
+    }
+    if constexpr (platform.abi.win64) {
+        c.sub(rsp, 40);
+        c.mov(cl, rs);
+        c.mov(dl, rt);
+        c.mov(r8b, rd);
+        c.call(+do_qfsrv);
+        c.add(rsp, 40);
+    }
 }
 
 } // namespace ee
