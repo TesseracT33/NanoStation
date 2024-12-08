@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.13)
 
-target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE .)
+target_include_directories(${NANOSTATION_LIB} PRIVATE .)
 
 ##### asmjit ####################
 set(ASMJIT_BUILD_TEST OFF)
@@ -8,7 +8,7 @@ set(ASMJIT_STATIC ON)
 set(ASMJIT_BUILD_X86 X64)
 set(ASMJIT_BUILD_ARM ARM64)
 add_subdirectory(asmjit)
-target_link_libraries(${CMAKE_PROJECT_NAME} asmjit)
+target_link_libraries(${NANOSTATION_LIB} asmjit)
 
 ##### SDL #########################
 set(SDL_SHARED OFF)
@@ -23,7 +23,7 @@ set(SDL2_DISABLE_INSTALL ON)
 set(SDL2_DISABLE_UNINSTALL ON)
 add_subdirectory(SDL)
 target_compile_options(SDL3-static PRIVATE -w) # disable warnings
-target_link_libraries(${CMAKE_PROJECT_NAME} SDL3-static)
+target_link_libraries(${NANOSTATION_LIB} SDL3-static)
 
 ##### imgui #########################
 add_library(imgui STATIC
@@ -35,4 +35,7 @@ add_library(imgui STATIC
 )
 target_include_directories(imgui PRIVATE imgui)
 target_link_libraries(imgui SDL3-static)
-target_link_libraries(${CMAKE_PROJECT_NAME} imgui)
+target_link_libraries(${NANOSTATION_LIB} imgui)
+
+##### googletest #########################
+add_subdirectory(googletest)

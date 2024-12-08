@@ -3,6 +3,7 @@
 project(NanoStation LANGUAGES CXX C)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(NANOSTATION_LIB ${CMAKE_PROJECT_NAME}Lib)
 
 if (CMAKE_SYSTEM_PROCESSOR MATCHES "AMD64" OR CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
 	set(X64 1)
@@ -15,10 +16,25 @@ endif()
 
 include(GlobalCompilerOptions.cmake)
 
-add_executable(${CMAKE_PROJECT_NAME})
+add_library(${NANOSTATION_LIB} STATIC)
 
 add_subdirectory(ext)
 
 include(CompilerOptions.cmake)
 
 add_subdirectory(src)
+
+add_executable(${CMAKE_PROJECT_NAME}
+	src/main.cpp
+)
+
+target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
+	src/
+	src/common/
+)
+
+target_link_libraries(${CMAKE_PROJECT_NAME}
+	${NANOSTATION_LIB}
+)
+
+add_subdirectory(test)

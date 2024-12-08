@@ -1,8 +1,6 @@
 cmake_minimum_required (VERSION 3.13)
 
-target_sources(NanoStation PRIVATE
-	main.cpp
-
+target_sources(${NANOSTATION_LIB} PRIVATE
 	common/bump_allocator.cpp
 	common/emulator.cpp
 	common/log.cpp
@@ -32,7 +30,7 @@ target_sources(NanoStation PRIVATE
 	mips/disassembler.cpp
 )
 
-target_include_directories(NanoStation PRIVATE
+target_include_directories(${NANOSTATION_LIB} PRIVATE
 	.
 	common
 )

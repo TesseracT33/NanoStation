@@ -7,3 +7,6 @@
 [submodule "ext/asmjit"]
 	path = ext/asmjit
 	url = https://github.com/asmjit/asmjit
+[submodule "ext/googletest"]
+	path = ext/googletest
+	url = https://github.com/google/googletest
