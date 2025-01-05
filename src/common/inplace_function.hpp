@@ -3,6 +3,7 @@
 #include <concepts>
 #include <new>
 #include <type_traits>
+#include <utility>
 
 #include "numtypes.hpp"
 
@@ -13,20 +14,21 @@ template<typename R, typename... P> class InplaceFunction<R(P...)> {
 
     template<typename F> static R invoke(void const* storage, P... params)
     {
-        return (*static_cast<F const*>(storage))(params...);
+        return (*static_cast<F const*>(storage))(std::forward<P>(params)...);
     }
 
-    alignas(16) u8 storage_[kCapacity];
+    alignas(kCapacity) u8 storage_[kCapacity];
     R (*invoke_)(void const*, P...);
 
 public:
     template<typename F>
     InplaceFunction(F&& f)
-        requires(sizeof(F) <= kCapacity && std::invocable<F, P...>)
+        requires(sizeof(F) <= kCapacity
+                 && std::invocable<F, P...> && std::is_trivially_destructible_v<std::remove_reference_t<F>>)
       : invoke_{ invoke<std::remove_reference_t<F>> }
     {
-        ::new (static_cast<void*>(storage_)) std::remove_reference_t<F>(f);
+        ::new (storage_) std::remove_reference_t<F>(std::forward<F>(f));
     }
 
-    R operator()(P... params) const { return invoke_(storage_, params...); }
+    R operator()(P... params) const { return invoke_(storage_, std::forward<P>(params)...); }
 };
