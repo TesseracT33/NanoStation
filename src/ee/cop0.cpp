@@ -1,6 +1,7 @@
 #include "cop0.hpp"
 #include "ee.hpp"
 #include "exceptions.hpp"
+#include "intc.hpp"
 #include "mmu.hpp"
 #include "scheduler.hpp"
 

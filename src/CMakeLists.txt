@@ -1,9 +1,8 @@
 cmake_minimum_required (VERSION 3.13)
 
 target_sources(${NANOSTATION_LIB} PRIVATE
-	common/bump_allocator.cpp
 	common/emulator.cpp
-	common/log.cpp
+	common/jit_common.cpp
 	common/scheduler.cpp
 
 	ee/cop0.cpp
@@ -12,6 +11,8 @@ target_sources(${NANOSTATION_LIB} PRIVATE
 	ee/cpu.cpp
 	ee/ee.cpp
 	ee/exceptions.cpp
+	ee/intc.cpp
+	ee/jit.cpp
 	ee/mmi.cpp
 	ee/mmu.cpp
 	ee/register_allocator.cpp
@@ -27,10 +28,10 @@ target_sources(${NANOSTATION_LIB} PRIVATE
 	iop/iop.cpp
 	iop/memory.cpp
 
-	mips/disassembler.cpp
+	mips/decoder.cpp
 )
 
-target_include_directories(${NANOSTATION_LIB} PRIVATE
+target_include_directories(${NANOSTATION_LIB} PUBLIC
 	.
 	common
 )

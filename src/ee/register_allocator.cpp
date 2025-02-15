@@ -1,11 +1,10 @@
 #include "register_allocator.hpp"
-#include "asmjit/x86/x86operand.h"
+#include "asmjit/a64.h"
+#include "asmjit/x86.h"
 #include "ee/ee.hpp"
 #include "jit.hpp"
-#include "jit_utils.hpp"
-#include "mips/disassembler.hpp"
-#include "numtypes.hpp"
-#include "platform.hpp"
+#include "jit_common.hpp"
+#include "mips/decoder.hpp"
 
 #include <algorithm>
 #include <cassert>
@@ -30,7 +29,8 @@ enum : u32 {
     hi_index,
 };
 
-RegisterAllocator::RegisterAllocator()
+RegisterAllocator::RegisterAllocator(JitCompiler& compiler)
+  : c{ compiler }
 {
     std::ranges::transform(reg_alloc_volatile_gprs, gpr_bindings.begin(), [](HostGpr64 gpr) {
         return Binding{ .host = gpr, .is_volatile = true };
@@ -56,7 +56,7 @@ void RegisterAllocator::BlockEpilog()
     }
 }
 
-void RegisterAllocator::BlockEpilogWithJmp(void* func)
+void RegisterAllocator::BlockEpilogWithJmp(void (*func)())
 {
     FlushAndRestoreAll();
     if constexpr (!IsVolatile(guest_gpr_base_ptr_reg)) {
@@ -142,6 +142,21 @@ HostGpr64 RegisterAllocator::GetDirtyGpr(u32 guest)
     return GetGpr(guest, guest != 0);
 }
 
+HostGpr128 RegisterAllocator::GetDirtyHi()
+{
+    return {};
+}
+
+HostGpr128 RegisterAllocator::GetDirtyLo()
+{
+    return {};
+}
+
+HostGpr128 RegisterAllocator::GetDirtyVpr(u32)
+{
+    return {};
+}
+
 HostGpr64 RegisterAllocator::GetGpr(u32 guest)
 {
     return GetGpr(guest, false);
@@ -175,7 +190,7 @@ HostGpr64 RegisterAllocator::GetGpr(u32 guest, bool make_dirty)
         }
         assert(binding);
         if (!found_free) {
-            FlushAndDestroyBinding(*binding, false);
+            Flush(*binding, false);
         }
     }
 
@@ -196,13 +211,7 @@ HostGpr64 RegisterAllocator::GetGpr(u32 guest, bool make_dirty)
             }
         }
         if (found_free) {
-            s32 stack_offset = get_nonvolatile_host_gpr_stack_offset(host);
-            if constexpr (platform.a64) {
-                // TODO
-            }
-            if constexpr (platform.x64) {
-                c.mov(qword_ptr(x86::rsp, stack_offset), host);
-            }
+            SaveHost(host);
         }
     }
 
@@ -226,15 +235,30 @@ HostGpr64 RegisterAllocator::GetGpr(u32 guest, bool make_dirty)
 
 s32 RegisterAllocator::GetGprMidPtrOffset(u32 guest) const
 {
-    static constexpr u32 kNumRegs = 32;
-    return s32(sizeof(u128)) * (guest - kNumRegs / 2);
+    static constexpr s32 kNumRegs = 32;
+    return s32(sizeof(u128)) * (s32(guest) - kNumRegs / 2);
+}
+
+HostGpr128 RegisterAllocator::GetHi()
+{
+    return {};
+}
+
+HostGpr128 RegisterAllocator::GetLo()
+{
+    return {};
+}
+
+HostGpr128 RegisterAllocator::GetVpr(u32)
+{
+    return {};
 }
 
 std::string RegisterAllocator::GetStatus() const
 {
     std::string used_str, free_str;
     for (Binding const& b : gpr_bindings) {
-        auto host_reg_str{ JitRegToStr(b.host) };
+        auto host_reg_str{ HostRegToStr(b.host) };
         if (b.Occupied()) {
             u32 guest = b.guest.value();
             std::string guest_reg_str =
@@ -246,6 +270,11 @@ std::string RegisterAllocator::GetStatus() const
         }
     }
     return std::format("Used: {}; Free: {}\n", used_str, free_str);
+}
+
+HostGpr128 RegisterAllocator::GetVpr(u32, bool)
+{
+    return {};
 }
 
 void RegisterAllocator::Reset()
@@ -269,22 +298,27 @@ void RegisterAllocator::ResetBinding(Binding& b)
         b.guest = {};
         b.dirty = false;
     }
-    b.access_index = host_access_index;
 }
 
-void RegisterAllocator::RestoreHost(HostGpr64 gpr) const
+void RegisterAllocator::RestoreHost(HostGpr64 host) const
 {
-    if constexpr (platform.a64) {}
+    s32 stack_offset = get_nonvolatile_host_gpr_stack_offset(host);
+    if constexpr (platform.a64) {
+        // TODO
+    }
     if constexpr (platform.x64) {
-        c.mov(gpr, qword_ptr(x86::rsp, 8 * gpr.id()));
+        c.mov(host, qword_ptr(x86::rsp, stack_offset));
     }
 }
 
-void RegisterAllocator::SaveHost(HostGpr64 gpr) const
+void RegisterAllocator::SaveHost(HostGpr64 host) const
 {
-    if constexpr (platform.a64) {}
+    s32 stack_offset = get_nonvolatile_host_gpr_stack_offset(host);
+    if constexpr (platform.a64) {
+        // TODO
+    }
     if constexpr (platform.x64) {
-        c.mov(qword_ptr(x86::rsp, 8 * gpr.id()), gpr);
+        c.mov(qword_ptr(x86::rsp, stack_offset), host);
     }
 }
 

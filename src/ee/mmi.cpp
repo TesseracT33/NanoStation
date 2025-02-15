@@ -4,7 +4,7 @@
 
 #include "asmjit/x86.h"
 #include "jit.hpp"
-#include "jit_utils.hpp"
+#include "jit_common.hpp"
 #include "platform.hpp"
 #include <algorithm>
 #include <bit>

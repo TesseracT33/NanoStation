@@ -1,11 +1,12 @@
 #include "timers.hpp"
 #include "ee.hpp"
+#include "intc.hpp"
+#include "log.hpp"
 #include "scheduler.hpp"
 
 #include <array>
 #include <format>
 #include <limits>
-#include <print>
 #include <utility>
 
 namespace ee::timers {
@@ -347,7 +348,7 @@ u32 read_io(u32 addr)
     case Addr::TN_MODE:  return timer.mode_raw; // 10000010h + N*800h
     case Addr::TN_COMP:  return timer.compare; // 10000020h + N*800h
     case Addr::TN_HOLD:  return timer.sbus_int_compare; // 10000030h + N*800h
-    default:             std::println("EE: Tried to read from unknown timer IO address: {:08X}", addr); return {};
+    default:             log_error("EE: Tried to read from unknown timer IO address: {:08X}", addr); return {};
     }
 }
 
@@ -359,7 +360,7 @@ void write_io(u32 addr, u32 data)
     case Addr::TN_MODE:  timer.write_mode(data); break; // 10000010h + N*800h
     case Addr::TN_COMP:  timer.write_compare(data); break; // 10000020h + N*800h
     case Addr::TN_HOLD:  timer.write_sbus_counter(data); break; // 10000030h + N*800h
-    default:             std::println("EE: Tried to write to unknown timer IO address: {:08X}", addr);
+    default:             log_error("EE: Tried to write to unknown timer IO address: {:08X}", addr);
     }
 }
 

@@ -1,9 +1,6 @@
 #pragma once
 
-#include "asmjit/a64.h"
-#include "asmjit/x86.h"
-#include "asmjit/x86/x86operand.h"
-#include "jit_utils.hpp"
+#include "jit_common.hpp"
 #include "numtypes.hpp"
 #include "platform.hpp"
 
@@ -135,33 +132,18 @@ class RegisterAllocator {
         u16 access_index;
         bool dirty;
         bool is_volatile;
-        bool Occupied() const { return guest.has_value(); }
+        bool Occupied() const
+        {
+            return guest.has_value();
+        }
     };
 
-public:
-    RegisterAllocator();
-
-    void BlockEpilog();
-    void BlockEpilogWithJmp(void* func);
-    void BlockProlog();
-    void FlushAll();
-    HostGpr64 GetDirtyGpr(u32 guest);
-    HostGpr128 GetDirtyHi() { return {}; };
-    HostGpr128 GetDirtyLo() { return {}; };
-    HostGpr128 GetDirtyVpr(u32) { return {}; };
-    HostGpr64 GetGpr(u32 guest);
-    HostGpr128 GetHi() { return {}; };
-    HostGpr128 GetLo() { return {}; };
-    HostGpr128 GetVpr(u32) { return {}; };
-    std::string GetStatus() const;
-    bool StackIsAlignedForCall() const;
-
-protected:
     std::array<Binding, reg_alloc_num_gprs> gpr_bindings;
     std::array<Binding, reg_alloc_num_vprs> vpr_bindings;
     std::array<Binding*, 32> guest_to_host;
     std::array<Binding*, 32> guest128_to_host;
     typename decltype(gpr_bindings)::iterator next_free_binding_it{ gpr_bindings.begin() };
+    JitCompiler& c;
     u16 host_access_index{};
     bool nonvolatile_gprs_used{};
     bool stack_is_aligned_for_call{};
@@ -169,17 +151,32 @@ protected:
     void Flush(Binding const& b, bool restore) const;
     void FlushAndDestroyAllVolatile();
     void FlushAndDestroyBinding(Binding& b, bool restore);
-    // This should only be used as part of an instruction epilogue. Thus, there is no need
-    // to destroy bindings. In fact, this would be undesirable, since this function could not
-    // be called in an epilog emitted mid-block, as part of a code path dependent on a run-time branch.
     void FlushAndRestoreAll() const;
     s32 GetGprMidPtrOffset(u32 guest) const;
     HostGpr64 GetGpr(u32 guest, bool make_dirty);
-    HostGpr128 GetVpr(u32, bool) { return {}; };
+    HostGpr128 GetVpr(u32, bool);
     void Reset();
     void ResetBinding(Binding& b);
-    void RestoreHost(HostGpr64 gpr) const;
-    void SaveHost(HostGpr64 gpr) const;
+    void RestoreHost(HostGpr64 host) const;
+    void SaveHost(HostGpr64 host) const;
+
+public:
+    RegisterAllocator(JitCompiler& compiler);
+
+    void BlockEpilog();
+    void BlockEpilogWithJmp(void (*func)());
+    void BlockProlog();
+    void FlushAll();
+    HostGpr64 GetDirtyGpr(u32 guest);
+    HostGpr128 GetDirtyHi();
+    HostGpr128 GetDirtyLo();
+    HostGpr128 GetDirtyVpr(u32 guest);
+    HostGpr64 GetGpr(u32 guest);
+    HostGpr128 GetHi();
+    HostGpr128 GetLo();
+    std::string GetStatus() const;
+    HostGpr128 GetVpr(u32 guest);
+    bool StackIsAlignedForCall() const;
 };
 
 } // namespace ee

@@ -13,9 +13,7 @@ static std::jthread emu_thread;
 
 bool init()
 {
-    if (!ee::init()) {
-        return false;
-    }
+    ee::init();
     scheduler::init();
     return true;
 }

@@ -3,7 +3,7 @@
 #include "exceptions.hpp"
 #include "frontend/message.hpp"
 #include "memory.hpp"
-#include "mips/disassembler.hpp"
+#include "mips/decoder.hpp"
 #include "util.hpp"
 
 #include <algorithm>
@@ -47,7 +47,7 @@ void fetch_decode_exec()
 {
     u32 instr = read<u32, Alignment::Aligned, MemOp::InstrFetch>(pc);
     pc += 4;
-    mips::disassemble_iop(instr);
+    mips::decode_iop(instr);
     advance_pipeline(1);
 }
 

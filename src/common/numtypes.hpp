@@ -30,7 +30,9 @@ using uint = unsigned;
 using f32 = float;
 using f64 = double;
 
+using std::ptrdiff_t;
 using std::size_t;
+using std::uintptr_t;
 
 template<size_t> struct SIntOfSize {};
 template<size_t> struct UIntOfSize {};

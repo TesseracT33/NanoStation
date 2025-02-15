@@ -3,6 +3,7 @@
 #include "numtypes.hpp"
 
 namespace ee {
+
 enum class MemOp;
 
 inline bool exception_occurred;
@@ -25,4 +26,5 @@ void tlb_invalid_exception(u32 vaddr, MemOp mem_op);
 void tlb_mod_exception(u32 vaddr);
 void tlb_refill_exception(u32 vaddr, MemOp mem_op);
 void trap_exception();
+
 } // namespace ee

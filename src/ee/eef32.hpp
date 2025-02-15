@@ -33,7 +33,7 @@ private:
             result &= 0x8000'0000; // return zero, preserve sign
         }
         if (exp == 0x7F80'0000) {
-            result = (result & 0x8000'0000) | 0x7F7F'FFFF; // return IEEE-754 F32_MIN/F32_MAX, preserve sign
+            result |= 0x7F7F'FFFF; // return IEEE-754 F32_MIN/F32_MAX, preserve sign
         }
         return std::bit_cast<f32>(result);
     }

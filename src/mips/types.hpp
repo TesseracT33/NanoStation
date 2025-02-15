@@ -17,13 +17,13 @@ enum class Cond {
     Le,
     Lt,
     Ltu,
-    Ne
+    Ne,
 };
 
 enum class OperatingMode {
     User,
     Supervisor,
-    Kernel
+    Kernel,
 };
 
 } // namespace mips

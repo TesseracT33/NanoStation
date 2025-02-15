@@ -1,7 +1,7 @@
 #pragma once
 
-#include <string_view>
-
+inline constexpr bool enable_ee_jit_error_handler = false;
 inline constexpr bool enable_file_logging = false;
-
-inline constexpr std::string_view log_path = "F:\\nanostation.log";
+inline constexpr bool log_ee_branches = false;
+inline constexpr bool log_ee_jit_blocks = false;
+inline constexpr bool log_ee_jit_register_status = false;

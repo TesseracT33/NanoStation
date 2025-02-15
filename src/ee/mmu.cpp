@@ -3,6 +3,7 @@
 #include "ee.hpp"
 #include "exceptions.hpp"
 #include "frontend/message.hpp"
+#include "intc.hpp"
 #include "timers.hpp"
 
 #include <bit>
@@ -39,6 +40,11 @@ void TlbEntry::write()
     vpn2_addr_mask = ~page_mask & ~0x1FFF;
     vpn2_compare = hi.raw & vpn2_addr_mask;
     offset_addr_mask = page_mask >> 1 | 0xFFF;
+}
+
+u32 devirtualize(u32 vaddr)
+{
+    return vaddr; // TODO
 }
 
 template<ee_uint Int> Int read_bios(u32 addr)

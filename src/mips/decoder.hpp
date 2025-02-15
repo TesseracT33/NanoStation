@@ -47,8 +47,8 @@ constexpr std::string_view gpr_index_to_name(u32 idx)
     }
 }
 
-void disassemble_ee(u32 instr);
-void disassemble_iop(u32 instr);
-std::string disassemble_str(u32 instr);
+void decode_ee(u32 instr);
+void decode_iop(u32 instr);
+std::string disassemble(u32 instr);
 
 } // namespace mips
